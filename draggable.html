@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+  </head>
+
+  <body>
+    <svg
+      class="gate"
+      draggable="true"
+      width="500"
+      height="500"
+      viewBox="0 0 500 500"
+    >
+      <use
+        xlink:href="gates.svg#2nand"
+        id="nand0"
+        x="100"
+        y="100"
+        width="800"
+        height="800"
+        draggable="true"
+      ></use>
+      
+      <!-- Fallback rectangle in case SVG reference doesn't work -->
+      <rect id="fallback" x="300" y="300" width="120" height="60" fill="lightblue" stroke="darkblue" stroke-width="2" />
+      <text x="360" y="335" text-anchor="middle" font-family="Arial" font-size="16">NAND</text>
+    </svg>
+
+    <!-- <img src="dont-use.svg" alt="Dont use"> -->
+    <!-- <img src="and.svg" alt="and gate"> -->
+    <!-- <img src="or.svg" alt="Dont use"> -->
+    <br />
+
+    <script>
+      const svg = document.querySelector("svg");
+      const rect = document.getElementById("nand0");
+
+      let startX = 0;
+      let startY = 0;
+      let isDragging = false;
+
+      rect.addEventListener("mousedown", (event) => {
+        isDragging = true;
+        
+        // Get the SVG's bounding rectangle to convert screen coordinates to SVG coordinates
+        const svgRect = svg.getBoundingClientRect();
+        const currentX = parseFloat(rect.getAttribute("x")) || 0;
+        const currentY = parseFloat(rect.getAttribute("y")) || 0;
+        
+        // Calculate offset from mouse position to element position
+        startX = event.clientX - svgRect.left - currentX;
+        startY = event.clientY - svgRect.top - currentY;
+        
+        console.log(
+          "MOUSEDOWN currentX: ",
+          currentX,
+          " currentY: ",
+          currentY,
+          " startX: ",
+          startX,
+          " startY: ",
+          startY
+        );
+        
+        event.preventDefault();
+      });
+
+      document.addEventListener("mousemove", (event) => {
+        if (!isDragging) return;
+
+        // Get the SVG's bounding rectangle
+        const svgRect = svg.getBoundingClientRect();
+        
+        // Calculate new position relative to SVG
+        const newX = event.clientX - svgRect.left - startX;
+        const newY = event.clientY - svgRect.top - startY;
+
+        rect.setAttribute("x", newX);
+        rect.setAttribute("y", newY);
+        
+        event.preventDefault();
+      });
+
+      document.addEventListener("mouseup", () => {
+        isDragging = false;
+      });
+    </script>
+  </body>
+</html>

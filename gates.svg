@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="2nand" viewBox="0 0 1000 1000">
+        <g stroke="darkblue">
+        <!-- Draw AND gate shape -->
+        <path d="M40,20l-30,0l0,40l30,0a1,1,0,0,0,0,-40" />
+        <!-- Draw NOT -->
+        <circle cx="64" cy="40" r="4"/>
+        <!-- Draw inputs and output -->
+        <line x1="0" y1="30" x2="10" y2="30" />
+        <line x1="0" y1="50" x2="10" y2="50" />
+        <line x1="68" y1="40" x2="78" y2="40" />
+        </g>
+    </symbol>
+
+    <symbol id="3nand" viewBox="0 0 1000 1000">
+        <g stroke="darkblue">
+        <!-- Draw AND gate shape -->
+        <path d="M40,20l-30,0l0,40l30,0a1,1,0,0,0,0,-40" />
+        <!-- Draw NOT -->
+        <circle cx="64" cy="40" r="4"/>
+        <!-- Draw inputs and output -->
+        <line x1="0" y1="25" x2="10" y2="30" />
+        <line x1="0" y1="40" x2="10" y2="30" />
+        <line x1="0" y1="55" x2="10" y2="50" />
+        <line x1="68" y1="40" x2="78" y2="40" />
+        </g>
+    </symbol>
+
+    <symbol id="4nand" viewBox="0 0 1000 1000">
+        <g stroke="darkblue">
+        <!-- Draw AND gate shape -->
+        <path d="M40,20l-30,0l0,40l30,0a1,1,0,0,0,0,-40" />
+        <!-- Draw NOT -->
+        <circle cx="64" cy="40" r="4"/>
+        <!-- Draw inputs and output -->
+        <line x1="0" y1="25" x2="10" y2="30" />
+        <line x1="0" y1="40" x2="10" y2="30" />
+        <line x1="0" y1="55" x2="10" y2="50" />
+        <line x1="68" y1="40" x2="78" y2="40" />
+        </g>
+    </symbol>
+
+    </defs>
+
+</svg>
