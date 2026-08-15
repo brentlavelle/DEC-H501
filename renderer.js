@@ -56,7 +56,8 @@ function renderCircuit(circuit, svgElement) {
     const y2 = toComponent.y + toPin.y;
     const curve = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     curve.setAttribute('d', wirePath(x1, y1, x2, y2));
-    curve.setAttribute('class', 'wire');
+    curve.setAttribute('class', `wire${states[wire.from.component] ? ' wire-energized' : ''}`);
+    curve.setAttribute('data-energized', states[wire.from.component] ? '1' : '0');
     curve.setAttribute('data-wire-index', wireIndex);
     svgElement.appendChild(curve);
   });

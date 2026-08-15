@@ -50,6 +50,11 @@ button:hover {
     cursor: pointer;
 }
 
+.wire-energized {
+    stroke: #e4a62a;
+    filter: drop-shadow(0 0 4px #ffd875);
+}
+
 .wire-selected {
     stroke: #e64b35;
     stroke-width: 4;
