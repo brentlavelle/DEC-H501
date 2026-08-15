@@ -77,6 +77,18 @@ function renderCircuit(circuit, svgElement) {
     useElement.setAttribute('data-type', component.type);
     useElement.setAttribute('data-state', states[component.id] ? '1' : '0');
     svgElement.appendChild(useElement);
+
+    gateDef.pins.forEach(pin => {
+      const pinElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      pinElement.setAttribute('cx', component.x + pin.x);
+      pinElement.setAttribute('cy', component.y + pin.y);
+      pinElement.setAttribute('r', '12');
+      pinElement.setAttribute('class', 'pin-hotspot');
+      pinElement.setAttribute('data-component', component.id);
+      pinElement.setAttribute('data-pin', pin.name);
+      pinElement.setAttribute('data-direction', pin.name.startsWith('in') ? 'input' : 'output');
+      svgElement.appendChild(pinElement);
+    });
   });
 }
 

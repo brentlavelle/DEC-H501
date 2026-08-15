@@ -19,9 +19,31 @@ fetch('./exampleCircuit.json')
 let draggedElement = null;
 let offsetX = 0;
 let offsetY = 0;
+let pendingWire = null;
 
 // Enable dragging for gates
 board.addEventListener('mousedown', (event) => {
+  const pin = event.target.closest('[data-pin]');
+  if (pin) {
+    if (pin.dataset.direction !== 'output') return;
+
+    const point = screenToSvg(event);
+    pendingWire = {
+      from: {
+        component: pin.dataset.component,
+        pin: pin.dataset.pin
+      },
+      startX: point.x,
+      startY: point.y,
+      endX: point.x,
+      endY: point.y,
+      targetPin: null
+    };
+    drawPendingWire();
+    event.preventDefault();
+    return;
+  }
+
   const target = event.target.closest('use');
   if (!target) return;
 
@@ -47,7 +69,21 @@ function screenToSvg(event) {
   };
 }
 
+function findPinTarget(event) {
+  const element = document.elementFromPoint(event.clientX, event.clientY);
+  return element?.closest?.('[data-pin]') || null;
+}
+
 document.addEventListener('mousemove', (event) => {
+  if (pendingWire) {
+    const point = screenToSvg(event);
+    pendingWire.endX = point.x;
+    pendingWire.endY = point.y;
+    pendingWire.targetPin = findPinTarget(event);
+    drawPendingWire();
+    return;
+  }
+
   if (!draggedElement) return;
 
   const point = screenToSvg(event);
@@ -58,7 +94,33 @@ document.addEventListener('mousemove', (event) => {
   draggedElement.setAttribute('y', newY);
 });
 
-document.addEventListener('mouseup', () => {
+document.addEventListener('mouseup', (event) => {
+  if (pendingWire) {
+    const target = pendingWire.targetPin || findPinTarget(event);
+    if (
+      target &&
+      target.dataset.direction === 'input' &&
+      target.dataset.component !== pendingWire.from.component
+    ) {
+      const alreadyConnected = circuit.wires.some(wire =>
+        wire.to.component === target.dataset.component && wire.to.pin === target.dataset.pin
+      );
+      if (!alreadyConnected) {
+        circuit.wires.push({
+          from: pendingWire.from,
+          to: {
+            component: target.dataset.component,
+            pin: target.dataset.pin
+          }
+        });
+      }
+    }
+
+    pendingWire = null;
+    renderCircuit(circuit, board);
+    return;
+  }
+
   if (!draggedElement) return;
 
   // Update circuit model
@@ -72,6 +134,20 @@ document.addEventListener('mouseup', () => {
   draggedElement = null;
   renderCircuit(circuit, board); // Re-render to ensure wires update
 });
+
+function drawPendingWire() {
+  let preview = board.querySelector('.wire-preview');
+  if (!preview) {
+    preview = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    preview.setAttribute('class', 'wire-preview');
+    board.appendChild(preview);
+  }
+
+  preview.setAttribute('x1', pendingWire.startX);
+  preview.setAttribute('y1', pendingWire.startY);
+  preview.setAttribute('x2', pendingWire.endX);
+  preview.setAttribute('y2', pendingWire.endY);
+}
 
 // Palette for adding new gates
 const palette = document.getElementById('palette');

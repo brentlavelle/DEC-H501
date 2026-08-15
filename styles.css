@@ -48,6 +48,26 @@ button:hover {
     stroke-width: 2;
 }
 
+.wire-preview {
+    stroke: #e64b35;
+    stroke-width: 3;
+    stroke-dasharray: 6 4;
+    pointer-events: none;
+}
+
+.pin-hotspot {
+    fill: transparent;
+    stroke: transparent;
+    cursor: crosshair;
+    pointer-events: all;
+}
+
+.pin-hotspot:hover {
+    fill: #e64b35;
+    stroke: #ffffff;
+    stroke-width: 2;
+}
+
 #board use[data-type="switch"] {
     cursor: pointer;
 }
