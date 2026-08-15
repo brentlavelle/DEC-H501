@@ -173,9 +173,10 @@ function drawPendingWire() {
   }
 
   const horizontalDistance = Math.max(40, Math.abs(pendingWire.endX - pendingWire.startX) * 0.35);
+  const direction = pendingWire.endX >= pendingWire.startX ? 1 : -1;
   preview.setAttribute(
     'd',
-    `M ${pendingWire.startX} ${pendingWire.startY} C ${pendingWire.startX + horizontalDistance} ${pendingWire.startY}, ${pendingWire.endX - horizontalDistance} ${pendingWire.endY}, ${pendingWire.endX} ${pendingWire.endY}`
+    `M ${pendingWire.startX} ${pendingWire.startY} C ${pendingWire.startX + direction * horizontalDistance} ${pendingWire.startY}, ${pendingWire.endX - direction * horizontalDistance} ${pendingWire.endY}, ${pendingWire.endX} ${pendingWire.endY}`
   );
 }
 

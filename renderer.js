@@ -96,7 +96,8 @@ function renderCircuit(circuit, svgElement) {
 
 function wirePath(x1, y1, x2, y2) {
   const horizontalDistance = Math.max(40, Math.abs(x2 - x1) * 0.35);
-  return `M ${x1} ${y1} C ${x1 + horizontalDistance} ${y1}, ${x2 - horizontalDistance} ${y2}, ${x2} ${y2}`;
+  const direction = x2 >= x1 ? 1 : -1;
+  return `M ${x1} ${y1} C ${x1 + direction * horizontalDistance} ${y1}, ${x2 - direction * horizontalDistance} ${y2}, ${x2} ${y2}`;
 }
 
 export default renderCircuit;
