@@ -39,7 +39,7 @@ function renderCircuit(circuit, svgElement) {
   const states = evaluateCircuit(circuit);
 
   // Render wires first so components and pin labels remain visible above them.
-  circuit.wires.forEach(wire => {
+  circuit.wires.forEach((wire, wireIndex) => {
     const fromComponent = circuit.components.find(c => c.id === wire.from.component);
     const toComponent = circuit.components.find(c => c.id === wire.to.component);
 
@@ -56,6 +56,7 @@ function renderCircuit(circuit, svgElement) {
     line.setAttribute('x2', toComponent.x + toPin.x);
     line.setAttribute('y2', toComponent.y + toPin.y);
     line.setAttribute('class', 'wire');
+    line.setAttribute('data-wire-index', wireIndex);
     svgElement.appendChild(line);
   });
 

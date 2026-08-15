@@ -46,6 +46,12 @@ button:hover {
 .wire {
     stroke: #17212b;
     stroke-width: 2;
+    cursor: pointer;
+}
+
+.wire-selected {
+    stroke: #e64b35;
+    stroke-width: 4;
 }
 
 .wire-preview {

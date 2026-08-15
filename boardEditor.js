@@ -20,9 +20,26 @@ let draggedElement = null;
 let offsetX = 0;
 let offsetY = 0;
 let pendingWire = null;
+let selectedWireIndex = null;
+
+function clearWireSelection() {
+  selectedWireIndex = null;
+  board.querySelectorAll('.wire-selected').forEach(line => {
+    line.classList.remove('wire-selected');
+  });
+}
 
 // Enable dragging for gates
 board.addEventListener('mousedown', (event) => {
+  const wire = event.target.closest('.wire');
+  if (wire) {
+    clearWireSelection();
+    selectedWireIndex = Number(wire.dataset.wireIndex);
+    wire.classList.add('wire-selected');
+    event.preventDefault();
+    return;
+  }
+
   const pin = event.target.closest('[data-pin]');
   if (pin) {
     if (pin.dataset.direction !== 'output') return;
@@ -117,6 +134,7 @@ document.addEventListener('mouseup', (event) => {
     }
 
     pendingWire = null;
+    clearWireSelection();
     renderCircuit(circuit, board);
     return;
   }
@@ -132,7 +150,18 @@ document.addEventListener('mouseup', (event) => {
   }
 
   draggedElement = null;
+  clearWireSelection();
   renderCircuit(circuit, board); // Re-render to ensure wires update
+});
+
+document.addEventListener('keydown', (event) => {
+  if (selectedWireIndex === null) return;
+  if (event.key !== 'Delete' && event.key !== 'Backspace') return;
+
+  circuit.wires.splice(selectedWireIndex, 1);
+  clearWireSelection();
+  renderCircuit(circuit, board);
+  event.preventDefault();
 });
 
 function drawPendingWire() {
