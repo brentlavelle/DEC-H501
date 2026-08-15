@@ -1,12 +1,20 @@
 {
   "board": { "width": 1200, "height": 800 },
   "components": [
-    { "id": "g1", "type": "2nand", "x": 100, "y": 150 },
-    { "id": "sw1", "type": "switch", "x": 20, "y": 140, "state": 0 },
-    { "id": "led1", "type": "led", "x": 300, "y": 150 }
+    { "id": "sw1", "type": "switch", "x": 24, "y": 70, "state": 0 },
+    { "id": "sw2", "type": "switch", "x": 24, "y": 240, "state": 0 },
+    { "id": "sw3", "type": "switch", "x": 24, "y": 410, "state": 0 },
+    { "id": "sw4", "type": "switch", "x": 24, "y": 580, "state": 0 },
+    { "id": "nor1", "type": "nor", "x": 325, "y": 35 },
+    { "id": "nor2", "type": "nor", "x": 610, "y": 35 },
+    { "id": "nand1", "type": "2nand", "x": 325, "y": 205 },
+    { "id": "nand2", "type": "2nand", "x": 610, "y": 205 },
+    { "id": "ff1", "type": "jk", "x": 325, "y": 375 },
+    { "id": "ff2", "type": "jk", "x": 610, "y": 375 },
+    { "id": "light1", "type": "led", "x": 925, "y": 45 },
+    { "id": "light2", "type": "led", "x": 925, "y": 215 },
+    { "id": "light3", "type": "led", "x": 925, "y": 385 },
+    { "id": "light4", "type": "led", "x": 925, "y": 555 }
   ],
-  "wires": [
-    { "from": { "component": "sw1", "pin": "out" }, "to": { "component": "g1", "pin": "in0" } },
-    { "from": { "component": "g1", "pin": "out" }, "to": { "component": "led1", "pin": "in" } }
-  ]
+  "wires": []
 }

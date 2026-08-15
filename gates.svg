@@ -1,65 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <symbol id="2nand" viewBox="0 0 1000 1000">
-        <g stroke="darkblue">
-        <!-- Draw AND gate shape -->
-        <path d="M40,20l-30,0l0,40l30,0a1,1,0,0,0,0,-40" />
-        <!-- Draw NOT -->
-        <circle cx="64" cy="40" r="4"/>
-        <!-- Draw inputs and output -->
-        <line x1="0" y1="30" x2="10" y2="30" />
-        <line x1="0" y1="50" x2="10" y2="50" />
-        <line x1="68" y1="40" x2="78" y2="40" />
-        </g>
-    </symbol>
+    <defs>
+        <style>
+            .outline { fill: #f8f6ef; stroke: #202525; stroke-width: 6; stroke-linejoin: round; stroke-linecap: round; }
+            .detail { fill: none; stroke: #202525; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+            .pin { stroke: #225a69; stroke-width: 5; stroke-linecap: round; }
+        </style>
 
-    <symbol id="3nand" viewBox="0 0 1000 1000">
-        <g stroke="darkblue">
-        <!-- Draw AND gate shape -->
-        <path d="M40,20l-30,0l0,40l30,0a1,1,0,0,0,0,-40" />
-        <!-- Draw NOT -->
-        <circle cx="64" cy="40" r="4"/>
-        <!-- Draw inputs and output -->
-        <line x1="0" y1="25" x2="10" y2="30" />
-        <line x1="0" y1="40" x2="10" y2="30" />
-        <line x1="0" y1="55" x2="10" y2="50" />
-        <line x1="68" y1="40" x2="78" y2="40" />
-        </g>
-    </symbol>
-
-    <symbol id="4nand" viewBox="0 0 1000 1000">
-        <g stroke="darkblue">
-        <!-- Draw AND gate shape -->
-        <path d="M40,20l-30,0l0,40l30,0a1,1,0,0,0,0,-40" />
-        <!-- Draw NOT -->
-        <circle cx="64" cy="40" r="4"/>
-        <!-- Draw inputs and output -->
-        <line x1="0" y1="25" x2="10" y2="30" />
-        <line x1="0" y1="40" x2="10" y2="30" />
-        <line x1="0" y1="55" x2="10" y2="50" />
-        <line x1="68" y1="40" x2="78" y2="40" />
-        </g>
-    </symbol>
-
-        <symbol id="switch" viewBox="0 0 1000 1000">
-                <g stroke="darkblue" stroke-width="3" fill="none">
-                    <line x1="10" y1="40" x2="30" y2="40" />
-                    <line x1="30" y1="40" x2="58" y2="22" />
-                    <circle cx="30" cy="40" r="5" fill="white" />
-                    <circle cx="60" cy="40" r="5" fill="white" />
-                    <line x1="60" y1="40" x2="78" y2="40" />
-                </g>
+        <symbol id="and" viewBox="0 0 260 130">
+            <line class="pin" x1="18" y1="42" x2="76" y2="42" />
+            <line class="pin" x1="18" y1="88" x2="76" y2="88" />
+            <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+            <line class="pin" x1="161" y1="65" x2="224" y2="65" />
         </symbol>
 
-        <symbol id="led" viewBox="0 0 1000 1000">
-                <g stroke="darkblue" stroke-width="3">
-                    <line x1="0" y1="40" x2="25" y2="40" />
-                    <circle cx="45" cy="40" r="20" fill="#5b6670" />
-                    <line x1="65" y1="40" x2="78" y2="40" />
-                </g>
+        <symbol id="or" viewBox="0 0 260 130">
+            <line class="pin" x1="18" y1="42" x2="84" y2="42" />
+            <line class="pin" x1="18" y1="88" x2="84" y2="88" />
+            <path class="outline" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+            <line class="pin" x1="164" y1="65" x2="224" y2="65" />
         </symbol>
 
+        <symbol id="nand" viewBox="0 0 260 130">
+            <use href="#and" />
+            <circle class="outline" cx="169" cy="65" r="10" />
+            <line class="pin" x1="179" y1="65" x2="224" y2="65" />
+        </symbol>
+
+        <symbol id="nor" viewBox="0 0 260 130">
+            <use href="#or" />
+            <circle class="outline" cx="174" cy="65" r="10" />
+            <line class="pin" x1="184" y1="65" x2="224" y2="65" />
+        </symbol>
+
+        <symbol id="not" viewBox="0 0 260 130">
+            <line class="pin" x1="18" y1="65" x2="78" y2="65" />
+            <path class="outline" d="M78 24l78 41-78 41z" />
+            <circle class="outline" cx="168" cy="65" r="10" />
+            <line class="pin" x1="178" y1="65" x2="224" y2="65" />
+        </symbol>
+
+        <symbol id="jk" viewBox="0 0 260 130">
+            <rect class="outline" x="70" y="18" width="110" height="94" />
+            <line class="pin" x1="18" y1="42" x2="70" y2="42" />
+            <line class="pin" x1="18" y1="88" x2="70" y2="88" />
+            <line class="pin" x1="18" y1="65" x2="70" y2="65" />
+            <line class="pin" x1="180" y1="42" x2="224" y2="42" />
+            <line class="pin" x1="180" y1="88" x2="224" y2="88" />
+            <line class="pin" x1="125" y1="112" x2="125" y2="126" />
+            <path class="detail" d="M70 60l10 6-10 6" />
+            <text x="82" y="47" fill="#5d625d" font-size="10">J</text>
+            <text x="82" y="69" fill="#5d625d" font-size="10">C</text>
+            <text x="82" y="96" fill="#5d625d" font-size="10">K</text>
+            <text x="125" y="103" text-anchor="middle" fill="#5d625d" font-size="10">RESET</text>
+            <text x="153" y="47" fill="#5d625d" font-size="10">Q</text>
+            <text x="148" y="96" fill="#5d625d" font-size="10">Q'</text>
+        </symbol>
+
+        <symbol id="switch" viewBox="0 0 260 130">
+            <line class="pin" x1="18" y1="65" x2="70" y2="65" />
+            <line class="detail" x1="70" y1="65" x2="120" y2="32" />
+            <circle class="outline" cx="70" cy="65" r="7" />
+            <circle class="outline" cx="125" cy="65" r="7" />
+            <line class="pin" x1="125" y1="65" x2="224" y2="65" />
+        </symbol>
+
+        <symbol id="light" viewBox="0 0 260 130">
+            <line class="pin" x1="18" y1="65" x2="94" y2="65" />
+            <circle cx="132" cy="65" r="38" fill="#4b504d" stroke="#202525" stroke-width="6" />
+            <path class="detail" d="M115 105h34M120 114h24" />
+        </symbol>
+
+        <!-- Compatibility symbols for the original palette. -->
+        <symbol id="2nand" viewBox="0 0 260 130"><use href="#nand" /></symbol>
+
+        <symbol id="3nand" viewBox="0 0 260 130">
+            <line class="pin" x1="18" y1="30" x2="76" y2="30" />
+            <line class="pin" x1="18" y1="65" x2="76" y2="65" />
+            <line class="pin" x1="18" y1="100" x2="76" y2="100" />
+            <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+            <circle class="outline" cx="169" cy="65" r="10" />
+            <line class="pin" x1="179" y1="65" x2="224" y2="65" />
+        </symbol>
+
+        <symbol id="4nand" viewBox="0 0 260 130">
+            <line class="pin" x1="18" y1="22" x2="76" y2="22" />
+            <line class="pin" x1="18" y1="50" x2="76" y2="50" />
+            <line class="pin" x1="18" y1="80" x2="76" y2="80" />
+            <line class="pin" x1="18" y1="108" x2="76" y2="108" />
+            <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+            <circle class="outline" cx="169" cy="65" r="10" />
+            <line class="pin" x1="179" y1="65" x2="224" y2="65" />
+        </symbol>
     </defs>
-
 </svg>

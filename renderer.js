@@ -69,8 +69,8 @@ function renderCircuit(circuit, svgElement) {
 
     const useElement = document.createElementNS('http://www.w3.org/2000/svg', 'use');
     useElement.setAttribute('href', `gates.svg#${gateDef.svgId}`);
-    useElement.setAttribute('width', '1000');
-    useElement.setAttribute('height', '1000');
+    useElement.setAttribute('width', '260');
+    useElement.setAttribute('height', '130');
     useElement.setAttribute('x', component.x);
     useElement.setAttribute('y', component.y);
     useElement.setAttribute('id', component.id);
@@ -86,7 +86,7 @@ function renderCircuit(circuit, svgElement) {
       pinElement.setAttribute('class', 'pin-hotspot');
       pinElement.setAttribute('data-component', component.id);
       pinElement.setAttribute('data-pin', pin.name);
-      pinElement.setAttribute('data-direction', pin.name.startsWith('in') ? 'input' : 'output');
+      pinElement.setAttribute('data-direction', pin.direction || (pin.name.startsWith('in') ? 'input' : 'output'));
       svgElement.appendChild(pinElement);
     });
   });
