@@ -60,11 +60,11 @@ const GateLibrary = {
   "jk": {
     svgId: "jk",
     pins: [
-      { name: "j", x: 18, y: 42, direction: "input" },
+      { name: "j", x: 18, y: 36, direction: "input" },
       { name: "c", x: 18, y: 65, direction: "input" },
-      { name: "k", x: 18, y: 88, direction: "input" },
-      { name: "q", x: 224, y: 42, direction: "output" },
-      { name: "qbar", x: 224, y: 88, direction: "output" },
+      { name: "k", x: 18, y: 94, direction: "input" },
+      { name: "q", x: 224, y: 36, direction: "output" },
+      { name: "qbar", x: 224, y: 94, direction: "output" },
       { name: "reset", x: 125, y: 126, direction: "input" }
     ]
   },

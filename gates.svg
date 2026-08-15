@@ -71,26 +71,26 @@
         </symbol>
 
         <symbol id="jk" viewBox="0 0 260 130">
-            <rect class="outline" x="70" y="18" width="110" height="94" />
-            <line class="pin" x1="18" y1="42" x2="70" y2="42" />
-            <line class="pin" x1="18" y1="88" x2="70" y2="88" />
-            <line class="pin" x1="18" y1="65" x2="70" y2="65" />
-            <line class="pin" x1="180" y1="42" x2="224" y2="42" />
-            <line class="pin" x1="180" y1="88" x2="224" y2="88" />
-            <line class="pin" x1="125" y1="112" x2="125" y2="126" />
-            <circle class="terminal" cx="18" cy="42" r="7" />
+            <rect class="outline" x="84" y="18" width="82" height="100" />
+            <line class="pin" x1="18" y1="36" x2="84" y2="36" />
+            <line class="pin" x1="18" y1="94" x2="84" y2="94" />
+            <line class="pin" x1="18" y1="65" x2="84" y2="65" />
+            <line class="pin" x1="166" y1="36" x2="224" y2="36" />
+            <line class="pin" x1="166" y1="94" x2="224" y2="94" />
+            <line class="pin" x1="125" y1="118" x2="125" y2="126" />
+            <circle class="terminal" cx="18" cy="36" r="7" />
             <circle class="terminal" cx="18" cy="65" r="7" />
-            <circle class="terminal" cx="18" cy="88" r="7" />
-            <circle class="terminal" cx="224" cy="42" r="7" />
-            <circle class="terminal" cx="224" cy="88" r="7" />
+            <circle class="terminal" cx="18" cy="94" r="7" />
+            <circle class="terminal" cx="224" cy="36" r="7" />
+            <circle class="terminal" cx="224" cy="94" r="7" />
             <circle class="terminal" cx="125" cy="126" r="7" />
-            <path class="detail" d="M70 60l10 6-10 6" />
-            <text x="82" y="47" fill="#5d625d" font-size="10">J</text>
-            <text x="82" y="69" fill="#5d625d" font-size="10">C</text>
-            <text x="82" y="96" fill="#5d625d" font-size="10">K</text>
-            <text x="125" y="103" text-anchor="middle" fill="#5d625d" font-size="10">RESET</text>
-            <text x="153" y="47" fill="#5d625d" font-size="10">Q</text>
-            <text x="148" y="96" fill="#5d625d" font-size="10">Q'</text>
+            <path class="detail" d="M84 60l10 6-10 6" />
+            <text x="95" y="41" fill="#5d625d" font-size="10">J</text>
+            <text x="91" y="69" fill="#5d625d" font-size="10">C</text>
+            <text x="95" y="101" fill="#5d625d" font-size="10">K</text>
+            <text x="125" y="110" text-anchor="middle" fill="#5d625d" font-size="9">RESET</text>
+            <text x="141" y="41" fill="#5d625d" font-size="10">Q</text>
+            <text x="135" y="101" fill="#5d625d" font-size="10">Q'</text>
         </symbol>
 
         <symbol id="switch-open" viewBox="0 0 260 130">
