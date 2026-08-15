@@ -14,11 +14,23 @@ function evaluateCircuit(circuit) {
   const states = Object.fromEntries(circuit.components.map(component => [component.id, Boolean(component.state)]));
 
   circuit.components.forEach(component => {
-    if (!component.type.endsWith('nand')) return;
+    if (!['nand', 'nor', 'xor', 'xnor', '2nand', '3nand', '4nand'].includes(component.type)) return;
 
     const pins = GateLibrary[component.type].pins.filter(pin => pin.name.startsWith('in'));
-    const allInputsHigh = pins.every(pin => readInput(circuit, component.id, pin.name, states));
-    states[component.id] = !allInputsHigh;
+    const inputs = pins.map(pin => readInput(circuit, component.id, pin.name, states));
+    const highCount = inputs.filter(Boolean).length;
+    const allInputsHigh = highCount === inputs.length;
+    const anyInputHigh = highCount > 0;
+
+    if (component.type === 'nor') {
+      states[component.id] = !anyInputHigh;
+    } else if (component.type === 'xor') {
+      states[component.id] = highCount % 2 === 1;
+    } else if (component.type === 'xnor') {
+      states[component.id] = highCount % 2 === 0;
+    } else {
+      states[component.id] = !allInputsHigh;
+    }
   });
 
   circuit.components.forEach(component => {
@@ -71,7 +83,10 @@ function renderCircuit(circuit, svgElement) {
     }
 
     const useElement = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-    useElement.setAttribute('href', `gates.svg#${gateDef.svgId}`);
+    const symbolId = component.type === 'switch'
+      ? (component.state ? 'switch-closed' : 'switch-open')
+      : gateDef.svgId;
+    useElement.setAttribute('href', `gates.svg#${symbolId}`);
     useElement.setAttribute('width', '260');
     useElement.setAttribute('height', '130');
     useElement.setAttribute('x', component.x);

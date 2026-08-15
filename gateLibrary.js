@@ -34,6 +34,22 @@ const GateLibrary = {
       { name: "out", x: 224, y: 65 }
     ]
   },
+  "xor": {
+    svgId: "xor",
+    pins: [
+      { name: "in0", x: 18, y: 42 },
+      { name: "in1", x: 18, y: 88 },
+      { name: "out", x: 224, y: 65 }
+    ]
+  },
+  "xnor": {
+    svgId: "xnor",
+    pins: [
+      { name: "in0", x: 18, y: 42 },
+      { name: "in1", x: 18, y: 88 },
+      { name: "out", x: 224, y: 65 }
+    ]
+  },
   "not": {
     svgId: "not",
     pins: [
