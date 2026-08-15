@@ -88,7 +88,8 @@ const GateLibrary = {
   "led": {
     svgId: "light",
     pins: [
-    { name: "in", x: 18, y: 65 }
+    { name: "in", x: 94, y: 25, direction: "input" },
+    { name: "return", x: 170, y: 25, direction: "input" }
     ]
   }
 };
