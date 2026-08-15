@@ -42,6 +42,24 @@
         </g>
     </symbol>
 
+        <symbol id="switch" viewBox="0 0 1000 1000">
+                <g stroke="darkblue" stroke-width="3" fill="none">
+                    <line x1="10" y1="40" x2="30" y2="40" />
+                    <line x1="30" y1="40" x2="58" y2="22" />
+                    <circle cx="30" cy="40" r="5" fill="white" />
+                    <circle cx="60" cy="40" r="5" fill="white" />
+                    <line x1="60" y1="40" x2="78" y2="40" />
+                </g>
+        </symbol>
+
+        <symbol id="led" viewBox="0 0 1000 1000">
+                <g stroke="darkblue" stroke-width="3">
+                    <line x1="0" y1="40" x2="25" y2="40" />
+                    <circle cx="45" cy="40" r="20" fill="#5b6670" />
+                    <line x1="65" y1="40" x2="78" y2="40" />
+                </g>
+        </symbol>
+
     </defs>
 
 </svg>

@@ -1,0 +1,12 @@
+{
+  "board": { "width": 1200, "height": 800 },
+  "components": [
+    { "id": "g1", "type": "2nand", "x": 100, "y": 150 },
+    { "id": "sw1", "type": "switch", "x": 20, "y": 140, "state": 0 },
+    { "id": "led1", "type": "led", "x": 300, "y": 150 }
+  ],
+  "wires": [
+    { "from": { "component": "sw1", "pin": "out" }, "to": { "component": "g1", "pin": "in0" } },
+    { "from": { "component": "g1", "pin": "out" }, "to": { "component": "led1", "pin": "in" } }
+  ]
+}

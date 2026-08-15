@@ -1,0 +1,67 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    background: #eef1f4;
+    color: #17212b;
+}
+
+#palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-width: 1200px;
+    padding: 0.75rem;
+    border: 1px solid #9aa8b5;
+    background: #d8e0e7;
+}
+
+button {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #536575;
+    border-radius: 3px;
+    background: #f7f9fa;
+    color: inherit;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #ffffff;
+}
+
+#board {
+    display: block;
+    width: min(1200px, 100%);
+    height: auto;
+    min-height: 500px;
+    margin-top: 1rem;
+    border: 1px solid #536575;
+    background: #fbfcfd;
+}
+
+.wire {
+    stroke: #17212b;
+    stroke-width: 2;
+}
+
+#board use[data-type="switch"] {
+    cursor: pointer;
+}
+
+#board use[data-type="switch"][data-state="1"] {
+    filter: hue-rotate(90deg);
+}
+
+#board use[data-type="led"][data-state="1"] {
+    filter: drop-shadow(0 0 5px #e64b35);
+}
+
+.gate {
+    stroke: black;
+    fill: white;
+    stroke-width: 3px;
+}

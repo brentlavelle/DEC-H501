@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Logic Trainer</title>
+    <script type="module" src="boardEditor.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="palette" style="border: 1px solid black; padding: 10px">
+      <button data-gate-type="2nand">Add 2-NAND</button>
+      <button data-gate-type="3nand">Add 3-NAND</button>
+      <button data-gate-type="4nand">Add 4-NAND</button>
+    </div>
+    <svg
+      id="board"
+      viewBox="0 0 1200 800"
+      role="img"
+      aria-label="Logic circuit board"
+    ></svg>
+  </body>
+</html>
