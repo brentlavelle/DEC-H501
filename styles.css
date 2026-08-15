@@ -45,7 +45,8 @@ button:hover {
 
 .wire {
     stroke: #17212b;
-    stroke-width: 2;
+    stroke-width: 4;
+    fill: none;
     cursor: pointer;
 }
 
@@ -56,7 +57,8 @@ button:hover {
 
 .wire-preview {
     stroke: #e64b35;
-    stroke-width: 3;
+    stroke-width: 5;
+    fill: none;
     stroke-dasharray: 6 4;
     pointer-events: none;
 }

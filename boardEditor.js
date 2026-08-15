@@ -167,15 +167,16 @@ document.addEventListener('keydown', (event) => {
 function drawPendingWire() {
   let preview = board.querySelector('.wire-preview');
   if (!preview) {
-    preview = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    preview = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     preview.setAttribute('class', 'wire-preview');
     board.appendChild(preview);
   }
 
-  preview.setAttribute('x1', pendingWire.startX);
-  preview.setAttribute('y1', pendingWire.startY);
-  preview.setAttribute('x2', pendingWire.endX);
-  preview.setAttribute('y2', pendingWire.endY);
+  const horizontalDistance = Math.max(40, Math.abs(pendingWire.endX - pendingWire.startX) * 0.35);
+  preview.setAttribute(
+    'd',
+    `M ${pendingWire.startX} ${pendingWire.startY} C ${pendingWire.startX + horizontalDistance} ${pendingWire.startY}, ${pendingWire.endX - horizontalDistance} ${pendingWire.endY}, ${pendingWire.endX} ${pendingWire.endY}`
+  );
 }
 
 // Palette for adding new gates

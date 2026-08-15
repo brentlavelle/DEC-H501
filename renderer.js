@@ -50,14 +50,15 @@ function renderCircuit(circuit, svgElement) {
 
     if (!fromPin || !toPin) return;
 
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', fromComponent.x + fromPin.x);
-    line.setAttribute('y1', fromComponent.y + fromPin.y);
-    line.setAttribute('x2', toComponent.x + toPin.x);
-    line.setAttribute('y2', toComponent.y + toPin.y);
-    line.setAttribute('class', 'wire');
-    line.setAttribute('data-wire-index', wireIndex);
-    svgElement.appendChild(line);
+    const x1 = fromComponent.x + fromPin.x;
+    const y1 = fromComponent.y + fromPin.y;
+    const x2 = toComponent.x + toPin.x;
+    const y2 = toComponent.y + toPin.y;
+    const curve = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    curve.setAttribute('d', wirePath(x1, y1, x2, y2));
+    curve.setAttribute('class', 'wire');
+    curve.setAttribute('data-wire-index', wireIndex);
+    svgElement.appendChild(curve);
   });
 
   // Render components
@@ -91,6 +92,11 @@ function renderCircuit(circuit, svgElement) {
       svgElement.appendChild(pinElement);
     });
   });
+}
+
+function wirePath(x1, y1, x2, y2) {
+  const horizontalDistance = Math.max(40, Math.abs(x2 - x1) * 0.35);
+  return `M ${x1} ${y1} C ${x1 + horizontalDistance} ${y1}, ${x2 - horizontalDistance} ${y2}, ${x2} ${y2}`;
 }
 
 export default renderCircuit;
