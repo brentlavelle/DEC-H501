@@ -5,6 +5,7 @@
             .outline { fill: #f8f6ef; stroke: #202525; stroke-width: 6; stroke-linejoin: round; stroke-linecap: round; }
             .detail { fill: none; stroke: #202525; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
             .pin { stroke: #225a69; stroke-width: 5; stroke-linecap: round; }
+            .terminal { fill: #f8f6ef; stroke: #225a69; stroke-width: 5; }
         </style>
 
         <symbol id="and" viewBox="0 0 260 130">
@@ -12,6 +13,9 @@
             <line class="pin" x1="18" y1="88" x2="76" y2="88" />
             <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
             <line class="pin" x1="161" y1="65" x2="224" y2="65" />
+            <circle class="terminal" cx="18" cy="42" r="7" />
+            <circle class="terminal" cx="18" cy="88" r="7" />
+            <circle class="terminal" cx="224" cy="65" r="7" />
         </symbol>
 
         <symbol id="or" viewBox="0 0 260 130">
@@ -19,18 +23,23 @@
             <line class="pin" x1="18" y1="88" x2="84" y2="88" />
             <path class="outline" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
             <line class="pin" x1="164" y1="65" x2="224" y2="65" />
+            <circle class="terminal" cx="18" cy="42" r="7" />
+            <circle class="terminal" cx="18" cy="88" r="7" />
+            <circle class="terminal" cx="224" cy="65" r="7" />
         </symbol>
 
         <symbol id="nand" viewBox="0 0 260 130">
             <use href="#and" />
             <circle class="outline" cx="169" cy="65" r="10" />
             <line class="pin" x1="179" y1="65" x2="224" y2="65" />
+            <circle class="terminal" cx="224" cy="65" r="7" />
         </symbol>
 
         <symbol id="nor" viewBox="0 0 260 130">
             <use href="#or" />
             <circle class="outline" cx="174" cy="65" r="10" />
             <line class="pin" x1="184" y1="65" x2="224" y2="65" />
+            <circle class="terminal" cx="224" cy="65" r="7" />
         </symbol>
 
         <symbol id="not" viewBox="0 0 260 130">
@@ -38,6 +47,8 @@
             <path class="outline" d="M78 24l78 41-78 41z" />
             <circle class="outline" cx="168" cy="65" r="10" />
             <line class="pin" x1="178" y1="65" x2="224" y2="65" />
+            <circle class="terminal" cx="18" cy="65" r="7" />
+            <circle class="terminal" cx="224" cy="65" r="7" />
         </symbol>
 
         <symbol id="jk" viewBox="0 0 260 130">
@@ -48,6 +59,12 @@
             <line class="pin" x1="180" y1="42" x2="224" y2="42" />
             <line class="pin" x1="180" y1="88" x2="224" y2="88" />
             <line class="pin" x1="125" y1="112" x2="125" y2="126" />
+            <circle class="terminal" cx="18" cy="42" r="7" />
+            <circle class="terminal" cx="18" cy="65" r="7" />
+            <circle class="terminal" cx="18" cy="88" r="7" />
+            <circle class="terminal" cx="224" cy="42" r="7" />
+            <circle class="terminal" cx="224" cy="88" r="7" />
+            <circle class="terminal" cx="125" cy="126" r="7" />
             <path class="detail" d="M70 60l10 6-10 6" />
             <text x="82" y="47" fill="#5d625d" font-size="10">J</text>
             <text x="82" y="69" fill="#5d625d" font-size="10">C</text>
@@ -63,6 +80,7 @@
             <circle class="outline" cx="70" cy="65" r="7" />
             <circle class="outline" cx="125" cy="65" r="7" />
             <line class="pin" x1="125" y1="65" x2="224" y2="65" />
+            <circle class="terminal" cx="224" cy="65" r="7" />
         </symbol>
 
         <symbol id="light" viewBox="0 0 260 130">
@@ -81,9 +99,13 @@
             <line class="pin" x1="18" y1="30" x2="76" y2="30" />
             <line class="pin" x1="18" y1="65" x2="76" y2="65" />
             <line class="pin" x1="18" y1="100" x2="76" y2="100" />
+            <circle class="terminal" cx="18" cy="30" r="7" />
+            <circle class="terminal" cx="18" cy="65" r="7" />
+            <circle class="terminal" cx="18" cy="100" r="7" />
             <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
             <circle class="outline" cx="169" cy="65" r="10" />
             <line class="pin" x1="179" y1="65" x2="224" y2="65" />
+            <circle class="terminal" cx="224" cy="65" r="7" />
         </symbol>
 
         <symbol id="4nand" viewBox="0 0 260 130">
@@ -91,9 +113,14 @@
             <line class="pin" x1="18" y1="50" x2="76" y2="50" />
             <line class="pin" x1="18" y1="80" x2="76" y2="80" />
             <line class="pin" x1="18" y1="108" x2="76" y2="108" />
+            <circle class="terminal" cx="18" cy="22" r="7" />
+            <circle class="terminal" cx="18" cy="50" r="7" />
+            <circle class="terminal" cx="18" cy="80" r="7" />
+            <circle class="terminal" cx="18" cy="108" r="7" />
             <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
             <circle class="outline" cx="169" cy="65" r="10" />
             <line class="pin" x1="179" y1="65" x2="224" y2="65" />
+            <circle class="terminal" cx="224" cy="65" r="7" />
         </symbol>
     </defs>
 </svg>
