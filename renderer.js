@@ -7,11 +7,18 @@ function readInput(circuit, componentId, pinName, states) {
   const wire = circuit.wires.find(item =>
     item.to.component === componentId && item.to.pin === pinName
   );
-  return wire ? Boolean(states[wire.from.component]) : false;
+  return wire ? readOutput(wire.from.component, wire.from.pin, states) : false;
+}
+
+function readOutput(componentId, pinName, states) {
+  const value = Boolean(states[componentId]);
+  const component = states.components?.find(item => item.id === componentId);
+  return component?.type === 'jk' && pinName === 'qbar' ? !value : value;
 }
 
 function evaluateCircuit(circuit) {
   const states = Object.fromEntries(circuit.components.map(component => [component.id, Boolean(component.state)]));
+  states.components = circuit.components;
 
   circuit.components.forEach(component => {
     if (!['nand', 'nor', 'xor', 'xnor', '2nand', '3nand', '4nand'].includes(component.type)) return;
@@ -31,6 +38,27 @@ function evaluateCircuit(circuit) {
     } else {
       states[component.id] = !allInputsHigh;
     }
+  });
+
+  circuit.components.forEach(component => {
+    if (component.type !== 'jk') return;
+
+    const clock = readInput(circuit, component.id, 'c', states);
+    const reset = readInput(circuit, component.id, 'reset', states);
+    const j = readInput(circuit, component.id, 'j', states);
+    const k = readInput(circuit, component.id, 'k', states);
+    const previousClock = Boolean(component.previousClock);
+
+    if (reset) {
+      component.state = 0;
+    } else if (clock && !previousClock) {
+      if (j && !k) component.state = 1;
+      if (!j && k) component.state = 0;
+      if (j && k) component.state = component.state ? 0 : 1;
+    }
+
+    component.previousClock = clock ? 1 : 0;
+    states[component.id] = Boolean(component.state);
   });
 
   circuit.components.forEach(component => {
@@ -68,8 +96,9 @@ function renderCircuit(circuit, svgElement) {
     const y2 = toComponent.y + toPin.y;
     const curve = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     curve.setAttribute('d', wirePath(x1, y1, x2, y2));
-    curve.setAttribute('class', `wire${states[wire.from.component] ? ' wire-energized' : ''}`);
-    curve.setAttribute('data-energized', states[wire.from.component] ? '1' : '0');
+    const energized = readOutput(wire.from.component, wire.from.pin, states);
+    curve.setAttribute('class', `wire${energized ? ' wire-energized' : ''}`);
+    curve.setAttribute('data-energized', energized ? '1' : '0');
     curve.setAttribute('data-wire-index', wireIndex);
     svgElement.appendChild(curve);
   });
