@@ -85,7 +85,9 @@ function renderCircuit(circuit, svgElement) {
     const useElement = document.createElementNS('http://www.w3.org/2000/svg', 'use');
     const symbolId = component.type === 'switch'
       ? (component.state ? 'switch-closed' : 'switch-open')
-      : gateDef.svgId;
+      : component.type === 'led'
+        ? (states[component.id] ? 'light-on' : 'light-off')
+        : gateDef.svgId;
     useElement.setAttribute('href', `gates.svg#${symbolId}`);
     useElement.setAttribute('width', '260');
     useElement.setAttribute('height', '130');
@@ -95,6 +97,19 @@ function renderCircuit(circuit, svgElement) {
     useElement.setAttribute('data-type', component.type);
     useElement.setAttribute('data-state', states[component.id] ? '1' : '0');
     svgElement.appendChild(useElement);
+
+    if (component.type === 'switch') {
+      const switchHitArea = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      switchHitArea.setAttribute('x', component.x - 26);
+      switchHitArea.setAttribute('y', component.y + 35);
+      switchHitArea.setAttribute('width', '312');
+      switchHitArea.setAttribute('height', '60');
+      switchHitArea.setAttribute('fill', 'transparent');
+      switchHitArea.setAttribute('class', 'switch-hit-area');
+      switchHitArea.setAttribute('data-switch-hit', 'true');
+      switchHitArea.setAttribute('data-component', component.id);
+      svgElement.appendChild(switchHitArea);
+    }
 
     gateDef.pins.forEach(pin => {
       const pinElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');

@@ -122,6 +122,13 @@
             <path class="detail" d="M115 124h34" />
         </symbol>
 
+        <symbol id="light-off" viewBox="0 0 260 130"><use href="#light" /></symbol>
+
+        <symbol id="light-on" viewBox="0 0 260 130">
+            <use href="#light" />
+            <circle cx="132" cy="84" r="34" fill="#e4a62a" filter="drop-shadow(0 0 8px #ffd875)" />
+        </symbol>
+
         <!-- Compatibility symbols for the original palette. -->
         <symbol id="2nand" viewBox="0 0 260 130"><use href="#nand" /></symbol>
 

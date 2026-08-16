@@ -85,6 +85,11 @@ button:hover {
     cursor: pointer;
 }
 
+.switch-hit-area {
+    cursor: pointer;
+    pointer-events: all;
+}
+
 #board use[data-type="switch"][data-state="1"] {
     filter: hue-rotate(90deg);
 }

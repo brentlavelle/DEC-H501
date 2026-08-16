@@ -31,6 +31,17 @@ function clearWireSelection() {
 
 // Enable dragging for gates
 board.addEventListener('mousedown', (event) => {
+  const switchHitArea = event.target.closest('[data-switch-hit]');
+  if (switchHitArea) {
+    const component = circuit?.components.find(c => c.id === switchHitArea.dataset.component);
+    if (component) {
+      component.state = component.state ? 0 : 1;
+      renderCircuit(circuit, board);
+    }
+    event.preventDefault();
+    return;
+  }
+
   const wire = event.target.closest('.wire');
   if (wire) {
     clearWireSelection();
@@ -78,12 +89,10 @@ board.addEventListener('mousedown', (event) => {
 });
 
 function screenToSvg(event) {
-  const bounds = board.getBoundingClientRect();
-  const viewBox = board.viewBox.baseVal;
-  return {
-    x: viewBox.x + ((event.clientX - bounds.left) / bounds.width) * viewBox.width,
-    y: viewBox.y + ((event.clientY - bounds.top) / bounds.height) * viewBox.height
-  };
+  const point = board.createSVGPoint();
+  point.x = event.clientX;
+  point.y = event.clientY;
+  return point.matrixTransform(board.getScreenCTM().inverse());
 }
 
 function findPinTarget(event) {
