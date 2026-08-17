@@ -74,3 +74,11 @@ Each component has `id`, `type`, `x`, `y`. Switches have a `state` (0/1). LEDs r
 - Start with `draggable.html` for a working prototype reference.
 - Use `.github/agents/dec-h501.agent.md` for detailed architecture guidance.
 - This file for a quick scan of the codebase layout and current state.
+
+## I found a similar tool
+I recently watched a video from https://www.instagram.com/sagecadence_ that
+showed a tool called falstad.com/circut that does what I was looking for.
+Over a year into this project and days after usinging better AI models. I don't like the look
+of it but it is a WAY better tool. I may take some ideas from it but keep my project pure digital.
+That creater is fantastic showing me so many tools that I knew of like Spice that I need to use the
+formats that industsry use for later features like save and restore features.
