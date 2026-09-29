@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DEC H-501 Gate Symbols — Thick Outline Study</title>
+    <style>
+      :root {
+        --paper: #d7d1c2;
+        --panel: #eee9dc;
+        --ink: #202525;
+        --muted: #5d625d;
+        --line: #a8a391;
+        --blue: #225a69;
+        --amber: #e4a62a;
+        --amber-glow: #ffd875;
+        --steel: #c7c1b1;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(60, 55, 42, 0.06) 1px, transparent 1px),
+          var(--paper);
+        background-size: 22px 22px, 22px 22px, auto;
+        color: var(--ink);
+        font-family: "Courier New", Courier, monospace;
+        min-width: 320px;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 42px 0 54px;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 24px;
+        margin-bottom: 28px;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--blue);
+        font-size: 12px;
+        letter-spacing: 2px;
+        font-weight: bold;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(25px, 5vw, 48px);
+        letter-spacing: 1px;
+        line-height: 1;
+      }
+
+      header p {
+        max-width: 360px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      /* === METAL PLATE PANEL === */
+      .plate {
+        padding: 20px;
+        border: 2px solid var(--ink);
+        background: rgba(238, 233, 220, 0.87);
+        box-shadow: 7px 7px 0 rgba(32, 37, 37, 0.16);
+      }
+
+      .plate-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding-bottom: 14px;
+        border-bottom: 2px solid var(--ink);
+      }
+
+      .plate-title h2 {
+        margin: 0;
+        font-size: 14px;
+        letter-spacing: 1px;
+      }
+
+      .plate-title span {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      /* === GATE CATALOG GRID === */
+      .catalog {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding-top: 16px;
+      }
+
+      .specimen {
+        min-height: 195px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.25);
+      }
+
+      .specimen h3 {
+        margin: 0 0 4px;
+        font-size: 13px;
+        letter-spacing: 1px;
+      }
+
+      .specimen p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      .specimen svg {
+        display: block;
+        width: 100%;
+        height: 128px;
+        margin-top: 3px;
+        overflow: visible;
+      }
+
+      /* === SVG STYLES (thick outline, paper fill) === */
+      .outline {
+        fill: #f8f6ef;
+        stroke: var(--ink);
+        stroke-width: 6;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+      }
+
+      .detail {
+        fill: none;
+        stroke: var(--ink);
+        stroke-width: 6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .pin {
+        stroke: var(--blue);
+        stroke-width: 5;
+        stroke-linecap: round;
+      }
+
+      .pin-dot { fill: var(--blue); }
+
+      .label {
+        fill: var(--muted);
+        font-size: 10px;
+        font-family: "Courier New", monospace;
+      }
+
+      .light {
+        fill: #4b504d;
+        stroke: var(--ink);
+        stroke-width: 6;
+      }
+
+      .light.on {
+        fill: var(--amber);
+        filter: drop-shadow(0 0 8px var(--amber-glow));
+      }
+
+      /* === INTERACTIVE DEMO STRIP === */
+      .demo-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .control-panel {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 16px;
+        border: 2px solid var(--ink);
+        background: var(--steel);
+      }
+
+      .control-panel strong {
+        display: block;
+        font-size: 13px;
+      }
+
+      .control-panel small {
+        display: block;
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      button {
+        border: 2px solid var(--ink);
+        padding: 9px 13px;
+        color: var(--ink);
+        background: var(--amber);
+        font: bold 12px "Courier New", monospace;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 var(--ink);
+      }
+
+      button:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 var(--ink);
+      }
+
+      .light-readout {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+      }
+
+      .readout-lamp {
+        width: 22px;
+        height: 22px;
+        border: 3px solid var(--ink);
+        border-radius: 50%;
+        background: #4b504d;
+      }
+
+      .readout-lamp.on {
+        background: var(--amber);
+        box-shadow: 0 0 12px var(--amber-glow);
+      }
+
+      /* === SIMULATION AREA === */
+      .sim-strip {
+        margin-top: 12px;
+        padding: 16px;
+        border: 2px solid var(--ink);
+        background: rgba(238, 233, 220, 0.7);
+      }
+
+      .sim-strip h3 {
+        font-size: 14px;
+        letter-spacing: 1px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--ink);
+        margin-bottom: 12px;
+      }
+
+      .sim-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .sim-label {
+        font-size: 10px;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 2px;
+      }
+
+      .gate-stage {
+        width: 120px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .gate-stage svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .wire-h {
+        height: 4px;
+        background: var(--blue);
+        flex-shrink: 0;
+      }
+
+      .wire-h.off { background: #8a8a7e; }
+
+      /* === FOOTER === */
+      footer {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      @media (max-width: 760px) {
+        header { display: block; }
+        header p { margin-top: 16px; }
+        .catalog { grid-template-columns: repeat(2, 1fr); }
+      }
+
+      @media (max-width: 480px) {
+        main { padding-top: 24px; width: min(100% - 20px, 1120px); }
+        .plate { padding: 12px; }
+        .catalog, .demo-strip { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+
+      <!-- === HEADER === -->
+      <header>
+        <div>
+          <p class="eyebrow">DEC H-500 / H-501 LOGIC TRAINER</p>
+          <h1>Gate Symbols — Thick Outline Study</h1>
+        </div>
+        <p>
+          Heavy instrument outlines, open interiors, blue patch points, and warm
+          indicator lamps. Seven logic symbols for the next sprite sheet.
+        </p>
+      </header>
+
+      <!-- === CATALOG PLATE === -->
+      <section class="plate" aria-labelledby="catalog-title">
+        <div class="plate-title">
+          <h2 id="catalog-title">LOGIC MODULE CATALOG</h2>
+          <span>ALL SYMBOLS / 6 PX OUTLINE</span>
+        </div>
+
+        <div class="catalog">
+
+          <!-- AND -->
+          <article class="specimen">
+            <h3>AND</h3>
+            <p>ALL INPUTS HIGH</p>
+            <svg viewBox="0 0 260 130" aria-label="AND gate">
+              <line class="pin" x1="18" y1="42" x2="76" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="76" y2="88" />
+              <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+              <line class="pin" x1="161" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+            </svg>
+          </article>
+
+          <!-- OR -->
+          <article class="specimen">
+            <h3>OR</h3>
+            <p>ANY INPUT HIGH</p>
+            <svg viewBox="0 0 260 130" aria-label="OR gate">
+              <line class="pin" x1="18" y1="42" x2="84" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="84" y2="88" />
+              <path class="outline" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+              <line class="pin" x1="164" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+            </svg>
+          </article>
+
+          <!-- NAND -->
+          <article class="specimen">
+            <h3>NAND</h3>
+            <p>AND + INVERT</p>
+            <svg viewBox="0 0 260 130" aria-label="NAND gate">
+              <line class="pin" x1="18" y1="42" x2="76" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="76" y2="88" />
+              <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+              <circle class="outline" cx="169" cy="65" r="10" />
+              <line class="pin" x1="179" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+            </svg>
+          </article>
+
+          <!-- NOR -->
+          <article class="specimen">
+            <h3>NOR</h3>
+            <p>OR + INVERT</p>
+            <svg viewBox="0 0 260 130" aria-label="NOR gate">
+              <line class="pin" x1="18" y1="42" x2="84" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="84" y2="88" />
+              <path class="outline" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+              <circle class="outline" cx="174" cy="65" r="10" />
+              <line class="pin" x1="184" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+            </svg>
+          </article>
+
+          <!-- XOR -->
+          <article class="specimen">
+            <h3>XOR</h3>
+            <p>INPUTS DIFFER</p>
+            <svg viewBox="0 0 260 130" aria-label="XOR gate">
+              <line class="pin" x1="18" y1="42" x2="84" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="84" y2="88" />
+              <path class="detail" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+              <path class="detail" d="M70 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+              <path class="outline" d="M78 22h42a43 43 0 0 1 0 86H78z" />
+              <line class="pin" x1="165" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+            </svg>
+          </article>
+
+          <!-- XNOR -->
+          <article class="specimen">
+            <h3>XNOR</h3>
+            <p>XOR + INVERT</p>
+            <svg viewBox="0 0 260 130" aria-label="XNOR gate">
+              <line class="pin" x1="18" y1="42" x2="84" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="84" y2="88" />
+              <path class="detail" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+              <path class="detail" d="M70 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+              <path class="outline" d="M78 22h42a43 43 0 0 1 0 86H78z" />
+              <circle class="outline" cx="169" cy="65" r="10" />
+              <line class="pin" x1="179" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+            </svg>
+          </article>
+
+          <!-- NOT -->
+          <article class="specimen">
+            <h3>NOT</h3>
+            <p>SINGLE INPUT INVERTER</p>
+            <svg viewBox="0 0 260 130" aria-label="NOT gate">
+              <line class="pin" x1="18" y1="65" x2="78" y2="65" />
+              <path class="outline" d="M78 24l78 41-78 41z" />
+              <circle class="outline" cx="168" cy="65" r="10" />
+              <line class="pin" x1="178" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="65" r="4" />
+            </svg>
+          </article>
+
+          <!-- JK FLIP-FLOP -->
+          <article class="specimen">
+            <h3>JK FLIP FLOP</h3>
+            <p>EDGE-TRIGGERED MEMORY</p>
+            <svg viewBox="0 0 260 130" aria-label="JK flip flop">
+              <rect class="outline" x="70" y="18" width="110" height="94" />
+              <line class="pin" x1="18" y1="42" x2="70" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="70" y2="88" />
+              <line class="pin" x1="18" y1="65" x2="70" y2="65" />
+              <line class="pin" x1="180" y1="42" x2="224" y2="42" />
+              <line class="pin" x1="180" y1="88" x2="224" y2="88" />
+              <line class="pin" x1="125" y1="112" x2="125" y2="126" />
+              <path class="detail" d="M70 60l10 6-10 6" />
+              <text class="label" x="82" y="47">J</text>
+              <text class="label" x="82" y="96">K</text>
+              <text class="label" x="82" y="69">C</text>
+              <text class="label" x="153" y="47">Q</text>
+              <text class="label" x="148" y="96">Q'</text>
+              <text class="label" x="125" y="103" text-anchor="middle">RESET</text>
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+              <circle class="pin-dot" cx="18" cy="65" r="4" />
+              <circle class="pin-dot" cx="125" cy="126" r="4" />
+            </svg>
+          </article>
+
+          <!-- LED -->
+          <article class="specimen">
+            <h3>LIGHT</h3>
+            <p>OUTPUT INDICATOR</p>
+            <svg viewBox="0 0 260 130" aria-label="light indicator">
+              <line class="pin" x1="18" y1="65" x2="94" y2="65" />
+              <circle id="catalog-light" class="light" cx="132" cy="65" r="38" />
+              <path class="detail" d="M115 105h34M120 114h24" />
+              <circle class="pin-dot" cx="18" cy="65" r="4" />
+            </svg>
+          </article>
+
+        </div><!-- .catalog -->
+      </section><!-- .plate -->
+
+      <!-- === INTERACTIVE DEMO === -->
+      <section class="demo-strip" aria-label="Interactive demonstration">
+        <div class="control-panel">
+          <div>
+            <strong>PATCH INPUT / SW1</strong>
+            <small>Toggle the input state.</small>
+          </div>
+          <button id="toggle-btn" type="button">SET HIGH</button>
+        </div>
+        <div class="control-panel light-readout">
+          <div class="readout-lamp" id="readout-lamp" aria-hidden="true"></div>
+          <div>
+            <strong id="readout-state">LIGHT OFF</strong>
+            <small>Output indicator state</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- === MINI SIMULATION: NAND GATE SIGNAL PATH === -->
+      <section class="sim-strip" aria-label="NAND gate signal path simulation">
+        <h3>NAND GATE — SIGNAL PATH SIMULATION</h3>
+        <div class="sim-row">
+          <div>
+            <!-- Input A toggle -->
+            <button class="sim-btn" data-input="a">A = 0</button>
+            <p class="sim-label">INPUT A</p>
+          </div>
+          <div class="wire-h off" id="wire-a"></div>
+          <!-- Gate A icon (mini AND body) -->
+          <div class="gate-stage">
+            <svg viewBox="0 0 100 60" aria-label="AND gate symbol">
+              <line class="pin" x1="4" y1="20" x2="36" y2="20" />
+              <line class="pin" x1="4" y1="40" x2="36" y2="40" />
+              <path class="outline" d="M36 8h30a22 22 0 0 1 0 44H36z" style="stroke-width:4;" />
+              <line class="pin" x1="92" y1="30" x2="100" y2="30" />
+            </svg>
+            <p class="sim-label">GATE</p>
+          </div>
+          <div class="wire-h off" id="wire-out"></div>
+          <!-- Output LED -->
+          <div>
+            <svg width="24" height="24" aria-hidden="true">
+              <circle id="sim-led" cx="12" cy="12" r="10" class="light" style="stroke-width:3;" />
+            </svg>
+            <p class="sim-label">OUTPUT Q'</p>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        SELF-CONTAINED SVG STUDY / NO PROJECT FILES MODIFIED
+      </footer>
+
+    </main>
+
+    <script>
+      // === GLOBAL TOGGLE (catalog LED) ===
+      const toggleBtn = document.getElementById("toggle-btn");
+      const catalogLight = document.getElementById("catalog-light");
+      const readoutLamp = document.getElementById("readout-lamp");
+      const readoutState = document.getElementById("readout-state");
+      let high = false;
+
+      toggleBtn.addEventListener("click", () => {
+        high = !high;
+        toggleBtn.textContent = high ? "SET LOW" : "SET HIGH";
+        catalogLight.classList.toggle("on", high);
+        readoutLamp.classList.toggle("on", high);
+        readoutState.textContent = high ? "LIGHT ON" : "LIGHT OFF";
+      });
+
+      // === MINI NAND SIMULATION ===
+      let aState = 0;
+      let bState = 1; // default HIGH for B (simulated as tied high)
+      const simBtnA = document.querySelector('[data-input="a"]');
+
+      function updateNand() {
+        const q = (aState && bState) ? 0 : 1;
+        // Wire A
+        const wireA = document.getElementById("wire-a");
+        wireA.style.background = aState === 1 ? "var(--blue)" : "#8a8a7e";
+
+        // Output LED
+        const simLed = document.getElementById("sim-led");
+        simLed.classList.toggle("on", q === 1);
+
+        // Wire out
+        const wireOut = document.getElementById("wire-out");
+        wireOut.style.background = q === 1 ? "var(--blue)" : "#8a8a7e";
+      }
+
+      simBtnA.addEventListener("click", () => {
+        aState = aState === 0 ? 1 : 0;
+        simBtnA.textContent = `A = ${aState}`;
+        updateNand();
+      });
+
+      // Initial state
+      updateNand();
+    </script>
+
+  </body>
+</html>

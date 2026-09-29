@@ -48,16 +48,26 @@ function evaluateCircuit(circuit) {
     const j = readInput(circuit, component.id, 'j', states);
     const k = readInput(circuit, component.id, 'k', states);
     const previousClock = Boolean(component.previousClock);
+    const previousJ = Boolean(component.previousJ);
+    const previousK = Boolean(component.previousK);
+    const clockPulse = clock && !previousClock;
+    const inputPulse = clock && (j !== previousJ || k !== previousK);
 
     if (reset) {
       component.state = 0;
-    } else if (clock && !previousClock) {
-      if (j && !k) component.state = 1;
-      if (!j && k) component.state = 0;
-      if (j && k) component.state = component.state ? 0 : 1;
+    } else if (clockPulse || inputPulse) {
+      if (j && k) {
+        component.state = component.state ? 0 : 1;
+      } else if (j && !k) {
+        component.state = 1;
+      } else if (!j && k) {
+        component.state = 0;
+      }
     }
 
     component.previousClock = clock ? 1 : 0;
+    component.previousJ = j;
+    component.previousK = k;
     states[component.id] = Boolean(component.state);
   });
 
@@ -116,7 +126,9 @@ function renderCircuit(circuit, svgElement) {
       ? (component.state ? 'switch-closed' : 'switch-open')
       : component.type === 'led'
         ? (states[component.id] ? 'light-on' : 'light-off')
-        : gateDef.svgId;
+        : component.type === 'jk'
+          ? (states[component.id] ? 'jk-high' : 'jk')
+          : gateDef.svgId;
     useElement.setAttribute('href', `gates.svg#${symbolId}`);
     useElement.setAttribute('width', '260');
     useElement.setAttribute('height', '130');
