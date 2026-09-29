@@ -2,18 +2,86 @@
 // Adds drag-and-drop functionality and a palette for placing gates
 
 import renderCircuit from './renderer.js';
+import { createEmptyCircuit, parseCircuitFile, serializeCircuit } from './circuitModel.js';
 
 const board = document.getElementById('board');
+const fileStatus = document.getElementById('fileStatus');
 let circuit = null; // Circuit will be loaded dynamically
+
+function setStatus(message, isError = false) {
+  if (!fileStatus) return;
+  fileStatus.textContent = message;
+  fileStatus.style.color = isError ? 'crimson' : 'inherit';
+}
 
 // Fetch the circuit JSON dynamically
 fetch('./exampleCircuit.json')
   .then(response => response.json())
   .then(data => {
-    circuit = data;
+    circuit = parseCircuitFile(JSON.stringify(data));
     renderCircuit(circuit, board);
   })
   .catch(error => console.error('Error loading circuit JSON:', error));
+
+// --- File menu: New / Save / Load ---
+
+document.getElementById('newCircuitBtn')?.addEventListener('click', () => {
+  if (!confirm('Start a new circuit? Unsaved changes will be lost.')) return;
+  circuit = createEmptyCircuit();
+  renderCircuit(circuit, board);
+  setStatus('New circuit created.');
+});
+
+document.getElementById('saveCircuitBtn')?.addEventListener('click', async () => {
+  if (!circuit) return;
+  const json = serializeCircuit(circuit);
+
+  if (window.showSaveFilePicker) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: 'circuit.json',
+        types: [{ description: 'Circuit JSON', accept: { 'application/json': ['.json'] } }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(json);
+      await writable.close();
+      setStatus('Saved.');
+      return;
+    } catch (error) {
+      if (error?.name === 'AbortError') return; // user cancelled the picker
+      console.error('Save via file picker failed, falling back to download:', error);
+    }
+  }
+
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'circuit.json';
+  link.click();
+  URL.revokeObjectURL(url);
+  setStatus('Downloaded circuit.json.');
+});
+
+const loadCircuitInput = document.getElementById('loadCircuitInput');
+document.getElementById('loadCircuitBtn')?.addEventListener('click', () => {
+  loadCircuitInput?.click();
+});
+loadCircuitInput?.addEventListener('change', async () => {
+  const file = loadCircuitInput.files?.[0];
+  loadCircuitInput.value = '';
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    circuit = parseCircuitFile(text);
+    clearWireSelection();
+    renderCircuit(circuit, board);
+    setStatus(`Loaded ${file.name}.`);
+  } catch (error) {
+    setStatus(`Load failed: ${error.message}`, true);
+  }
+});
 
 // Drag state
 let draggedElement = null;
