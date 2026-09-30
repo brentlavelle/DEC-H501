@@ -4,6 +4,7 @@
 import renderCircuit from './renderer.js';
 import { createEmptyCircuit, parseCircuitFile, serializeCircuit } from './circuitModel.js';
 import { makeComponent, ungroupComponent, isSubcircuitType } from './subcircuits.js';
+import { generateBOM } from './bomGenerator.js';
 
 const board = document.getElementById('board');
 const fileStatus = document.getElementById('fileStatus');
@@ -185,6 +186,49 @@ board.addEventListener('dblclick', (event) => {
     navStack.push(box.dataset.type);
     selectedIds.clear();
     render();
+  }
+});
+
+// --- BOM: which real 7400-series ICs would be needed to build this circuit ---
+
+document.getElementById('generateBomBtn')?.addEventListener('click', () => {
+  const bomResults = document.getElementById('bomResults');
+  if (!circuit || !bomResults) return;
+
+  const { rows, unsupported, totalGates } = generateBOM(circuit);
+
+  if (rows.length === 0 && unsupported.length === 0) {
+    bomResults.textContent = 'No ICs needed for this circuit.';
+    return;
+  }
+
+  const table = document.createElement('table');
+  table.innerHTML = `
+    <thead>
+      <tr><th>Part</th><th>Gate type</th><th>Inputs</th><th>Gates used</th><th>Gates/pkg</th><th>Packages</th></tr>
+    </thead>
+  `;
+  const tbody = document.createElement('tbody');
+  rows.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${row.part}</td><td>${row.type}</td><td>${row.inputs}</td><td>${row.count}</td><td>${row.gatesPerPackage}</td><td>${row.packages}</td>`;
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  bomResults.innerHTML = '';
+  bomResults.appendChild(table);
+
+  const totalPackages = rows.reduce((sum, row) => sum + row.packages, 0);
+  const summary = document.createElement('p');
+  summary.textContent = `${totalGates} primitive gates, ${totalPackages} package(s) total.`;
+  bomResults.appendChild(summary);
+
+  if (unsupported.length > 0) {
+    const warning = document.createElement('p');
+    warning.style.color = 'crimson';
+    warning.textContent = `No catalog entry for: ${unsupported.map(u => `${u.type} (${u.inputs}-input) x${u.count}`).join(', ')}.`;
+    bomResults.appendChild(warning);
   }
 });
 
