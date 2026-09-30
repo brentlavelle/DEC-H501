@@ -6,6 +6,15 @@ import renderCircuit from './renderer.js';
 const board = document.getElementById('board');
 let circuit = null; // Circuit will be loaded dynamically
 
+// Optional snap to the H-500's module-bay grid (gate footprint + a small gutter).
+const GRID_CELL_X = 285;
+const GRID_CELL_Y = 150;
+const gridSnapToggle = document.getElementById('gridSnapToggle');
+
+function snapToGrid(value, cellSize) {
+  return Math.round(value / cellSize) * cellSize;
+}
+
 // Fetch the circuit JSON dynamically
 fetch('./exampleCircuit.json')
   .then(response => response.json())
@@ -154,8 +163,14 @@ document.addEventListener('mouseup', (event) => {
   const id = draggedElement.getAttribute('id');
   const component = circuit.components.find(c => c.id === id);
   if (component) {
-    component.x = parseFloat(draggedElement.getAttribute('x'));
-    component.y = parseFloat(draggedElement.getAttribute('y'));
+    let newX = parseFloat(draggedElement.getAttribute('x'));
+    let newY = parseFloat(draggedElement.getAttribute('y'));
+    if (gridSnapToggle?.checked) {
+      newX = snapToGrid(newX, GRID_CELL_X);
+      newY = snapToGrid(newY, GRID_CELL_Y);
+    }
+    component.x = newX;
+    component.y = newY;
   }
 
   draggedElement = null;
