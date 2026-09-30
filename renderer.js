@@ -2,6 +2,9 @@
 // Converts JSON circuit model into SVG elements
 
 import GateLibrary from './gateLibrary.js';
+import { flattenCircuit, getComponentPins, isSubcircuitType } from './subcircuits.js';
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 function readInput(circuit, componentId, pinName, states) {
   const wire = circuit.wires.find(item =>
@@ -80,13 +83,42 @@ function evaluateCircuit(circuit) {
   return states;
 }
 
+function renderSubcircuitBox(circuit, component, svgElement) {
+  const subDef = circuit.subcircuits[component.type];
+  const rect = document.createElementNS(SVG_NS, 'rect');
+  rect.setAttribute('x', component.x);
+  rect.setAttribute('y', component.y);
+  rect.setAttribute('width', subDef.width);
+  rect.setAttribute('height', subDef.height);
+  rect.setAttribute('class', 'ic-box');
+  rect.setAttribute('id', component.id);
+  rect.setAttribute('data-type', component.type);
+  svgElement.appendChild(rect);
+
+  const label = document.createElementNS(SVG_NS, 'text');
+  label.setAttribute('x', component.x + subDef.width / 2);
+  label.setAttribute('y', component.y + subDef.height / 2);
+  label.setAttribute('text-anchor', 'middle');
+  label.setAttribute('dominant-baseline', 'middle');
+  label.setAttribute('class', 'ic-label');
+  label.textContent = component.type;
+  svgElement.appendChild(label);
+}
+
 function renderCircuit(circuit, svgElement) {
   // Clear existing SVG content
   while (svgElement.firstChild) {
     svgElement.removeChild(svgElement.firstChild);
   }
 
-  const states = evaluateCircuit(circuit);
+  const flattened = flattenCircuit(circuit);
+  const states = evaluateCircuit(flattened);
+
+  // Resolves a root-level {component, pin} to the qualified id that actually carries the
+  // signal, following through any subcircuit instance's external pin mapping.
+  function rootPin(componentId, pinName) {
+    return flattened.rootPinMap[componentId]?.[pinName] || { component: componentId, pin: pinName };
+  }
 
   // Render wires first so components and pin labels remain visible above them.
   circuit.wires.forEach((wire, wireIndex) => {
@@ -95,8 +127,8 @@ function renderCircuit(circuit, svgElement) {
 
     if (!fromComponent || !toComponent) return;
 
-    const fromPin = GateLibrary[fromComponent.type]?.pins.find(p => p.name === wire.from.pin);
-    const toPin = GateLibrary[toComponent.type]?.pins.find(p => p.name === wire.to.pin);
+    const fromPin = getComponentPins(circuit, fromComponent.type)?.find(p => p.name === wire.from.pin);
+    const toPin = getComponentPins(circuit, toComponent.type)?.find(p => p.name === wire.to.pin);
 
     if (!fromPin || !toPin) return;
 
@@ -104,9 +136,10 @@ function renderCircuit(circuit, svgElement) {
     const y1 = fromComponent.y + fromPin.y;
     const x2 = toComponent.x + toPin.x;
     const y2 = toComponent.y + toPin.y;
-    const curve = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const curve = document.createElementNS(SVG_NS, 'path');
     curve.setAttribute('d', wirePath(x1, y1, x2, y2));
-    const energized = readOutput(wire.from.component, wire.from.pin, states);
+    const qualified = rootPin(wire.from.component, wire.from.pin);
+    const energized = readOutput(qualified.component, qualified.pin, states);
     curve.setAttribute('class', `wire${energized ? ' wire-energized' : ''}`);
     curve.setAttribute('data-energized', energized ? '1' : '0');
     curve.setAttribute('data-wire-index', wireIndex);
@@ -115,45 +148,50 @@ function renderCircuit(circuit, svgElement) {
 
   // Render components
   circuit.components.forEach(component => {
-    const gateDef = GateLibrary[component.type];
-    if (!gateDef) {
-      console.error(`Unknown gate type: ${component.type}`);
+    const pins = getComponentPins(circuit, component.type);
+    if (!pins) {
+      console.error(`Unknown component type: ${component.type}`);
       return;
     }
 
-    const useElement = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-    const symbolId = component.type === 'switch'
-      ? (component.state ? 'switch-closed' : 'switch-open')
-      : component.type === 'led'
-        ? (states[component.id] ? 'light-on' : 'light-off')
-        : component.type === 'jk'
-          ? (states[component.id] ? 'jk-high' : 'jk')
-          : gateDef.svgId;
-    useElement.setAttribute('href', `gates.svg#${symbolId}`);
-    useElement.setAttribute('width', '260');
-    useElement.setAttribute('height', '130');
-    useElement.setAttribute('x', component.x);
-    useElement.setAttribute('y', component.y);
-    useElement.setAttribute('id', component.id);
-    useElement.setAttribute('data-type', component.type);
-    useElement.setAttribute('data-state', states[component.id] ? '1' : '0');
-    svgElement.appendChild(useElement);
+    if (isSubcircuitType(circuit, component.type)) {
+      renderSubcircuitBox(circuit, component, svgElement);
+    } else {
+      const gateDef = GateLibrary[component.type];
+      const useElement = document.createElementNS(SVG_NS, 'use');
+      const symbolId = component.type === 'switch'
+        ? (component.state ? 'switch-closed' : 'switch-open')
+        : component.type === 'led'
+          ? (states[component.id] ? 'light-on' : 'light-off')
+          : component.type === 'jk'
+            ? (states[component.id] ? 'jk-high' : 'jk')
+            : gateDef.svgId;
+      useElement.setAttribute('href', `gates.svg#${symbolId}`);
+      useElement.setAttribute('width', '260');
+      useElement.setAttribute('height', '130');
+      useElement.setAttribute('x', component.x);
+      useElement.setAttribute('y', component.y);
+      useElement.setAttribute('id', component.id);
+      useElement.setAttribute('data-type', component.type);
+      useElement.setAttribute('data-state', states[component.id] ? '1' : '0');
+      svgElement.appendChild(useElement);
 
-    if (component.type === 'switch') {
-      const switchHitArea = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      switchHitArea.setAttribute('x', component.x - 26);
-      switchHitArea.setAttribute('y', component.y + 35);
-      switchHitArea.setAttribute('width', '312');
-      switchHitArea.setAttribute('height', '60');
-      switchHitArea.setAttribute('fill', 'transparent');
-      switchHitArea.setAttribute('class', 'switch-hit-area');
-      switchHitArea.setAttribute('data-switch-hit', 'true');
-      switchHitArea.setAttribute('data-component', component.id);
-      svgElement.appendChild(switchHitArea);
+      if (component.type === 'switch') {
+        const switchHitArea = document.createElementNS(SVG_NS, 'rect');
+        switchHitArea.setAttribute('x', component.x - 26);
+        switchHitArea.setAttribute('y', component.y + 35);
+        switchHitArea.setAttribute('width', '312');
+        switchHitArea.setAttribute('height', '60');
+        switchHitArea.setAttribute('fill', 'transparent');
+        switchHitArea.setAttribute('class', 'switch-hit-area');
+        switchHitArea.setAttribute('data-switch-hit', 'true');
+        switchHitArea.setAttribute('data-component', component.id);
+        svgElement.appendChild(switchHitArea);
+      }
     }
 
-    gateDef.pins.forEach(pin => {
-      const pinElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    pins.forEach(pin => {
+      const pinElement = document.createElementNS(SVG_NS, 'circle');
       pinElement.setAttribute('cx', component.x + pin.x);
       pinElement.setAttribute('cy', component.y + pin.y);
       pinElement.setAttribute('r', '12');

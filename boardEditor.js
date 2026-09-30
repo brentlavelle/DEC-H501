@@ -3,10 +3,18 @@
 
 import renderCircuit from './renderer.js';
 import { createEmptyCircuit, parseCircuitFile, serializeCircuit } from './circuitModel.js';
+import { makeComponent, ungroupComponent, isSubcircuitType } from './subcircuits.js';
 
 const board = document.getElementById('board');
 const fileStatus = document.getElementById('fileStatus');
+const componentStatus = document.getElementById('componentStatus');
+const breadcrumbEl = document.getElementById('breadcrumb');
 let circuit = null; // Circuit will be loaded dynamically
+
+// Navigation stack of subcircuit type names being edited; [] means viewing the root circuit.
+let navStack = [];
+// Ids of components selected in the currently active view (root or a zoomed-in subcircuit).
+let selectedIds = new Set();
 
 function setStatus(message, isError = false) {
   if (!fileStatus) return;
@@ -14,12 +22,59 @@ function setStatus(message, isError = false) {
   fileStatus.style.color = isError ? 'crimson' : 'inherit';
 }
 
+function setComponentStatus(message, isError = false) {
+  if (!componentStatus) return;
+  componentStatus.textContent = message;
+  componentStatus.style.color = isError ? 'crimson' : 'inherit';
+}
+
+// Returns a { components, wires, subcircuits } view onto whatever is being edited right
+// now: the root circuit, or the definition of the subcircuit currently zoomed into.
+function activeView() {
+  if (navStack.length === 0) return circuit;
+  const def = circuit.subcircuits[navStack[navStack.length - 1]];
+  return { components: def.components, wires: def.wires, subcircuits: circuit.subcircuits };
+}
+
+function updateBreadcrumb() {
+  if (!breadcrumbEl) return;
+  breadcrumbEl.innerHTML = '';
+  const path = ['Root', ...navStack];
+  path.forEach((name, index) => {
+    const span = document.createElement('span');
+    span.textContent = name;
+    span.className = 'breadcrumb-item';
+    if (index < path.length - 1) {
+      span.classList.add('clickable');
+      span.addEventListener('click', () => {
+        navStack = navStack.slice(0, index);
+        selectedIds.clear();
+        render();
+      });
+    }
+    breadcrumbEl.appendChild(span);
+    if (index < path.length - 1) breadcrumbEl.appendChild(document.createTextNode(' > '));
+  });
+}
+
+function applySelectionHighlight() {
+  board.querySelectorAll('[data-type]').forEach(element => {
+    element.classList.toggle('selected', selectedIds.has(element.getAttribute('id')));
+  });
+}
+
+function render() {
+  renderCircuit(activeView(), board);
+  applySelectionHighlight();
+  updateBreadcrumb();
+}
+
 // Fetch the circuit JSON dynamically
 fetch('./exampleCircuit.json')
   .then(response => response.json())
   .then(data => {
     circuit = parseCircuitFile(JSON.stringify(data));
-    renderCircuit(circuit, board);
+    render();
   })
   .catch(error => console.error('Error loading circuit JSON:', error));
 
@@ -28,7 +83,9 @@ fetch('./exampleCircuit.json')
 document.getElementById('newCircuitBtn')?.addEventListener('click', () => {
   if (!confirm('Start a new circuit? Unsaved changes will be lost.')) return;
   circuit = createEmptyCircuit();
-  renderCircuit(circuit, board);
+  navStack = [];
+  selectedIds.clear();
+  render();
   setStatus('New circuit created.');
 });
 
@@ -75,11 +132,59 @@ loadCircuitInput?.addEventListener('change', async () => {
   try {
     const text = await file.text();
     circuit = parseCircuitFile(text);
+    navStack = [];
+    selectedIds.clear();
     clearWireSelection();
-    renderCircuit(circuit, board);
+    render();
     setStatus(`Loaded ${file.name}.`);
   } catch (error) {
     setStatus(`Load failed: ${error.message}`, true);
+  }
+});
+
+// --- Component menu: Make Component / Ungroup ---
+
+document.getElementById('makeComponentBtn')?.addEventListener('click', () => {
+  if (selectedIds.size === 0) {
+    setComponentStatus('Select one or more components first (shift-click to multi-select).', true);
+    return;
+  }
+  const name = prompt('Name for the new component:');
+  if (!name || !name.trim()) return;
+
+  try {
+    makeComponent(activeView(), [...selectedIds], name.trim());
+    selectedIds.clear();
+    render();
+    setComponentStatus(`Created component "${name.trim()}".`);
+  } catch (error) {
+    setComponentStatus(error.message, true);
+  }
+});
+
+document.getElementById('ungroupComponentBtn')?.addEventListener('click', () => {
+  if (selectedIds.size !== 1) {
+    setComponentStatus('Select exactly one component instance to ungroup.', true);
+    return;
+  }
+  const [id] = selectedIds;
+  try {
+    ungroupComponent(activeView(), id);
+    selectedIds.clear();
+    render();
+    setComponentStatus('Ungrouped.');
+  } catch (error) {
+    setComponentStatus(error.message, true);
+  }
+});
+
+// Double-click a component box to zoom into its definition; double-click empty board to zoom out.
+board.addEventListener('dblclick', (event) => {
+  const box = event.target.closest('.ic-box');
+  if (box) {
+    navStack.push(box.dataset.type);
+    selectedIds.clear();
+    render();
   }
 });
 
@@ -89,6 +194,8 @@ let offsetX = 0;
 let offsetY = 0;
 let pendingWire = null;
 let selectedWireIndex = null;
+let selectionRectStart = null;
+let selectionRectEl = null;
 
 function clearWireSelection() {
   selectedWireIndex = null;
@@ -101,10 +208,10 @@ function clearWireSelection() {
 board.addEventListener('mousedown', (event) => {
   const switchHitArea = event.target.closest('[data-switch-hit]');
   if (switchHitArea) {
-    const component = circuit?.components.find(c => c.id === switchHitArea.dataset.component);
+    const component = activeView()?.components.find(c => c.id === switchHitArea.dataset.component);
     if (component) {
       component.state = component.state ? 0 : 1;
-      renderCircuit(circuit, board);
+      render();
     }
     event.preventDefault();
     return;
@@ -140,14 +247,38 @@ board.addEventListener('mousedown', (event) => {
     return;
   }
 
-  const target = event.target.closest('use');
-  if (!target) return;
+  const target = event.target.closest('[data-type]');
+  if (!target) {
+    // Clicked empty board: start a rubber-band selection rectangle.
+    const point = screenToSvg(event);
+    if (!event.shiftKey) selectedIds.clear();
+    selectionRectStart = point;
+    applySelectionHighlight();
+    event.preventDefault();
+    return;
+  }
 
-  const component = circuit?.components.find(c => c.id === target.getAttribute('id'));
+  const componentId = target.getAttribute('id');
+  const component = activeView()?.components.find(c => c.id === componentId);
+
+  if (event.shiftKey) {
+    if (selectedIds.has(componentId)) selectedIds.delete(componentId);
+    else selectedIds.add(componentId);
+    applySelectionHighlight();
+    event.preventDefault();
+    return;
+  }
+
   if (component?.type === 'switch') {
     component.state = component.state ? 0 : 1;
-    renderCircuit(circuit, board);
+    render();
     return;
+  }
+
+  if (!selectedIds.has(componentId)) {
+    selectedIds.clear();
+    selectedIds.add(componentId);
+    applySelectionHighlight();
   }
 
   draggedElement = target;
@@ -178,6 +309,24 @@ document.addEventListener('mousemove', (event) => {
     return;
   }
 
+  if (selectionRectStart) {
+    const point = screenToSvg(event);
+    if (!selectionRectEl) {
+      selectionRectEl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      selectionRectEl.setAttribute('class', 'select-rect');
+      board.appendChild(selectionRectEl);
+    }
+    const x = Math.min(selectionRectStart.x, point.x);
+    const y = Math.min(selectionRectStart.y, point.y);
+    const width = Math.abs(point.x - selectionRectStart.x);
+    const height = Math.abs(point.y - selectionRectStart.y);
+    selectionRectEl.setAttribute('x', x);
+    selectionRectEl.setAttribute('y', y);
+    selectionRectEl.setAttribute('width', width);
+    selectionRectEl.setAttribute('height', height);
+    return;
+  }
+
   if (!draggedElement) return;
 
   const point = screenToSvg(event);
@@ -196,11 +345,12 @@ document.addEventListener('mouseup', (event) => {
       target.dataset.direction === 'input' &&
       target.dataset.component !== pendingWire.from.component
     ) {
-      const alreadyConnected = circuit.wires.some(wire =>
+      const wires = activeView().wires;
+      const alreadyConnected = wires.some(wire =>
         wire.to.component === target.dataset.component && wire.to.pin === target.dataset.pin
       );
       if (!alreadyConnected) {
-        circuit.wires.push({
+        wires.push({
           from: pendingWire.from,
           to: {
             component: target.dataset.component,
@@ -212,7 +362,25 @@ document.addEventListener('mouseup', (event) => {
 
     pendingWire = null;
     clearWireSelection();
-    renderCircuit(circuit, board);
+    render();
+    return;
+  }
+
+  if (selectionRectStart) {
+    const rect = selectionRectEl?.getBBox();
+    if (rect && (rect.width > 2 || rect.height > 2)) {
+      activeView().components.forEach(component => {
+        const width = isSubcircuitType(activeView(), component.type) ? (circuit.subcircuits[component.type].width) : 260;
+        const height = isSubcircuitType(activeView(), component.type) ? (circuit.subcircuits[component.type].height) : 130;
+        const intersects = component.x < rect.x + rect.width && component.x + width > rect.x &&
+          component.y < rect.y + rect.height && component.y + height > rect.y;
+        if (intersects) selectedIds.add(component.id);
+      });
+    }
+    selectionRectEl?.remove();
+    selectionRectEl = null;
+    selectionRectStart = null;
+    applySelectionHighlight();
     return;
   }
 
@@ -220,24 +388,31 @@ document.addEventListener('mouseup', (event) => {
 
   // Update circuit model
   const id = draggedElement.getAttribute('id');
-  const component = circuit.components.find(c => c.id === id);
+  const component = activeView().components.find(c => c.id === id);
+  let moved = false;
   if (component) {
-    component.x = parseFloat(draggedElement.getAttribute('x'));
-    component.y = parseFloat(draggedElement.getAttribute('y'));
+    const newX = parseFloat(draggedElement.getAttribute('x'));
+    const newY = parseFloat(draggedElement.getAttribute('y'));
+    moved = newX !== component.x || newY !== component.y;
+    component.x = newX;
+    component.y = newY;
   }
 
   draggedElement = null;
   clearWireSelection();
-  renderCircuit(circuit, board); // Re-render to ensure wires update
+  // Only re-render if something actually moved: a plain click just selecting a
+  // component shouldn't tear down and rebuild the whole board (it also preserves the
+  // clicked DOM node so native dblclick detection keeps working).
+  if (moved) render();
 });
 
 document.addEventListener('keydown', (event) => {
   if (selectedWireIndex === null) return;
   if (event.key !== 'Delete' && event.key !== 'Backspace') return;
 
-  circuit.wires.splice(selectedWireIndex, 1);
+  activeView().wires.splice(selectedWireIndex, 1);
   clearWireSelection();
-  renderCircuit(circuit, board);
+  render();
   event.preventDefault();
 });
 
@@ -263,14 +438,15 @@ palette.addEventListener('click', (event) => {
   const gateType = event.target.dataset.gateType;
   if (!gateType) return;
 
+  const view = activeView();
   // Add new gate to circuit model
   const newGate = {
-    id: `g${circuit.components.length + 1}`,
+    id: `g${view.components.length + 1}`,
     type: gateType,
     x: 100,
     y: 100
   };
-  circuit.components.push(newGate);
+  view.components.push(newGate);
 
-  renderCircuit(circuit, board);
+  render();
 });

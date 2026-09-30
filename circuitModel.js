@@ -3,6 +3,7 @@
 // This is the single place future circuit-file format changes get normalized.
 
 import GateLibrary from './gateLibrary.js';
+import { getComponentPins } from './subcircuits.js';
 
 export const CURRENT_VERSION = 1;
 
@@ -11,7 +12,8 @@ export function createEmptyCircuit() {
     version: CURRENT_VERSION,
     board: { width: 1200, height: 800 },
     components: [],
-    wires: []
+    wires: [],
+    subcircuits: {}
   };
 }
 
@@ -27,6 +29,7 @@ export function migrateCircuit(raw) {
   circuit.board = circuit.board || { width: 1200, height: 800 };
   circuit.components = Array.isArray(circuit.components) ? circuit.components : [];
   circuit.wires = Array.isArray(circuit.wires) ? circuit.wires : [];
+  circuit.subcircuits = circuit.subcircuits && typeof circuit.subcircuits === 'object' ? circuit.subcircuits : {};
 
   return circuit;
 }
@@ -52,7 +55,7 @@ export function validateCircuit(circuit) {
       throw new Error(`Duplicate component id "${component.id}".`);
     }
     ids.add(component.id);
-    if (!GateLibrary[component.type]) {
+    if (!GateLibrary[component.type] && !circuit.subcircuits?.[component.type]) {
       throw new Error(`Unknown component type "${component.type}".`);
     }
   }
@@ -65,8 +68,8 @@ export function validateCircuit(circuit) {
       if (!ids.has(end.component)) {
         throw new Error(`Wire references unknown component "${end.component}".`);
       }
-      const gateDef = GateLibrary[circuit.components.find(c => c.id === end.component).type];
-      if (!gateDef.pins.some(pin => pin.name === end.pin)) {
+      const pins = getComponentPins(circuit, circuit.components.find(c => c.id === end.component).type);
+      if (!pins.some(pin => pin.name === end.pin)) {
         throw new Error(`Wire references unknown pin "${end.pin}" on "${end.component}".`);
       }
     }

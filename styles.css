@@ -98,6 +98,49 @@ button:hover {
     filter: drop-shadow(0 0 5px #e64b35);
 }
 
+.ic-box {
+    fill: #24313d;
+    stroke: #9aa8b5;
+    stroke-width: 2;
+    cursor: move;
+}
+
+.ic-box.selected {
+    stroke: #e64b35;
+    stroke-width: 3;
+}
+
+#board use.selected {
+    filter: drop-shadow(0 0 6px #e64b35);
+}
+
+.ic-label {
+    fill: #f7f9fa;
+    font-size: 20px;
+    pointer-events: none;
+}
+
+.select-rect {
+    fill: rgba(230, 75, 53, 0.12);
+    stroke: #e64b35;
+    stroke-dasharray: 4 3;
+    pointer-events: none;
+}
+
+#breadcrumb {
+    padding: 0.4rem 0.75rem;
+    margin-top: 0.5rem;
+    background: #d8e0e7;
+    border: 1px solid #9aa8b5;
+    font-size: 0.9rem;
+}
+
+.breadcrumb-item.clickable {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+
 .gate {
     stroke: black;
     fill: white;
