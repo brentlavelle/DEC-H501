@@ -122,9 +122,11 @@ after each. It is additive: `advance(500)` twice equals `advance(1000)` once. If
 `maxEdges` (default 10 000) fall in the interval, stop applying edges, move time to the
 target anyway and report `behind: true`.
 
-**Clock waveform.** With period `T = 1000 / hz` ms, the output rises at `k * T` and falls at
-`k * T + w`, where `w = min(T / 2, 50)` ms, for k = 1, 2, 3 and so on, counted from when the
-clock was created or its rate last set.
+**Clock waveform.** With period `T = 1000 / hz` ms, the output rises at `k * T - w` and falls
+at `k * T`, where `w = min(T / 2, 50)` ms, for k = 1, 2, 3 and so on, counted from when the
+clock was created or its rate last set. Every whole period therefore ends on a trailing edge:
+N periods give exactly N trailing edges. An edge that lands exactly on the target time of
+`advance` belongs to that call, not the next one.
 
 **Contract.** Names may change in WP1 if the WP1 report records the final names here. The
 semantics may not.
@@ -155,10 +157,10 @@ how the editor adds a wire without resetting the user's counter.
   something changed. A redraw during a tick must not cancel a drag, a half-drawn wire or a
   selection, so ticks update lamp, wire and flip-flop appearance in place rather than calling
   the full `renderCircuit` rebuild.
-- Clock rate control: four coarse ranges, 0.5-5 Hz, 5-50 Hz, 50-500 Hz, 500-5000 Hz, and a
-  fine control that sweeps a range from slowest to fastest. The real unit picks the coarse
-  range with a patch cord between range terminals and has a fine knob, fully
-  counterclockwise slowest [W, p. XI].
+- Clock rate control: a four-position selector, 0.25, 0.5, 1 and 10 Hz. There is no fine
+  control in this generation. The real unit picks a coarse range with a patch cord between
+  range terminals and has a fine knob, fully counterclockwise slowest [W, p. XI]. The
+  simulator itself accepts any rate; the limit is in the control.
 - Pulser: HI on mouse or touch down, LO on up, including an up that happens off the symbol.
 - When `settle` or `advance` reports an oscillation or `behind`, say so in the status area.
 
@@ -208,8 +210,8 @@ how the editor adds a wire without resetting the user's counter.
 
 | Hardware | Here |
 |----------|------|
-| Clock from under 1 to over 10 million pulses per second, 50 ns pulses [W] | 0.5 Hz to 5 kHz, pulse stretched to up to 50 ms so it can be seen |
-| Coarse clock range set by a patch cord | Coarse range set by a selector |
+| Clock from under 1 to over 10 million pulses per second, 50 ns pulses [W] | 0.25, 0.5, 1 or 10 Hz, pulse stretched to 50 ms so it can be seen |
+| Coarse clock range set by a patch cord, fine knob within the range | Four fixed rates on a selector, no fine control |
 | Master-slave flip-flop catches J or K going HI while the clock is HI | J and K read at the trailing edge only |
 | Real gate delays, real hazards | One unit of delay per component |
 | Flip-flops power on in either state | Power on reset |
