@@ -451,6 +451,7 @@ document.addEventListener('mouseup', (event) => {
       newX = snapToGrid(newX, GRID_CELL_X);
       newY = snapToGrid(newY, GRID_CELL_Y);
     }
+    moved = newX !== component.x || newY !== component.y;
     component.x = newX;
     component.y = newY;
   }
