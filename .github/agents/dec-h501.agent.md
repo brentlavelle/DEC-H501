@@ -27,11 +27,7 @@ This project recreates that experience in the browser using **HTML, CSS, JavaScr
 - SVG coordinates are used for positioning gates on the canvas
 
 ## Current State
-
-- NAND gate SVG symbols exist (`2nand`, `3nand`, `4nand`) in `gates.svg`
-- Basic mousedown/mousemove drag logic is in progress in `index.html` and `draggable.html`
-- SVG viewBox coordinate conversion for dragging is partially implemented
-
+See `AGENTS.md` at the repository root. It replaces the description that used to be here.
 ## Core Work Areas
 
 ### 1. SVG Gate Symbols (`gates.svg`)

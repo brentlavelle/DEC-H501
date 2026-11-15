@@ -5,6 +5,9 @@ description: "Working plan for the next four major feature tracks. Update as wor
 
 # Roadmap
 
+
+**Status, 2026-11-15:** tracks 1 to 4 below have landed on the `h500-parity` branch. The
+current plan is `docs/WORK-PACKAGES.md`.
 Current baseline (Sep 2026): freeform SVG board, click-drag gate placement, patch-cord
 wires drawn as bezier paths, live boolean simulation (`evaluateCircuit` in
 [renderer.js](renderer.js)), gate symbols in `gates.svg`, pin maps in
