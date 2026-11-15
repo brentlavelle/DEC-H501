@@ -64,10 +64,20 @@ function applySelectionHighlight() {
   });
 }
 
+
 function render() {
   renderCircuit(activeView(), board);
   applySelectionHighlight();
   updateBreadcrumb();
+}
+
+// Optional snap to the H-500's module-bay grid (gate footprint + a small gutter).
+const GRID_CELL_X = 285;
+const GRID_CELL_Y = 150;
+const gridSnapToggle = document.getElementById('gridSnapToggle');
+
+function snapToGrid(value, cellSize) {
+  return Math.round(value / cellSize) * cellSize;
 }
 
 // Fetch the circuit JSON dynamically
@@ -435,9 +445,12 @@ document.addEventListener('mouseup', (event) => {
   const component = activeView().components.find(c => c.id === id);
   let moved = false;
   if (component) {
-    const newX = parseFloat(draggedElement.getAttribute('x'));
-    const newY = parseFloat(draggedElement.getAttribute('y'));
-    moved = newX !== component.x || newY !== component.y;
+    let newX = parseFloat(draggedElement.getAttribute('x'));
+    let newY = parseFloat(draggedElement.getAttribute('y'));
+    if (gridSnapToggle?.checked) {
+      newX = snapToGrid(newX, GRID_CELL_X);
+      newY = snapToGrid(newY, GRID_CELL_Y);
+    }
     component.x = newX;
     component.y = newY;
   }

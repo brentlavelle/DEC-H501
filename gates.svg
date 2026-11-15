@@ -6,6 +6,15 @@
             .detail { fill: none; stroke: #202525; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
             .pin { stroke: #225a69; stroke-width: 5; stroke-linecap: round; }
             .terminal { fill: #f8f6ef; stroke: #225a69; stroke-width: 5; }
+
+            /* H-500 panel toggle switches: chrome bezel + red lever, like the real unit. */
+            .switch-bezel { fill: #d7dbe0; stroke: #4a4f57; stroke-width: 4; }
+            .switch-lever { fill: none; stroke: #b3211f; stroke-width: 8; stroke-linecap: round; }
+
+            /* H-500 indicator lamps: dark bezel + red jeweled lens. */
+            .lamp-bezel { fill: #1c1f22; stroke: #0a0b0c; stroke-width: 6; }
+            .lamp-lens-off { fill: #5a2422; }
+            .lamp-lens-on { fill: #ff3b30; filter: drop-shadow(0 0 10px #ff6b60); }
         </style>
 
         <symbol id="and" viewBox="0 0 260 130">
@@ -101,7 +110,8 @@
 
         <symbol id="switch-open" viewBox="0 0 260 130">
             <line class="pin" x1="18" y1="65" x2="70" y2="65" />
-            <line class="detail" x1="70" y1="65" x2="120" y2="32" />
+            <circle class="switch-bezel" cx="97" cy="65" r="30" />
+            <line class="switch-lever" x1="70" y1="65" x2="120" y2="32" />
             <circle class="outline" cx="70" cy="65" r="7" />
             <circle class="outline" cx="125" cy="65" r="7" />
             <line class="pin" x1="125" y1="65" x2="224" y2="65" />
@@ -110,7 +120,8 @@
 
         <symbol id="switch-closed" viewBox="0 0 260 130">
             <line class="pin" x1="18" y1="65" x2="70" y2="65" />
-            <line class="detail" x1="70" y1="65" x2="125" y2="65" />
+            <circle class="switch-bezel" cx="97" cy="65" r="30" />
+            <line class="switch-lever" x1="70" y1="65" x2="125" y2="65" />
             <circle class="outline" cx="70" cy="65" r="7" />
             <circle class="outline" cx="125" cy="65" r="7" />
             <line class="pin" x1="125" y1="65" x2="224" y2="65" />
@@ -124,15 +135,18 @@
             <line class="pin" x1="132" y1="25" x2="132" y2="46" />
             <circle cx="94" cy="25" r="7" fill="#f8f6ef" stroke="#225a69" stroke-width="5" />
             <circle cx="170" cy="25" r="7" fill="#f8f6ef" stroke="#225a69" stroke-width="5" />
-            <circle cx="132" cy="84" r="38" fill="#4b504d" stroke="#202525" stroke-width="6" />
+            <circle class="lamp-bezel" cx="132" cy="84" r="38" />
             <path class="detail" d="M115 124h34" />
         </symbol>
 
-        <symbol id="light-off" viewBox="0 0 260 130"><use href="#light" /></symbol>
+        <symbol id="light-off" viewBox="0 0 260 130">
+            <use href="#light" />
+            <circle class="lamp-lens-off" cx="132" cy="84" r="28" />
+        </symbol>
 
         <symbol id="light-on" viewBox="0 0 260 130">
             <use href="#light" />
-            <circle cx="132" cy="84" r="34" fill="#e4a62a" filter="drop-shadow(0 0 8px #ffd875)" />
+            <circle class="lamp-lens-on" cx="132" cy="84" r="28" />
         </symbol>
 
         <!-- Compatibility symbols for the original palette. -->
