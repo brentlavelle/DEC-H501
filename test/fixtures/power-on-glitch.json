@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "board": { "width": 1540, "height": 800 },
+  "components": [
+    {"id":"sw","type":"switch","x":40,"y":40,"state":0},
+    {"id":"n1","type":"not","x":340,"y":40},
+    {"id":"n2","type":"not","x":640,"y":40},
+    {"id":"ff","type":"jk","x":940,"y":40},
+    {"id":"lamp","type":"led","x":1240,"y":40}
+  ],
+  "wires": [
+    {"from":{"component":"sw","pin":"out"},"to":{"component":"n1","pin":"in"}},
+    {"from":{"component":"n1","pin":"out"},"to":{"component":"n2","pin":"in"}},
+    {"from":{"component":"n2","pin":"out"},"to":{"component":"ff","pin":"c"}},
+    {"from":{"component":"ff","pin":"q"},"to":{"component":"lamp","pin":"in"}}
+  ],
+  "subcircuits": {}
+}

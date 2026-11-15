@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "board": { "width": 2140, "height": 800 },
+  "components": [
+    {"id":"a","type":"switch","x":40,"y":40,"state":0,"label":"A"},
+    {"id":"b","type":"switch","x":40,"y":200,"state":0,"label":"B"},
+    {"id":"cin","type":"switch","x":40,"y":360,"state":0,"label":"CARRY IN"},
+    {"id":"n1","type":"2nand","x":340,"y":40},
+    {"id":"n2","type":"2nand","x":640,"y":40},
+    {"id":"n3","type":"2nand","x":640,"y":200},
+    {"id":"n4","type":"2nand","x":940,"y":40},
+    {"id":"n5","type":"2nand","x":940,"y":200},
+    {"id":"n6","type":"2nand","x":1240,"y":40},
+    {"id":"n7","type":"2nand","x":1240,"y":200},
+    {"id":"n8","type":"2nand","x":1540,"y":40},
+    {"id":"n9","type":"2nand","x":1240,"y":360},
+    {"id":"l_sum","type":"led","x":1840,"y":40,"label":"SUM"},
+    {"id":"l_carry","type":"led","x":1840,"y":200,"label":"CARRY OUT"}
+  ],
+  "wires": [
+    {"from":{"component":"a","pin":"out"},"to":{"component":"n1","pin":"in0"}},
+    {"from":{"component":"b","pin":"out"},"to":{"component":"n1","pin":"in1"}},
+    {"from":{"component":"a","pin":"out"},"to":{"component":"n2","pin":"in0"}},
+    {"from":{"component":"n1","pin":"out"},"to":{"component":"n2","pin":"in1"}},
+    {"from":{"component":"n1","pin":"out"},"to":{"component":"n3","pin":"in0"}},
+    {"from":{"component":"b","pin":"out"},"to":{"component":"n3","pin":"in1"}},
+    {"from":{"component":"n2","pin":"out"},"to":{"component":"n4","pin":"in0"}},
+    {"from":{"component":"n3","pin":"out"},"to":{"component":"n4","pin":"in1"}},
+    {"from":{"component":"n4","pin":"out"},"to":{"component":"n5","pin":"in0"}},
+    {"from":{"component":"cin","pin":"out"},"to":{"component":"n5","pin":"in1"}},
+    {"from":{"component":"n4","pin":"out"},"to":{"component":"n6","pin":"in0"}},
+    {"from":{"component":"n5","pin":"out"},"to":{"component":"n6","pin":"in1"}},
+    {"from":{"component":"n5","pin":"out"},"to":{"component":"n7","pin":"in0"}},
+    {"from":{"component":"cin","pin":"out"},"to":{"component":"n7","pin":"in1"}},
+    {"from":{"component":"n6","pin":"out"},"to":{"component":"n8","pin":"in0"}},
+    {"from":{"component":"n7","pin":"out"},"to":{"component":"n8","pin":"in1"}},
+    {"from":{"component":"n1","pin":"out"},"to":{"component":"n9","pin":"in0"}},
+    {"from":{"component":"n5","pin":"out"},"to":{"component":"n9","pin":"in1"}},
+    {"from":{"component":"n8","pin":"out"},"to":{"component":"l_sum","pin":"in"}},
+    {"from":{"component":"n9","pin":"out"},"to":{"component":"l_carry","pin":"in"}}
+  ],
+  "subcircuits": {}
+}

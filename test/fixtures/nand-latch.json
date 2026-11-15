@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "board": { "width": 1200, "height": 800 },
+  "components": [
+    {"id":"s_n","type":"switch","x":40,"y":40,"state":1,"label":"SET (LO)"},
+    {"id":"r_n","type":"switch","x":40,"y":200,"state":1,"label":"RESET (LO)"},
+    {"id":"n1","type":"2nand","x":340,"y":40},
+    {"id":"n2","type":"2nand","x":340,"y":200},
+    {"id":"lq","type":"led","x":640,"y":40,"label":"Q"},
+    {"id":"lqbar","type":"led","x":640,"y":200,"label":"not Q"}
+  ],
+  "wires": [
+    {"from":{"component":"s_n","pin":"out"},"to":{"component":"n1","pin":"in0"}},
+    {"from":{"component":"n2","pin":"out"},"to":{"component":"n1","pin":"in1"}},
+    {"from":{"component":"n1","pin":"out"},"to":{"component":"n2","pin":"in0"}},
+    {"from":{"component":"r_n","pin":"out"},"to":{"component":"n2","pin":"in1"}},
+    {"from":{"component":"n1","pin":"out"},"to":{"component":"lq","pin":"in"}},
+    {"from":{"component":"n2","pin":"out"},"to":{"component":"lqbar","pin":"in"}}
+  ],
+  "subcircuits": {}
+}
