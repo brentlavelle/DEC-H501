@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Every symbol is half the size of the original drawings, with short leads and one
+     terminal per lead. Gates and the flip-flop have an 84 x 65 footprint: their art is in
+     the old 260 x 130 drawing units, cropped to x 44..212 and scaled by 0.5. Switches,
+     pulsers, lamps and the clock are 40 x 65 with the terminal at the top; the HIGH and
+     GND terminals are 40 x 30. Pin positions are listed in gateLibrary.js and must match. -->
 <svg xmlns="http://www.w3.org/2000/svg">
     <defs>
         <style>
@@ -7,214 +12,296 @@
             .pin { stroke: #225a69; stroke-width: 5; stroke-linecap: round; }
             .terminal { fill: #f8f6ef; stroke: #225a69; stroke-width: 5; }
 
-            /* H-500 panel toggle switches: chrome bezel + red lever, like the real unit. */
-            .switch-bezel { fill: #d7dbe0; stroke: #4a4f57; stroke-width: 4; }
-            .switch-lever { fill: none; stroke: #b3211f; stroke-width: 8; stroke-linecap: round; }
+            /* Controls are drawn in board units, so their strokes are already half width. */
+            .c-pin { stroke: #225a69; stroke-width: 2.5; stroke-linecap: round; }
+            .c-terminal { fill: #f8f6ef; stroke: #225a69; stroke-width: 2.5; }
+            .legend { fill: #d8e0e7; font-family: sans-serif; font-size: 7.5px; font-weight: 700; }
+
+            /* H-500 rocker switches (tan) and pulser keys (white). The pressed half is darker. */
+            .rocker-frame { fill: #14171a; stroke: #0a0b0c; stroke-width: 2; }
+            .rocker { fill: #e2a93a; }
+            .rocker-pressed { fill: #9c6f1a; }
+            .pulser-key { fill: #f4f2ea; }
 
             /* H-500 indicator lamps: dark bezel + red jeweled lens. */
-            .lamp-bezel { fill: #1c1f22; stroke: #0a0b0c; stroke-width: 6; }
+            .lamp-bezel { fill: #1c1f22; stroke: #0a0b0c; stroke-width: 3; }
             .lamp-lens-off { fill: #5a2422; }
-            .lamp-lens-on { fill: #ff3b30; filter: drop-shadow(0 0 10px #ff6b60); }
+            .lamp-lens-on { fill: #ff3b30; filter: drop-shadow(0 0 5px #ff6b60); }
+            .knob-mark { fill: none; stroke: #d8e0e7; stroke-width: 2.5; stroke-linecap: round; }
         </style>
 
-        <symbol id="and" viewBox="0 0 260 130">
-            <line class="pin" x1="18" y1="42" x2="76" y2="42" />
-            <line class="pin" x1="18" y1="88" x2="76" y2="88" />
-            <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
-            <line class="pin" x1="161" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="18" cy="42" r="7" />
-            <circle class="terminal" cx="18" cy="88" r="7" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="and" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <line class="pin" x1="58" y1="42" x2="76" y2="42" />
+                <line class="pin" x1="58" y1="88" x2="76" y2="88" />
+                <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+                <line class="pin" x1="161" y1="65" x2="198" y2="65" />
+                <circle class="terminal" cx="58" cy="42" r="7" />
+                <circle class="terminal" cx="58" cy="88" r="7" />
+                <circle class="terminal" cx="198" cy="65" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="or" viewBox="0 0 260 130">
-            <line class="pin" x1="18" y1="42" x2="84" y2="42" />
-            <line class="pin" x1="18" y1="88" x2="84" y2="88" />
-            <path class="outline" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
-            <line class="pin" x1="164" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="18" cy="42" r="7" />
-            <circle class="terminal" cx="18" cy="88" r="7" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="or" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <line class="pin" x1="58" y1="42" x2="84" y2="42" />
+                <line class="pin" x1="58" y1="88" x2="84" y2="88" />
+                <path class="outline" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+                <line class="pin" x1="164" y1="65" x2="198" y2="65" />
+                <circle class="terminal" cx="58" cy="42" r="7" />
+                <circle class="terminal" cx="58" cy="88" r="7" />
+                <circle class="terminal" cx="198" cy="65" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="nand" viewBox="0 0 260 130">
-            <use href="#and" />
-            <circle class="outline" cx="169" cy="65" r="10" />
-            <line class="pin" x1="179" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="nand" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <line class="pin" x1="58" y1="42" x2="76" y2="42" />
+                <line class="pin" x1="58" y1="88" x2="76" y2="88" />
+                <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+                <circle class="outline" cx="169" cy="65" r="10" />
+                <line class="pin" x1="179" y1="65" x2="198" y2="65" />
+                <circle class="terminal" cx="58" cy="42" r="7" />
+                <circle class="terminal" cx="58" cy="88" r="7" />
+                <circle class="terminal" cx="198" cy="65" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="nor" viewBox="0 0 260 130">
-            <use href="#or" />
-            <circle class="outline" cx="174" cy="65" r="10" />
-            <line class="pin" x1="184" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="nor" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <line class="pin" x1="58" y1="42" x2="84" y2="42" />
+                <line class="pin" x1="58" y1="88" x2="84" y2="88" />
+                <path class="outline" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+                <circle class="outline" cx="174" cy="65" r="10" />
+                <line class="pin" x1="184" y1="65" x2="198" y2="65" />
+                <circle class="terminal" cx="58" cy="42" r="7" />
+                <circle class="terminal" cx="58" cy="88" r="7" />
+                <circle class="terminal" cx="198" cy="65" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="xor" viewBox="0 0 260 130">
-            <line class="pin" x1="18" y1="42" x2="84" y2="42" />
-            <line class="pin" x1="18" y1="88" x2="84" y2="88" />
-            <path class="detail" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
-            <path class="detail" d="M66 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
-            <path class="outline" d="M78 22h42a43 43 0 0 1 0 86H78z" />
-            <line class="pin" x1="165" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="18" cy="42" r="7" />
-            <circle class="terminal" cx="18" cy="88" r="7" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="xor" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <line class="pin" x1="58" y1="42" x2="84" y2="42" />
+                <line class="pin" x1="58" y1="88" x2="84" y2="88" />
+                <path class="detail" d="M62 22c18 25 18 61 0 86" />
+                <path class="outline" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+                <line class="pin" x1="164" y1="65" x2="198" y2="65" />
+                <circle class="terminal" cx="58" cy="42" r="7" />
+                <circle class="terminal" cx="58" cy="88" r="7" />
+                <circle class="terminal" cx="198" cy="65" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="xnor" viewBox="0 0 260 130">
-            <use href="#xor" />
-            <circle class="outline" cx="174" cy="65" r="10" />
-            <line class="pin" x1="184" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="xnor" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <line class="pin" x1="58" y1="42" x2="84" y2="42" />
+                <line class="pin" x1="58" y1="88" x2="84" y2="88" />
+                <path class="detail" d="M62 22c18 25 18 61 0 86" />
+                <path class="outline" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+                <circle class="outline" cx="174" cy="65" r="10" />
+                <line class="pin" x1="184" y1="65" x2="198" y2="65" />
+                <circle class="terminal" cx="58" cy="42" r="7" />
+                <circle class="terminal" cx="58" cy="88" r="7" />
+                <circle class="terminal" cx="198" cy="65" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="not" viewBox="0 0 260 130">
-            <line class="pin" x1="18" y1="65" x2="78" y2="65" />
-            <path class="outline" d="M78 24l78 41-78 41z" />
-            <circle class="outline" cx="168" cy="65" r="10" />
-            <line class="pin" x1="178" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="18" cy="65" r="7" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="not" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <line class="pin" x1="58" y1="65" x2="78" y2="65" />
+                <path class="outline" d="M78 24l78 41-78 41z" />
+                <circle class="outline" cx="168" cy="65" r="10" />
+                <line class="pin" x1="178" y1="65" x2="198" y2="65" />
+                <circle class="terminal" cx="58" cy="65" r="7" />
+                <circle class="terminal" cx="198" cy="65" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="jk" viewBox="0 0 260 130">
-            <rect class="outline" x="84" y="18" width="82" height="100" />
-            <line class="pin" x1="18" y1="36" x2="84" y2="36" />
-            <line class="pin" x1="18" y1="94" x2="84" y2="94" />
-            <line class="pin" x1="18" y1="65" x2="84" y2="65" />
-            <line class="pin" x1="166" y1="36" x2="224" y2="36" />
-            <line class="pin" x1="166" y1="94" x2="224" y2="94" />
-            <line class="pin" x1="125" y1="118" x2="125" y2="126" />
-            <circle class="terminal" cx="18" cy="36" r="7" />
-            <circle class="terminal" cx="18" cy="65" r="7" />
-            <circle class="terminal" cx="18" cy="94" r="7" />
-            <circle class="terminal" cx="224" cy="36" r="7" />
-            <circle class="terminal" cx="224" cy="94" r="7" />
-            <circle class="terminal" cx="125" cy="126" r="7" />
-            <path class="detail" d="M84 60l10 6-10 6" />
-            <text x="95" y="41" fill="#5d625d" font-size="10">J</text>
-            <text x="91" y="69" fill="#5d625d" font-size="10">C</text>
-            <text x="95" y="101" fill="#5d625d" font-size="10">K</text>
-            <text x="125" y="110" text-anchor="middle" fill="#5d625d" font-size="9">RESET</text>
-            <text x="141" y="41" fill="#5d625d" font-size="10">Q</text>
-            <text x="135" y="101" fill="#5d625d" font-size="10">Q'</text>
+        <symbol id="2nand" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <line class="pin" x1="58" y1="42" x2="76" y2="42" />
+                <line class="pin" x1="58" y1="88" x2="76" y2="88" />
+                <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+                <circle class="outline" cx="169" cy="65" r="10" />
+                <line class="pin" x1="179" y1="65" x2="198" y2="65" />
+                <circle class="terminal" cx="58" cy="42" r="7" />
+                <circle class="terminal" cx="58" cy="88" r="7" />
+                <circle class="terminal" cx="198" cy="65" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="jk-high" viewBox="0 0 260 130">
-            <use href="#jk" />
-            <circle cx="148" cy="36" r="12" fill="#ffd875" opacity="0.8" filter="drop-shadow(0 0 8px #ffd875)"/>
-            <text x="141" y="41" fill="#202525" font-size="10" font-weight="700">Q</text>
+        <symbol id="3nand" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <line class="pin" x1="58" y1="30" x2="76" y2="30" />
+                <line class="pin" x1="58" y1="65" x2="76" y2="65" />
+                <line class="pin" x1="58" y1="100" x2="76" y2="100" />
+                <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+                <circle class="outline" cx="169" cy="65" r="10" />
+                <line class="pin" x1="179" y1="65" x2="198" y2="65" />
+                <circle class="terminal" cx="58" cy="30" r="7" />
+                <circle class="terminal" cx="58" cy="65" r="7" />
+                <circle class="terminal" cx="58" cy="100" r="7" />
+                <circle class="terminal" cx="198" cy="65" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="switch-open" viewBox="0 0 260 130">
-            <line class="pin" x1="18" y1="65" x2="70" y2="65" />
-            <circle class="switch-bezel" cx="97" cy="65" r="30" />
-            <line class="switch-lever" x1="70" y1="65" x2="120" y2="32" />
-            <circle class="outline" cx="70" cy="65" r="7" />
-            <circle class="outline" cx="125" cy="65" r="7" />
-            <line class="pin" x1="125" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="4nand" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <line class="pin" x1="58" y1="22" x2="76" y2="22" />
+                <line class="pin" x1="58" y1="50" x2="76" y2="50" />
+                <line class="pin" x1="58" y1="80" x2="76" y2="80" />
+                <line class="pin" x1="58" y1="108" x2="76" y2="108" />
+                <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+                <circle class="outline" cx="169" cy="65" r="10" />
+                <line class="pin" x1="179" y1="65" x2="198" y2="65" />
+                <circle class="terminal" cx="58" cy="22" r="7" />
+                <circle class="terminal" cx="58" cy="50" r="7" />
+                <circle class="terminal" cx="58" cy="80" r="7" />
+                <circle class="terminal" cx="58" cy="108" r="7" />
+                <circle class="terminal" cx="198" cy="65" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="switch-closed" viewBox="0 0 260 130">
-            <line class="pin" x1="18" y1="65" x2="70" y2="65" />
-            <circle class="switch-bezel" cx="97" cy="65" r="30" />
-            <line class="switch-lever" x1="70" y1="65" x2="125" y2="65" />
-            <circle class="outline" cx="70" cy="65" r="7" />
-            <circle class="outline" cx="125" cy="65" r="7" />
-            <line class="pin" x1="125" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="andnor" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <line class="pin" x1="58" y1="22" x2="76" y2="22" />
+                <line class="pin" x1="58" y1="48" x2="76" y2="48" />
+                <line class="pin" x1="58" y1="82" x2="76" y2="82" />
+                <line class="pin" x1="58" y1="108" x2="76" y2="108" />
+                <path class="outline" d="M76 16h20a19 19 0 0 1 0 38H76z" />
+                <path class="outline" d="M76 76h20a19 19 0 0 1 0 38H76z" />
+                <path class="detail" d="M115 35h8v17h9" />
+                <path class="detail" d="M115 95h8v-17h9" />
+                <path class="outline" transform="translate(79.6 26) scale(0.6)" d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z" />
+                <circle class="outline" cx="184.5" cy="65" r="6.5" />
+                <line class="pin" x1="191" y1="65" x2="198" y2="65" />
+                <circle class="terminal" cx="58" cy="22" r="7" />
+                <circle class="terminal" cx="58" cy="48" r="7" />
+                <circle class="terminal" cx="58" cy="82" r="7" />
+                <circle class="terminal" cx="58" cy="108" r="7" />
+                <circle class="terminal" cx="198" cy="65" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="switch" viewBox="0 0 260 130"><use href="#switch-open" /></symbol>
-
-        <symbol id="light" viewBox="0 0 260 130">
-            <line class="pin" x1="94" y1="25" x2="170" y2="25" />
-            <line class="pin" x1="132" y1="25" x2="132" y2="46" />
-            <circle cx="94" cy="25" r="7" fill="#f8f6ef" stroke="#225a69" stroke-width="5" />
-            <circle cx="170" cy="25" r="7" fill="#f8f6ef" stroke="#225a69" stroke-width="5" />
-            <circle class="lamp-bezel" cx="132" cy="84" r="38" />
-            <path class="detail" d="M115 124h34" />
+        <symbol id="jk" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <rect class="outline" x="84" y="14" width="82" height="98" />
+                <line class="pin" x1="58" y1="36" x2="84" y2="36" />
+                <line class="pin" x1="58" y1="65" x2="84" y2="65" />
+                <line class="pin" x1="58" y1="94" x2="84" y2="94" />
+                <line class="pin" x1="166" y1="36" x2="198" y2="36" />
+                <line class="pin" x1="166" y1="94" x2="198" y2="94" />
+                <line class="pin" x1="125" y1="112" x2="125" y2="122" />
+                <path class="detail" d="M84 57l11 8-11 8" />
+                <text x="99" y="43" text-anchor="start" fill="#202525" font-family="sans-serif" font-size="19" font-weight="700">J</text>
+                <text x="99" y="72" text-anchor="start" fill="#202525" font-family="sans-serif" font-size="19" font-weight="700">C</text>
+                <text x="99" y="101" text-anchor="start" fill="#202525" font-family="sans-serif" font-size="19" font-weight="700">K</text>
+                <text x="151" y="43" text-anchor="middle" fill="#202525" font-family="sans-serif" font-size="19" font-weight="700">1</text>
+                <text x="151" y="101" text-anchor="middle" fill="#202525" font-family="sans-serif" font-size="19" font-weight="700">0</text>
+                <text x="125" y="104" text-anchor="middle" fill="#202525" font-family="sans-serif" font-size="15" font-weight="700">R</text>
+                <circle class="terminal" cx="58" cy="36" r="7" />
+                <circle class="terminal" cx="58" cy="65" r="7" />
+                <circle class="terminal" cx="58" cy="94" r="7" />
+                <circle class="terminal" cx="198" cy="36" r="7" />
+                <circle class="terminal" cx="198" cy="94" r="7" />
+                <circle class="terminal" cx="125" cy="122" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="light-off" viewBox="0 0 260 130">
-            <use href="#light" />
-            <circle class="lamp-lens-off" cx="132" cy="84" r="28" />
+        <symbol id="jk-high" viewBox="0 0 84 65">
+            <g transform="translate(-22 0) scale(0.5)">
+                <rect class="outline" x="84" y="14" width="82" height="98" />
+                <line class="pin" x1="58" y1="36" x2="84" y2="36" />
+                <line class="pin" x1="58" y1="65" x2="84" y2="65" />
+                <line class="pin" x1="58" y1="94" x2="84" y2="94" />
+                <line class="pin" x1="166" y1="36" x2="198" y2="36" />
+                <line class="pin" x1="166" y1="94" x2="198" y2="94" />
+                <line class="pin" x1="125" y1="112" x2="125" y2="122" />
+                <circle cx="151" cy="36" r="13" fill="#ffd875" />
+                <path class="detail" d="M84 57l11 8-11 8" />
+                <text x="99" y="43" text-anchor="start" fill="#202525" font-family="sans-serif" font-size="19" font-weight="700">J</text>
+                <text x="99" y="72" text-anchor="start" fill="#202525" font-family="sans-serif" font-size="19" font-weight="700">C</text>
+                <text x="99" y="101" text-anchor="start" fill="#202525" font-family="sans-serif" font-size="19" font-weight="700">K</text>
+                <text x="151" y="43" text-anchor="middle" fill="#202525" font-family="sans-serif" font-size="19" font-weight="700">1</text>
+                <text x="151" y="101" text-anchor="middle" fill="#202525" font-family="sans-serif" font-size="19" font-weight="700">0</text>
+                <text x="125" y="104" text-anchor="middle" fill="#202525" font-family="sans-serif" font-size="15" font-weight="700">R</text>
+                <circle class="terminal" cx="58" cy="36" r="7" />
+                <circle class="terminal" cx="58" cy="65" r="7" />
+                <circle class="terminal" cx="58" cy="94" r="7" />
+                <circle class="terminal" cx="198" cy="36" r="7" />
+                <circle class="terminal" cx="198" cy="94" r="7" />
+                <circle class="terminal" cx="125" cy="122" r="7" />
+            </g>
         </symbol>
 
-        <symbol id="light-on" viewBox="0 0 260 130">
-            <use href="#light" />
-            <circle class="lamp-lens-on" cx="132" cy="84" r="28" />
+        <symbol id="switch-open" viewBox="0 0 40 65">
+            <line class="c-pin" x1="20" y1="6" x2="20" y2="17" />
+            <rect class="rocker-frame" x="7" y="15" width="26" height="46" rx="3" />
+            <path class="rocker" d="M9 17h22v23H9z" />
+            <path class="rocker-pressed" d="M9 40h22v19H9z" />
+            <circle class="c-terminal" cx="20" cy="6" r="3.5" />
         </symbol>
 
-        <!-- Compatibility symbols for the original palette. -->
-        <symbol id="2nand" viewBox="0 0 260 130"><use href="#nand" /></symbol>
-
-        <symbol id="3nand" viewBox="0 0 260 130">
-            <line class="pin" x1="18" y1="30" x2="76" y2="30" />
-            <line class="pin" x1="18" y1="65" x2="76" y2="65" />
-            <line class="pin" x1="18" y1="100" x2="76" y2="100" />
-            <circle class="terminal" cx="18" cy="30" r="7" />
-            <circle class="terminal" cx="18" cy="65" r="7" />
-            <circle class="terminal" cx="18" cy="100" r="7" />
-            <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
-            <circle class="outline" cx="169" cy="65" r="10" />
-            <line class="pin" x1="179" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="switch-closed" viewBox="0 0 40 65">
+            <line class="c-pin" x1="20" y1="6" x2="20" y2="17" />
+            <rect class="rocker-frame" x="7" y="15" width="26" height="46" rx="3" />
+            <path class="rocker-pressed" d="M9 17h22v17H9z" />
+            <path class="rocker" d="M9 34h22v25H9z" />
+            <circle class="c-terminal" cx="20" cy="6" r="3.5" />
         </symbol>
 
-        <symbol id="4nand" viewBox="0 0 260 130">
-            <line class="pin" x1="18" y1="22" x2="76" y2="22" />
-            <line class="pin" x1="18" y1="50" x2="76" y2="50" />
-            <line class="pin" x1="18" y1="80" x2="76" y2="80" />
-            <line class="pin" x1="18" y1="108" x2="76" y2="108" />
-            <circle class="terminal" cx="18" cy="22" r="7" />
-            <circle class="terminal" cx="18" cy="50" r="7" />
-            <circle class="terminal" cx="18" cy="80" r="7" />
-            <circle class="terminal" cx="18" cy="108" r="7" />
-            <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
-            <circle class="outline" cx="169" cy="65" r="10" />
-            <line class="pin" x1="179" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="switch" viewBox="0 0 40 65">
+            <line class="c-pin" x1="20" y1="6" x2="20" y2="17" />
+            <rect class="rocker-frame" x="7" y="15" width="26" height="46" rx="3" />
+            <path class="rocker" d="M9 17h22v23H9z" />
+            <path class="rocker-pressed" d="M9 40h22v19H9z" />
+            <circle class="c-terminal" cx="20" cy="6" r="3.5" />
         </symbol>
 
-        <!-- WP2 placeholders: plain boxes with the final pin positions. WP3 replaces them. -->
-        <symbol id="andnor" viewBox="0 0 260 130">
-            <line class="pin" x1="18" y1="30" x2="76" y2="30" />
-            <circle class="terminal" cx="18" cy="30" r="7" />
-            <line class="pin" x1="18" y1="50" x2="76" y2="50" />
-            <circle class="terminal" cx="18" cy="50" r="7" />
-            <line class="pin" x1="18" y1="80" x2="76" y2="80" />
-            <circle class="terminal" cx="18" cy="80" r="7" />
-            <line class="pin" x1="18" y1="100" x2="76" y2="100" />
-            <circle class="terminal" cx="18" cy="100" r="7" />
-            <rect class="outline" x="76" y="14" width="100" height="102" rx="6" />
-            <text x="126" y="71" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#202525">AND/NOR</text>
-            <line class="pin" x1="176" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="light" viewBox="0 0 40 65">
+            <line class="c-pin" x1="20" y1="6" x2="20" y2="17" />
+            <circle class="lamp-bezel" cx="20" cy="38" r="15" />
+            <circle class="c-terminal" cx="20" cy="6" r="3.5" />
         </symbol>
 
-        <symbol id="pulser" viewBox="0 0 260 130">
-            <rect class="outline" x="76" y="14" width="100" height="102" rx="6" />
-            <text x="126" y="71" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#202525">PULSER</text>
-            <line class="pin" x1="176" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="light-off" viewBox="0 0 40 65">
+            <line class="c-pin" x1="20" y1="6" x2="20" y2="17" />
+            <circle class="lamp-bezel" cx="20" cy="38" r="15" />
+            <circle class="lamp-lens-off" cx="20" cy="38" r="10" />
+            <circle class="c-terminal" cx="20" cy="6" r="3.5" />
         </symbol>
 
-        <symbol id="clock" viewBox="0 0 260 130">
-            <rect class="outline" x="76" y="14" width="100" height="102" rx="6" />
-            <text x="126" y="71" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#202525">CLOCK</text>
-            <line class="pin" x1="176" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="light-on" viewBox="0 0 40 65">
+            <line class="c-pin" x1="20" y1="6" x2="20" y2="17" />
+            <circle class="lamp-bezel" cx="20" cy="38" r="15" />
+            <circle class="lamp-lens-on" cx="20" cy="38" r="10" />
+            <circle class="c-terminal" cx="20" cy="6" r="3.5" />
         </symbol>
 
-        <symbol id="hi" viewBox="0 0 260 130">
-            <rect class="outline" x="76" y="14" width="100" height="102" rx="6" />
-            <text x="126" y="71" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#202525">HI</text>
-            <line class="pin" x1="176" y1="65" x2="224" y2="65" />
-            <circle class="terminal" cx="224" cy="65" r="7" />
+        <symbol id="pulser" viewBox="0 0 40 65">
+            <line class="c-pin" x1="20" y1="6" x2="20" y2="17" />
+            <rect class="rocker-frame" x="8" y="15" width="24" height="46" rx="3" />
+            <rect class="pulser-key" x="10" y="17" width="20" height="42" rx="2" />
+            <circle class="c-terminal" cx="20" cy="6" r="3.5" />
+        </symbol>
+
+        <symbol id="clock" viewBox="0 0 40 65">
+            <line class="c-pin" x1="20" y1="6" x2="20" y2="17" />
+            <circle class="lamp-bezel" cx="20" cy="36" r="14" />
+            <path class="knob-mark" d="M20 36l-7-8" />
+            <text x="20" y="62" text-anchor="middle" class="legend">CLOCK</text>
+            <circle class="c-terminal" cx="20" cy="6" r="3.5" />
+        </symbol>
+
+        <symbol id="hi" viewBox="0 0 40 30">
+            <text x="20" y="10" text-anchor="middle" class="legend">HIGH</text>
+            <circle class="c-terminal" cx="20" cy="21" r="3.5" />
+        </symbol>
+
+        <symbol id="gnd" viewBox="0 0 40 30">
+            <text x="20" y="10" text-anchor="middle" class="legend">GND</text>
+            <circle class="c-terminal" cx="20" cy="21" r="3.5" />
         </symbol>
     </defs>
 </svg>
