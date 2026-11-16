@@ -1,16 +1,16 @@
 {
   "version": 2,
-  "board": { "width": 1540, "height": 800 },
+  "board": { "width": 600, "height": 400 },
   "components": [
-    {"id":"a","type":"switch","x":40,"y":40,"state":0,"label":"A"},
-    {"id":"b","type":"switch","x":40,"y":200,"state":0,"label":"B"},
-    {"id":"n1","type":"2nand","x":340,"y":40},
-    {"id":"n2","type":"2nand","x":640,"y":40},
-    {"id":"n3","type":"2nand","x":640,"y":200},
-    {"id":"n4","type":"2nand","x":940,"y":40},
-    {"id":"n5","type":"2nand","x":640,"y":360},
-    {"id":"l_sum","type":"led","x":1240,"y":40,"label":"SUM"},
-    {"id":"l_carry","type":"led","x":1240,"y":200,"label":"CARRY"}
+    {"id":"a","type":"switch","x":30,"y":30,"state":0,"label":"A"},
+    {"id":"b","type":"switch","x":30,"y":115,"state":0,"label":"B"},
+    {"id":"n1","type":"2nand","x":140,"y":30},
+    {"id":"n2","type":"2nand","x":250,"y":30},
+    {"id":"n3","type":"2nand","x":250,"y":115},
+    {"id":"n4","type":"2nand","x":360,"y":30},
+    {"id":"n5","type":"2nand","x":250,"y":200},
+    {"id":"l_sum","type":"led","x":470,"y":30,"label":"SUM"},
+    {"id":"l_carry","type":"led","x":470,"y":115,"label":"CARRY"}
   ],
   "wires": [
     {"from":{"component":"a","pin":"out"},"to":{"component":"n1","pin":"in0"}},

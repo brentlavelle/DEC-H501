@@ -1,18 +1,18 @@
 {
   "version": 2,
-  "board": { "width": 1540, "height": 800 },
+  "board": { "width": 600, "height": 400 },
   "components": [
-    {"id":"p","type":"pulser","x":40,"y":40},
-    {"id":"rst","type":"switch","x":40,"y":200,"state":1,"label":"RESET (LO)"},
-    {"id":"ff0","type":"jk","x":340,"y":40},
-    {"id":"ff1","type":"jk","x":640,"y":40},
-    {"id":"ff2","type":"jk","x":940,"y":40},
-    {"id":"ff3","type":"jk","x":1240,"y":40},
-    {"id":"l0","type":"led","x":340,"y":200,"label":"1"},
-    {"id":"l1","type":"led","x":640,"y":200,"label":"2"},
-    {"id":"l2","type":"led","x":940,"y":200,"label":"4"},
-    {"id":"l3","type":"led","x":1240,"y":200,"label":"8"},
-    {"id":"l_spare","type":"led","x":40,"y":360,"label":"spare"}
+    {"id":"p","type":"pulser","x":30,"y":30},
+    {"id":"rst","type":"switch","x":30,"y":115,"state":1,"label":"RESET (LO)"},
+    {"id":"ff0","type":"jk","x":140,"y":30},
+    {"id":"ff1","type":"jk","x":250,"y":30},
+    {"id":"ff2","type":"jk","x":360,"y":30},
+    {"id":"ff3","type":"jk","x":470,"y":30},
+    {"id":"l0","type":"led","x":140,"y":115,"label":"1"},
+    {"id":"l1","type":"led","x":250,"y":115,"label":"2"},
+    {"id":"l2","type":"led","x":360,"y":115,"label":"4"},
+    {"id":"l3","type":"led","x":470,"y":115,"label":"8"},
+    {"id":"l_spare","type":"led","x":30,"y":200,"label":"spare"}
   ],
   "wires": [
     {"from":{"component":"p","pin":"out"},"to":{"component":"ff0","pin":"c"}},

@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "board": { "width": 1200, "height": 800 },
+  "board": { "width": 600, "height": 400 },
   "components": [
-    {"id":"p","type":"pulser","x":40,"y":40},
-    {"id":"ff","type":"jk","x":340,"y":40},
-    {"id":"lamp","type":"led","x":640,"y":40}
+    {"id":"p","type":"pulser","x":30,"y":30},
+    {"id":"ff","type":"jk","x":140,"y":30},
+    {"id":"lamp","type":"led","x":250,"y":30}
   ],
   "wires": [
     {"from":{"component":"p","pin":"out"},"to":{"component":"ff","pin":"c"}},
