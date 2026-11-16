@@ -3,7 +3,7 @@
 
 import renderCircuit, { updateCircuit } from './renderer.js';
 import { createEmptyCircuit, parseCircuitFile, serializeCircuit } from './circuitModel.js';
-import { flattenCircuit, makeComponent, ungroupComponent, isSubcircuitType } from './subcircuits.js';
+import { flattenCircuit, makeComponent, ungroupComponent, getComponentSize } from './subcircuits.js';
 import { generateBOM } from './bomGenerator.js';
 import { createSimulator } from './sim/core.js';
 import { createDriver } from './simDriver.js';
@@ -135,9 +135,9 @@ function render() {
   updateBreadcrumb();
 }
 
-// Optional snap to the H-500's module-bay grid (gate footprint + a small gutter).
-const GRID_CELL_X = 285;
-const GRID_CELL_Y = 150;
+// Optional snap to a module-bay grid (gate footprint + a small gutter).
+const GRID_CELL_X = 100;
+const GRID_CELL_Y = 80;
 const gridSnapToggle = document.getElementById('gridSnapToggle');
 
 function snapToGrid(value, cellSize) {
@@ -330,14 +330,6 @@ function clearWireSelection() {
 
 // Enable dragging for gates
 board.addEventListener('mousedown', (event) => {
-  const switchHitArea = event.target.closest('[data-switch-hit]');
-  if (switchHitArea) {
-    const component = activeView()?.components.find(c => c.id === switchHitArea.dataset.component);
-    if (component) toggleSwitch(component);
-    event.preventDefault();
-    return;
-  }
-
   const wire = event.target.closest('.wire');
   if (wire) {
     clearWireSelection();
@@ -491,8 +483,7 @@ document.addEventListener('mouseup', (event) => {
     const rect = selectionRectEl?.getBBox();
     if (rect && (rect.width > 2 || rect.height > 2)) {
       activeView().components.forEach(component => {
-        const width = isSubcircuitType(activeView(), component.type) ? (circuit.subcircuits[component.type].width) : 260;
-        const height = isSubcircuitType(activeView(), component.type) ? (circuit.subcircuits[component.type].height) : 130;
+        const { width, height } = getComponentSize(activeView(), component.type);
         const intersects = component.x < rect.x + rect.width && component.x + width > rect.x &&
           component.y < rect.y + rect.height && component.y + height > rect.y;
         if (intersects) selectedIds.add(component.id);
@@ -550,7 +541,7 @@ function drawPendingWire() {
     board.appendChild(preview);
   }
 
-  const horizontalDistance = Math.max(40, Math.abs(pendingWire.endX - pendingWire.startX) * 0.35);
+  const horizontalDistance = Math.max(20, Math.abs(pendingWire.endX - pendingWire.startX) * 0.35);
   const direction = pendingWire.endX >= pendingWire.startX ? 1 : -1;
   preview.setAttribute(
     'd',

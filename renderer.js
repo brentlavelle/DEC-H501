@@ -2,9 +2,11 @@
 // Converts JSON circuit model into SVG elements
 
 import GateLibrary from './gateLibrary.js';
-import { getComponentPins, isSubcircuitType } from './subcircuits.js';
+import { getComponentPins, getComponentSize, isSubcircuitType } from './subcircuits.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
+// Small enough that the hotspots of a 4-input gate's pins, 14 units apart, do not overlap.
+const PIN_HOTSPOT_RADIUS = 6;
 
 // Pin values come from a simulator; nothing is evaluated here.
 // `view` is { sim, rootPinMap }: the simulator built from the flattened circuit, and the
@@ -114,34 +116,22 @@ function renderCircuit(circuit, svgElement, view) {
       const on = shownLevel(component, level);
       const useElement = document.createElementNS(SVG_NS, 'use');
       useElement.setAttribute('href', `gates.svg#${symbolFor(component, on)}`);
-      useElement.setAttribute('width', '260');
-      useElement.setAttribute('height', '130');
+      const size = getComponentSize(circuit, component.type);
+      useElement.setAttribute('width', size.width);
+      useElement.setAttribute('height', size.height);
       useElement.setAttribute('x', component.x);
       useElement.setAttribute('y', component.y);
       useElement.setAttribute('id', component.id);
       useElement.setAttribute('data-type', component.type);
       useElement.setAttribute('data-state', on ? '1' : '0');
       svgElement.appendChild(useElement);
-
-      if (component.type === 'switch') {
-        const switchHitArea = document.createElementNS(SVG_NS, 'rect');
-        switchHitArea.setAttribute('x', component.x - 26);
-        switchHitArea.setAttribute('y', component.y + 35);
-        switchHitArea.setAttribute('width', '312');
-        switchHitArea.setAttribute('height', '60');
-        switchHitArea.setAttribute('fill', 'transparent');
-        switchHitArea.setAttribute('class', 'switch-hit-area');
-        switchHitArea.setAttribute('data-switch-hit', 'true');
-        switchHitArea.setAttribute('data-component', component.id);
-        svgElement.appendChild(switchHitArea);
-      }
     }
 
     pins.forEach(pin => {
       const pinElement = document.createElementNS(SVG_NS, 'circle');
       pinElement.setAttribute('cx', component.x + pin.x);
       pinElement.setAttribute('cy', component.y + pin.y);
-      pinElement.setAttribute('r', '12');
+      pinElement.setAttribute('r', PIN_HOTSPOT_RADIUS);
       pinElement.setAttribute('class', 'pin-hotspot');
       pinElement.setAttribute('data-component', component.id);
       pinElement.setAttribute('data-pin', pin.name);
@@ -152,7 +142,7 @@ function renderCircuit(circuit, svgElement, view) {
 }
 
 function wirePath(x1, y1, x2, y2) {
-  const horizontalDistance = Math.max(40, Math.abs(x2 - x1) * 0.35);
+  const horizontalDistance = Math.max(20, Math.abs(x2 - x1) * 0.35);
   const direction = x2 >= x1 ? 1 : -1;
   return `M ${x1} ${y1} C ${x1 + direction * horizontalDistance} ${y1}, ${x2 - direction * horizontalDistance} ${y2}, ${x2} ${y2}`;
 }

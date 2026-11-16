@@ -5,13 +5,21 @@
 
 import GateLibrary from './gateLibrary.js';
 
-const PIN_SPACING = 40;
-const BOX_WIDTH = 260;
-const BOX_MIN_HEIGHT = 130;
+const PIN_SPACING = 20;
+const BOX_WIDTH = 130;
+const BOX_MIN_HEIGHT = 65;
+// Box pins sit just inside the left and right edges.
+const BOX_PIN_INSET = 8;
 
 export function getComponentPins(circuit, type) {
   if (GateLibrary[type]) return GateLibrary[type].pins;
   return circuit.subcircuits?.[type]?.pins || null;
+}
+
+// The footprint a part occupies on the board: { width, height } in board units.
+export function getComponentSize(circuit, type) {
+  const def = GateLibrary[type] || circuit.subcircuits?.[type];
+  return def ? { width: def.width, height: def.height } : null;
 }
 
 export function isSubcircuitType(circuit, type) {
@@ -114,7 +122,7 @@ export function makeComponent(circuit, selectedIds, typeName) {
   let nextIn = 0;
   let nextOut = 0;
   pins.forEach(pin => {
-    pin.x = pin.direction === 'input' ? 18 : BOX_WIDTH - 36;
+    pin.x = pin.direction === 'input' ? BOX_PIN_INSET : BOX_WIDTH - BOX_PIN_INSET;
     const slot = pin.direction === 'input' ? nextIn++ : nextOut++;
     const count = pin.direction === 'input' ? inputCount : outputCount;
     pin.y = ((slot + 1) * height) / (count + 1);
