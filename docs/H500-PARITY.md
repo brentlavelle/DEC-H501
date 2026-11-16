@@ -97,6 +97,11 @@ The simulator is a module with no DOM and no clock of its own. All of this secti
 
 **State.** One boolean per output pin, plus, per flip-flop, the last value it saw on `c`.
 
+**Nets.** Wires have no direction. Pins joined by wires, directly or through other pins,
+form one net, so a cord chained from one input to the next carries the same signal. An input
+reads the output on its net. With no output on the net it is open. With more than one output
+on the net it reads LO if any of them is LO.
+
 **Power-on.** Sources take their own value (switch state, HI terminal HI, pulser LO, clock
 LO). Flip-flops are reset. Gate outputs start LO. Then settle. During that first settle a
 flip-flop obeys `reset` but ignores its clock, and its remembered clock value is taken when
@@ -113,23 +118,28 @@ delay, and the result cannot depend on the order of the `components` or `wires` 
 ascending id order, each seeing the newest values, up to the same limit. If that reaches a
 fixed point, the circuit had a symmetric race (for example a NAND latch powered on with both
 inputs HI) and it is now resolved the same way every time: report `settled: true,
-raceResolved: true`. If not, the circuit oscillates (for example a ring of three inverters):
+raceResolved: true`. Id order is plain string comparison, so `g10` comes before `g2`. If not, the circuit oscillates (for example a ring of three inverters):
 report `settled: false` and list the ids still changing. Never loop without a bound.
 
 **Time.** Virtual milliseconds, advanced only by the caller. `advance(ms)` finds every clock
 edge in the interval, takes them in time order (ties in id order), applies each and settles
 after each. It is additive: `advance(500)` twice equals `advance(1000)` once. If more than
 `maxEdges` (default 10 000) fall in the interval, stop applying edges, move time to the
-target anyway and report `behind: true`.
+target anyway and report `behind: true`. A rise and a fall are one edge each, in `edges` and
+against `maxEdges`: one second at 10 Hz is 20 edges. Edges skipped this way are discarded. A
+skipped clock keeps the level it had and carries on from the new time.
 
 **Clock waveform.** With period `T = 1000 / hz` ms, the output rises at `k * T - w` and falls
 at `k * T`, where `w = min(T / 2, 50)` ms, for k = 1, 2, 3 and so on, counted from when the
 clock was created or its rate last set. Every whole period therefore ends on a trailing edge:
 N periods give exactly N trailing edges. An edge that lands exactly on the target time of
-`advance` belongs to that call, not the next one.
+`advance` belongs to that call, not the next one. A clock with no `hz` runs at 1 Hz.
+`setClockRate` restarts the count from the current time and leaves the output level alone: a
+HI output stays HI until the next fall of the new waveform, so changing the rate never
+clocks anything.
 
-**Contract.** Names may change in WP1 if the WP1 report records the final names here. The
-semantics may not.
+**Contract.** These are the names WP1 shipped. `createSimulator` throws on an unknown type, a
+duplicate id, or a wire end that is not a pin; the methods throw on an unknown id or pin.
 
 ```js
 import { createSimulator } from './sim/core.js';
@@ -142,6 +152,7 @@ sim.setInput(id, value);     // switch or pulser. Settles, returns the result be
 sim.setClockRate(id, hz);    // Settles, returns the result below.
 sim.settle();                // { settled, sweeps, raceResolved, oscillating: [ids] }
 sim.advance(ms, { maxEdges }); // same, plus { edges, behind }
+sim.powerOn;                 // the settle result from construction: power-on, or after carryFrom
 sim.read(id, pin);           // boolean at an output pin
 sim.readInput(id, pin);      // boolean an input pin sees, open-input rule applied
 sim.time;                    // virtual ms
@@ -149,7 +160,10 @@ sim.time;                    // virtual ms
 
 `carryFrom` copies pin values, flip-flop state, remembered clock values, clock phase and
 virtual time for every id present in both simulators with the same type, then settles. It is
-how the editor adds a wire without resetting the user's counter.
+how the editor adds a wire without resetting the user's counter. A switch takes its position
+from the new circuit, not from the old simulator. A pulser that was held stays held. A clock
+whose `hz` differs from the old one starts its count at the carry. A part that is new powers
+on as in "Power-on" above, including ignoring its clock during that settle.
 
 ## 5. Controls in the browser [D]
 
