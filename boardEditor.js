@@ -129,7 +129,19 @@ function applySelectionHighlight() {
 }
 
 
+// The board is as big as the circuit says, at one screen pixel per board unit. A bigger
+// board does not make the parts smaller; the page scrolls.
+function applyBoardSize() {
+  const { width, height } = circuit?.board?.width > 0 && circuit?.board?.height > 0
+    ? circuit.board
+    : { width: 1200, height: 800 };
+  board.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  board.style.width = `${width}px`;
+  board.style.height = `${height}px`;
+}
+
 function render() {
+  applyBoardSize();
   renderCircuit(activeView(), board, { sim, rootPinMap });
   applySelectionHighlight();
   updateBreadcrumb();

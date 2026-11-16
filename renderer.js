@@ -127,6 +127,18 @@ function renderCircuit(circuit, svgElement, view) {
       svgElement.appendChild(useElement);
     }
 
+    // The optional label (a panel number, a legend) goes just under the part.
+    if (component.label) {
+      const size = getComponentSize(circuit, component.type);
+      const labelElement = document.createElementNS(SVG_NS, 'text');
+      labelElement.setAttribute('x', component.x + size.width / 2);
+      labelElement.setAttribute('y', component.y + size.height + 8);
+      labelElement.setAttribute('text-anchor', 'middle');
+      labelElement.setAttribute('class', 'part-label');
+      labelElement.textContent = component.label;
+      svgElement.appendChild(labelElement);
+    }
+
     pins.forEach(pin => {
       const pinElement = document.createElementNS(SVG_NS, 'circle');
       pinElement.setAttribute('cx', component.x + pin.x);
