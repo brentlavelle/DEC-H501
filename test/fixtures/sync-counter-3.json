@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "board": { "width": 1240, "height": 800 },
+  "components": [
+    {"id":"p","type":"pulser","x":40,"y":40},
+    {"id":"ff0","type":"jk","x":340,"y":40},
+    {"id":"ff1","type":"jk","x":640,"y":40},
+    {"id":"ff2","type":"jk","x":940,"y":40},
+    {"id":"g_nand","type":"2nand","x":340,"y":200},
+    {"id":"g_inv","type":"2nand","x":640,"y":200},
+    {"id":"l0","type":"led","x":340,"y":360,"label":"1"},
+    {"id":"l1","type":"led","x":640,"y":360,"label":"2"},
+    {"id":"l2","type":"led","x":940,"y":360,"label":"4"}
+  ],
+  "wires": [
+    {"from":{"component":"p","pin":"out"},"to":{"component":"ff0","pin":"c"}},
+    {"from":{"component":"p","pin":"out"},"to":{"component":"ff1","pin":"c"}},
+    {"from":{"component":"p","pin":"out"},"to":{"component":"ff2","pin":"c"}},
+    {"from":{"component":"ff0","pin":"q"},"to":{"component":"ff1","pin":"j"}},
+    {"from":{"component":"ff0","pin":"q"},"to":{"component":"ff1","pin":"k"}},
+    {"from":{"component":"ff0","pin":"q"},"to":{"component":"g_nand","pin":"in0"}},
+    {"from":{"component":"ff1","pin":"q"},"to":{"component":"g_nand","pin":"in1"}},
+    {"from":{"component":"g_nand","pin":"out"},"to":{"component":"g_inv","pin":"in0"}},
+    {"from":{"component":"g_nand","pin":"out"},"to":{"component":"g_inv","pin":"in1"}},
+    {"from":{"component":"g_inv","pin":"out"},"to":{"component":"ff2","pin":"j"}},
+    {"from":{"component":"g_inv","pin":"out"},"to":{"component":"ff2","pin":"k"}},
+    {"from":{"component":"ff0","pin":"q"},"to":{"component":"l0","pin":"in"}},
+    {"from":{"component":"ff1","pin":"q"},"to":{"component":"l1","pin":"in"}},
+    {"from":{"component":"ff2","pin":"q"},"to":{"component":"l2","pin":"in"}}
+  ],
+  "subcircuits": {}
+}
