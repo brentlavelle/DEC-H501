@@ -73,6 +73,7 @@ export const componentTypes = {
   switch: source(component => component.state === 1 || component.state === true),
   pulser: source(() => false),
   hi: source(() => true),
+  gnd: source(() => false),
   clock: source(() => false),
   led: { kind: 'sink', inputs: ['in'], outputs: [], openInput: false }
 };

@@ -236,8 +236,8 @@ the new simulator.
 
 1. `icCatalog.js`: add `andnor` as 7450, two gates per package. Change `jk` to 7473, two per
    package, which is the part the H-500 used.
-2. `generateBOM`: `switch`, `led`, `pulser`, `clock` and `hi` are not ICs and are not counted
-   in `totalGates`.
+2. `generateBOM`: `switch`, `led`, `pulser`, `clock`, `hi` and `gnd` are not ICs and are not
+   counted in `totalGates`.
 3. Tests for `makeComponent` and `ungroupComponent`: build a full adder from loose gates,
    record the lamp outputs for all eight input combinations, group it, compare, ungroup it,
    compare. Repeat with a subcircuit placed inside another subcircuit.

@@ -35,16 +35,17 @@ Each fact carries a tag:
 | Lamp | 8 | `led` | present, has a stray `return` pin |
 | Variable clock | 1 | `clock` | missing |
 | HI terminal | 6 | `hi` | missing |
+| GND terminal | 2 | `gnd` | missing |
 
-Quantities are [W] (specifications section), except the HI terminal count, which is
-counted from the panel photograph [R]. The chips behind them are [R]: 2 x SN7400,
+Quantities are [W] (specifications section), except the HI and GND terminal counts, which
+are counted from the panel photograph [R]. The chips behind them are [R]: 2 x SN7400,
 2 x SN7410, 2 x SN7420, 2 x SN7450, 4 x SN7473.
 
 Freeform-only types, not on the real panel: `and`, `or`, `nor`, `xor`, `xnor`, `not`, `nand`.
 They stay in the palette. The H-500 layout does not use them.
 
-GND terminals exist on the real panel for linking two units [W, p. 101]. They are not
-modelled.
+GND terminals exist on the real panel for linking two units [W, p. 101]. Linking units is
+not modelled, but the terminals are on the panel: see `gnd` in section 3.
 
 ## 3. Component behavior
 
@@ -81,7 +82,11 @@ carrying the same signal; one pin is enough here because one output can drive ma
 **Lamp (`led`).** Pin `in`. Lit when the input is HI, dark when it is LO, dark with nothing
 connected [W, p. XII]. Remove the `return` pin.
 
-**HI terminal (`hi`).** Pin `out`, always HI [W, p. XI].
+**HI terminal (`hi`).** Pin `out`, always HI [W, p. XI]. This is the panel's +5 V point.
+
+**GND terminal (`gnd`).** Pin `out`, always LO [D]. On the real panel it is the 0 V point
+used to join two units; here it is a LO source, the counterpart of the HI terminal, for
+tying an input LO.
 
 **Clock (`clock`).** Pin `out`. A continuous train of HI pulses [W, p. XI]. Persisted as
 `hz`. See section 5.
@@ -102,8 +107,8 @@ form one net, so a cord chained from one input to the next carries the same sign
 reads the output on its net. With no output on the net it is open. With more than one output
 on the net it reads LO if any of them is LO.
 
-**Power-on.** Sources take their own value (switch state, HI terminal HI, pulser LO, clock
-LO). Flip-flops are reset. Gate outputs start LO. Then settle. During that first settle a
+**Power-on.** Sources take their own value (switch state, HI terminal HI, GND terminal LO,
+pulser LO, clock LO). Flip-flops are reset. Gate outputs start LO. Then settle. During that first settle a
 flip-flop obeys `reset` but ignores its clock, and its remembered clock value is taken when
 the settle ends. Gate outputs rising and falling on their way to their first stable value
 would otherwise clock flip-flops at power-on.
@@ -231,13 +236,13 @@ on as in "Power-on" above, including ignoring its clock during that settle.
 | Flip-flops power on in either state | Power on reset |
 | Rocker switches bounce; pulsers are filtered [W] | Nothing bounces |
 | Fan-out limits: 10 for logic outputs, 30 for switches, pulsers, clock and HI [W] | Not enforced |
-| Two units can be linked through GND terminals | Not modelled |
+| GND terminals link the grounds of two units | One unit only. A GND terminal is a LO source |
 | A fixed panel of 30 logic elements | The same panel as a starting layout that can be rearranged, extended and resized |
 
 ## 8. Schema version 2
 
 - `version: 2`.
-- New types: `andnor`, `pulser`, `clock` (with `hz`), `hi`.
+- New types: `andnor`, `pulser`, `clock` (with `hz`), `hi`, `gnd`.
 - `board.width` and `board.height` are set by the user and saved.
 - Optional `label` string on any component, drawn beside it.
 - Removed from saved files: `previousClock`, `previousJ`, `previousK`, `internalState`, any

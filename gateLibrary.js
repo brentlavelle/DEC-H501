@@ -95,8 +95,15 @@ const GateLibrary = {
   "pulser": topTerminal("pulser", "out", "output"),
   "clock": topTerminal("clock", "out", "output"),
   "led": topTerminal("light", "in", "input"),
+  // Power rails: the HIGH (+5 V) and GND terminals. One terminal each, under its legend.
   "hi": {
     svgId: "hi",
+    width: 40,
+    height: 30,
+    pins: [{ name: "out", x: 20, y: 21, direction: "output" }]
+  },
+  "gnd": {
+    svgId: "gnd",
     width: 40,
     height: 30,
     pins: [{ name: "out", x: 20, y: 21, direction: "output" }]
