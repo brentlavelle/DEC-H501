@@ -23,8 +23,10 @@ export function getSubcircuitDef(circuit, type) {
 }
 
 // Expands every subcircuit instance into primitive gate components/wires with
-// instance-qualified ids ("u1.g2"), so the boolean simulator only ever sees base gate
-// types. Also returns rootPinMap: for each root-level subcircuit instance, maps its
+// instance-qualified ids ("u1.g2"), so the simulator only ever sees base gate types.
+// Pure: the circuit passed in is not modified, and the result shares no objects with it.
+// Runtime state is the simulator's, keyed by these qualified ids, so two instances of
+// one definition never share flip-flop state. Also returns rootPinMap: for each root-level subcircuit instance, maps its
 // external pin name to the qualified {component, pin} that actually carries the signal —
 // used by the renderer to look up simulation state for wires/pins on a collapsed box.
 export function flattenCircuit(circuit) {
@@ -48,22 +50,12 @@ function flattenLevel(levelComponents, levelWires, prefix, subcircuits, outCompo
 
     const childPrefix = `${qualifiedId}.`;
     const childPinMap = {};
-    // Per-instance runtime state (switch positions, flip-flop memory), layered onto the
-    // shared definition so instances of the same type don't share simulation state.
-    const instanceState = (component.internalState = component.internalState || {});
-    const statefulComponents = subDef.components.map(inner => ({ ...inner, ...(instanceState[inner.id] || {}) }));
-
-    flattenLevel(statefulComponents, subDef.wires, childPrefix, subcircuits, outComponents, outWires, childPinMap);
-
-    subDef.components.forEach(inner => {
-      const flattenedCopy = outComponents.find(c => c.id === childPrefix + inner.id);
-      if (flattenedCopy) instanceState[inner.id] = flattenedCopy;
-    });
+    flattenLevel(subDef.components, subDef.wires, childPrefix, subcircuits, outComponents, outWires, childPinMap);
 
     pinMapOut[component.id] = {};
     subDef.pins.forEach(pin => {
       const resolved = childPinMap[pin.internal.component]?.[pin.internal.pin];
-      pinMapOut[component.id][pin.name] = resolved || {
+      pinMapOut[component.id][pin.name] = resolved ? { ...resolved } : {
         component: childPrefix + pin.internal.component,
         pin: pin.internal.pin
       };
@@ -80,7 +72,7 @@ function flattenLevel(levelComponents, levelWires, prefix, subcircuits, outCompo
 
 function resolveEndpoint(endpoint, prefix, pinMap) {
   const mapped = pinMap[endpoint.component]?.[endpoint.pin];
-  return mapped || { component: prefix + endpoint.component, pin: endpoint.pin };
+  return mapped ? { ...mapped } : { component: prefix + endpoint.component, pin: endpoint.pin };
 }
 
 // Collapses the given component ids (plus any wires fully contained within them) into a
@@ -174,7 +166,6 @@ export function ungroupComponent(circuit, instanceId) {
   const prefix = `${instanceId}.`;
   const restoredComponents = subDef.components.map(inner => ({
     ...inner,
-    ...(instance.internalState?.[inner.id] || {}),
     id: prefix + inner.id,
     x: inner.x + instance.x,
     y: inner.y + instance.y

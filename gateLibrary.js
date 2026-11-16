@@ -104,8 +104,36 @@ const GateLibrary = {
   "led": {
     svgId: "light",
     pins: [
-    { name: "in", x: 94, y: 25, direction: "input" },
-    { name: "return", x: 170, y: 25, direction: "input" }
+    { name: "in", x: 94, y: 25, direction: "input" }
+    ]
+  },
+  // The four types below have placeholder symbols until WP3 draws the final ones.
+  "andnor": {
+    svgId: "andnor",
+    pins: [
+      { name: "in0", x: 18, y: 30 },
+      { name: "in1", x: 18, y: 50 },
+      { name: "in2", x: 18, y: 80 },
+      { name: "in3", x: 18, y: 100 },
+      { name: "out", x: 224, y: 65 }
+    ]
+  },
+  "pulser": {
+    svgId: "pulser",
+    pins: [
+      { name: "out", x: 224, y: 65 }
+    ]
+  },
+  "clock": {
+    svgId: "clock",
+    pins: [
+      { name: "out", x: 224, y: 65 }
+    ]
+  },
+  "hi": {
+    svgId: "hi",
+    pins: [
+      { name: "out", x: 224, y: 65 }
     ]
   }
 };

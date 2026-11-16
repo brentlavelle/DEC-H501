@@ -1,16 +1,25 @@
 // Board Editor
 // Adds drag-and-drop functionality and a palette for placing gates
 
-import renderCircuit from './renderer.js';
+import renderCircuit, { updateCircuit } from './renderer.js';
 import { createEmptyCircuit, parseCircuitFile, serializeCircuit } from './circuitModel.js';
-import { makeComponent, ungroupComponent, isSubcircuitType } from './subcircuits.js';
+import { flattenCircuit, makeComponent, ungroupComponent, isSubcircuitType } from './subcircuits.js';
 import { generateBOM } from './bomGenerator.js';
+import { createSimulator } from './sim/core.js';
+import { createDriver } from './simDriver.js';
 
 const board = document.getElementById('board');
 const fileStatus = document.getElementById('fileStatus');
 const componentStatus = document.getElementById('componentStatus');
 const breadcrumbEl = document.getElementById('breadcrumb');
+const simStatus = document.getElementById('simStatus');
 let circuit = null; // Circuit will be loaded dynamically
+
+// The one simulator for the active view (the root circuit, or the subcircuit definition
+// zoomed into, simulated on its own). All logic levels on screen are read from it.
+let sim = null;
+let rootPinMap = {};
+let simMessage = '';
 
 // Navigation stack of subcircuit type names being edited; [] means viewing the root circuit.
 let navStack = [];
@@ -27,6 +36,60 @@ function setComponentStatus(message, isError = false) {
   if (!componentStatus) return;
   componentStatus.textContent = message;
   componentStatus.style.color = isError ? 'crimson' : 'inherit';
+}
+
+function setSimStatus(message) {
+  if (!simStatus || message === simMessage) return;
+  simMessage = message;
+  simStatus.textContent = message;
+  simStatus.style.color = message ? 'crimson' : 'inherit';
+}
+
+// Says so when the circuit oscillates or the clock outruns the simulator.
+function reportSim(result) {
+  if (!result.settled) {
+    setSimStatus(`Oscillating, no stable state: ${result.oscillating.join(', ')}`);
+  } else if (result.behind) {
+    setSimStatus('The clock is running faster than the simulation can follow; pulses were skipped.');
+  } else {
+    setSimStatus('');
+  }
+}
+
+// Builds the simulator for the active view. With `carry`, parts that are still there
+// keep their state, so adding a wire does not reset a counter. A different view or a
+// different file starts from power-on.
+function rebuildSim({ carry = false } = {}) {
+  const view = activeView();
+  if (!view) {
+    sim = null;
+    rootPinMap = {};
+    return;
+  }
+  try {
+    const flat = flattenCircuit(view);
+    sim = createSimulator(flat, carry && sim ? { carryFrom: sim } : {});
+    rootPinMap = flat.rootPinMap;
+    reportSim(sim.powerOn);
+  } catch (error) {
+    sim = null;
+    rootPinMap = {};
+    setSimStatus(`Simulation stopped: ${error.message}`);
+  }
+}
+
+// Redraws logic levels in place, without rebuilding the board.
+function refresh() {
+  const view = activeView();
+  if (view) updateCircuit(view, board, { sim, rootPinMap });
+}
+
+function toggleSwitch(component) {
+  component.state = component.state ? 0 : 1;
+  if (sim) {
+    reportSim(sim.setInput(component.id, component.state));
+  }
+  refresh();
 }
 
 // Returns a { components, wires, subcircuits } view onto whatever is being edited right
@@ -50,6 +113,7 @@ function updateBreadcrumb() {
       span.addEventListener('click', () => {
         navStack = navStack.slice(0, index);
         selectedIds.clear();
+        rebuildSim();
         render();
       });
     }
@@ -66,7 +130,7 @@ function applySelectionHighlight() {
 
 
 function render() {
-  renderCircuit(activeView(), board);
+  renderCircuit(activeView(), board, { sim, rootPinMap });
   applySelectionHighlight();
   updateBreadcrumb();
 }
@@ -85,6 +149,7 @@ fetch('./exampleCircuit.json')
   .then(response => response.json())
   .then(data => {
     circuit = parseCircuitFile(JSON.stringify(data));
+    rebuildSim();
     render();
   })
   .catch(error => console.error('Error loading circuit JSON:', error));
@@ -96,6 +161,7 @@ document.getElementById('newCircuitBtn')?.addEventListener('click', () => {
   circuit = createEmptyCircuit();
   navStack = [];
   selectedIds.clear();
+  rebuildSim();
   render();
   setStatus('New circuit created.');
 });
@@ -146,6 +212,7 @@ loadCircuitInput?.addEventListener('change', async () => {
     navStack = [];
     selectedIds.clear();
     clearWireSelection();
+    rebuildSim();
     render();
     setStatus(`Loaded ${file.name}.`);
   } catch (error) {
@@ -166,6 +233,7 @@ document.getElementById('makeComponentBtn')?.addEventListener('click', () => {
   try {
     makeComponent(activeView(), [...selectedIds], name.trim());
     selectedIds.clear();
+    rebuildSim({ carry: true });
     render();
     setComponentStatus(`Created component "${name.trim()}".`);
   } catch (error) {
@@ -182,6 +250,7 @@ document.getElementById('ungroupComponentBtn')?.addEventListener('click', () => 
   try {
     ungroupComponent(activeView(), id);
     selectedIds.clear();
+    rebuildSim({ carry: true });
     render();
     setComponentStatus('Ungrouped.');
   } catch (error) {
@@ -195,6 +264,7 @@ board.addEventListener('dblclick', (event) => {
   if (box) {
     navStack.push(box.dataset.type);
     selectedIds.clear();
+    rebuildSim();
     render();
   }
 });
@@ -263,10 +333,7 @@ board.addEventListener('mousedown', (event) => {
   const switchHitArea = event.target.closest('[data-switch-hit]');
   if (switchHitArea) {
     const component = activeView()?.components.find(c => c.id === switchHitArea.dataset.component);
-    if (component) {
-      component.state = component.state ? 0 : 1;
-      render();
-    }
+    if (component) toggleSwitch(component);
     event.preventDefault();
     return;
   }
@@ -324,8 +391,7 @@ board.addEventListener('mousedown', (event) => {
   }
 
   if (component?.type === 'switch') {
-    component.state = component.state ? 0 : 1;
-    render();
+    toggleSwitch(component);
     return;
   }
 
@@ -416,6 +482,7 @@ document.addEventListener('mouseup', (event) => {
 
     pendingWire = null;
     clearWireSelection();
+    rebuildSim({ carry: true });
     render();
     return;
   }
@@ -470,6 +537,7 @@ document.addEventListener('keydown', (event) => {
 
   activeView().wires.splice(selectedWireIndex, 1);
   clearWireSelection();
+  rebuildSim({ carry: true });
   render();
   event.preventDefault();
 });
@@ -506,5 +574,9 @@ palette.addEventListener('click', (event) => {
   };
   view.components.push(newGate);
 
+  rebuildSim({ carry: true });
   render();
 });
+
+// Runs the clock. A frame only touches logic levels, never the elements themselves.
+createDriver({ getSim: () => sim, onChange: refresh, onReport: reportSim }).start();
