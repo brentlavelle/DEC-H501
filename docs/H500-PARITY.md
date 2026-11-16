@@ -205,13 +205,16 @@ on as in "Power-on" above, including ignoring its clock during that settle.
   | 4 | 4 AND/NOR gates |
   |   | 3 HIGH terminals, in the gaps below row 4 |
   | 5 | the same as row 2 |
-  | 6 | 4 J-K flip-flops, with 2 GND terminals below them |
+  | 6 | 4 J-K flip-flops, with 2 GND terminals (`gnd`) below them |
   | 7 | Terminal strip: CLOCK RANGE - COARSE with a FINE marker, CLOCK OUTPUT, PULSER OUTPUTS, then SWITCH OUTPUTS above LAMP INPUTS |
 
 - The flip-flop symbol has J, C and K down the left side, the 1 output at the top right, the
   0 output at the bottom right, and R at the bottom. The AND/NOR symbol is two AND shapes
   feeding one NOR shape.
 - Every terminal on the real panel is a pair of eyelets. Here one pin stands for the pair.
+- Parts are drawn at one screen pixel per board unit. Gates and flip-flops have an 84 x 65
+  footprint, half the size of the first drawings; switches, pulsers, lamps and the clock are
+  40 x 65 with their terminal at the top; HIGH and GND terminals are 40 x 30.
 - On the real machine the switches, pulsers, lamps and clock reach the patch panel through
   the row 7 terminal strip. Here they are parts with their own pins, so the preset puts the
   parts themselves where the strip and the controls are: the clock at the lower left, then

@@ -156,8 +156,8 @@ function snapToGrid(value, cellSize) {
   return Math.round(value / cellSize) * cellSize;
 }
 
-// Fetch the circuit JSON dynamically
-fetch('./exampleCircuit.json')
+// Opens on the H-500 panel: the real inventory, laid out like the real machine.
+fetch('./panels/h500.json')
   .then(response => response.json())
   .then(data => {
     circuit = parseCircuitFile(JSON.stringify(data));

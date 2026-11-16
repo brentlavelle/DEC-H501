@@ -28,15 +28,16 @@ The current goal is behavioral parity with the real H-500. The freeform editor, 
 
 | File | Role |
 |------|------|
-| `index.html` | Menus, palette, `<svg id="board" viewBox="0 0 1200 800">` |
+| `index.html` | Menus, palette, `<svg id="board">`. The board's size comes from `circuit.board`, one screen pixel per board unit |
 | `boardEditor.js` | All interaction: file menu, make/ungroup, BOM button, drag, wiring, selection, palette. Owns `circuit`, `navStack`, `selectedIds` |
 | `renderer.js` | `evaluateCircuit` (the simulator, to be replaced) and `renderCircuit(circuit, svg)`, which clears and rebuilds the whole SVG on every call |
-| `gateLibrary.js` | type -> `{ svgId, pins: [{ name, x, y, direction? }] }`. A pin with no `direction` is an input if its name starts with `in`, otherwise an output |
-| `gates.svg` | Symbol sprite sheet. Every symbol has a 260 x 130 footprint |
+| `gateLibrary.js` | type -> `{ svgId, width, height, pins: [{ name, x, y, direction? }] }`. A pin with no `direction` is an input if its name starts with `in`, otherwise an output |
+| `gates.svg` | Symbol sprite sheet. Gates and the flip-flop are 84 x 65, controls 40 x 65, HIGH and GND terminals 40 x 30. One terminal per lead |
+| `panels/h500.json` | The H-500 preset, loaded at startup |
 | `circuitModel.js` | `createEmptyCircuit`, `migrateCircuit`, `validateCircuit`, `parseCircuitFile`, `serializeCircuit`. Schema version 1 |
 | `subcircuits.js` | `flattenCircuit`, `makeComponent`, `ungroupComponent`, `getComponentPins`, `isSubcircuitType` |
 | `bomGenerator.js`, `icCatalog.js` | `generateBOM(circuit)` and the 7400-series catalog |
-| `exampleCircuit.json` | Loaded at startup |
+| `exampleCircuit.json` | A small version 1 sample. No longer loaded at startup |
 
 ## Known defects
 
