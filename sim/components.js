@@ -79,4 +79,3 @@ export const componentTypes = {
 };
 
 export const DEFAULT_CLOCK_HZ = 1;
-export const MAX_CLOCK_PULSE_MS = 50;

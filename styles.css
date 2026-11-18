@@ -95,8 +95,14 @@ button:hover {
     stroke-width: 1;
 }
 
-#board use[data-type="switch"] {
+#board use[data-type="switch"],
+#board use[data-type="pulser"],
+#board use[data-type="clock"] {
     cursor: pointer;
+}
+
+#board use[data-type="pulser"][data-state="1"] {
+    filter: drop-shadow(0 0 4px #ffd875) brightness(0.8);
 }
 
 #board use[data-type="led"][data-state="1"] {
@@ -107,7 +113,7 @@ button:hover {
     fill: #24313d;
     stroke: #9aa8b5;
     stroke-width: 1.5;
-    cursor: move;
+    cursor: pointer;
 }
 
 .ic-box.selected {

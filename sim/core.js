@@ -1,7 +1,7 @@
 // Simulator core (docs/H500-PARITY.md, section 4).
 // No DOM and no time source of its own: virtual time moves only in advance().
 
-import { componentTypes, DEFAULT_CLOCK_HZ, MAX_CLOCK_PULSE_MS } from './components.js';
+import { componentTypes, DEFAULT_CLOCK_HZ } from './components.js';
 
 const internals = new WeakMap();
 const byId = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
@@ -185,7 +185,7 @@ export function createSimulator(flat, options = {}) {
   function edgeTime(clock, edge) {
     const k = Math.floor(edge / 2) + 1;
     const fall = clock.origin + (k * 1000) / clock.hz;
-    return edge % 2 === 0 ? fall - Math.min(500 / clock.hz, MAX_CLOCK_PULSE_MS) : fall;
+    return edge % 2 === 0 ? fall - 500 / clock.hz : fall;
   }
 
   function skipEdgesThrough(clock, target) {

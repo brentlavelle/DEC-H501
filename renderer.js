@@ -127,6 +127,18 @@ function renderCircuit(circuit, svgElement, view) {
       svgElement.appendChild(useElement);
     }
 
+    // The clock shows its rate under the knob; click the knob to change it.
+    if (component.type === 'clock') {
+      const size = getComponentSize(circuit, component.type);
+      const rate = document.createElementNS(SVG_NS, 'text');
+      rate.setAttribute('x', component.x + size.width / 2);
+      rate.setAttribute('y', component.y + size.height + (component.label ? 16 : 8));
+      rate.setAttribute('text-anchor', 'middle');
+      rate.setAttribute('class', 'part-label clock-rate');
+      rate.textContent = `${component.hz ?? 1} Hz`;
+      svgElement.appendChild(rate);
+    }
+
     // The optional label (a panel number, a legend) goes just under the part.
     if (component.label) {
       const size = getComponentSize(circuit, component.type);

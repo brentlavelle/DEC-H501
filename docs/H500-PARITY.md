@@ -134,8 +134,9 @@ target anyway and report `behind: true`. A rise and a fall are one edge each, in
 against `maxEdges`: one second at 10 Hz is 20 edges. Edges skipped this way are discarded. A
 skipped clock keeps the level it had and carries on from the new time.
 
-**Clock waveform.** With period `T = 1000 / hz` ms, the output rises at `k * T - w` and falls
-at `k * T`, where `w = min(T / 2, 50)` ms, for k = 1, 2, 3 and so on, counted from when the
+**Clock waveform.** A square wave, changed from a narrow pulse at Brent's direction on
+2026-11-16. With period `T = 1000 / hz` ms, the output rises at `k * T - T / 2` and falls
+at `k * T`, for k = 1, 2, 3 and so on, counted from when the
 clock was created or its rate last set. Every whole period therefore ends on a trailing edge:
 N periods give exactly N trailing edges. An edge that lands exactly on the target time of
 `advance` belongs to that call, not the next one. A clock with no `hz` runs at 1 Hz.
@@ -176,7 +177,7 @@ on as in "Power-on" above, including ignoring its clock during that settle.
   something changed. A redraw during a tick must not cancel a drag, a half-drawn wire or a
   selection, so ticks update lamp, wire and flip-flop appearance in place rather than calling
   the full `renderCircuit` rebuild.
-- Clock rate control: a four-position selector, 0.25, 0.5, 1 and 10 Hz. There is no fine
+- Clock rate control: a four-position selector, 0.25, 0.5, 1 and 10 Hz. Click the clock to step to the next position; the rate is drawn under it. There is no fine
   control in this generation. The real unit picks a coarse range with a patch cord between
   range terminals and has a fine knob, fully counterclockwise slowest [W, p. XI]. The
   simulator itself accepts any rate; the limit is in the control.

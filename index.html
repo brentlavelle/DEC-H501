@@ -29,6 +29,9 @@
     >
       <button id="makeComponentBtn">Make Component from Selection</button>
       <button id="ungroupComponentBtn">Ungroup</button>
+      <button id="deleteSelectedBtn">Delete Selected</button>
+      <button id="undoBtn" disabled>Undo</button>
+      <button id="redoBtn" disabled>Redo</button>
       <span id="componentStatus"></span>
     </div>
     <div
@@ -52,6 +55,13 @@
       <button data-gate-type="xnor">Add XNOR</button>
       <button data-gate-type="not">Add NOT</button>
       <button data-gate-type="jk">Add Flip-Flop</button>
+      <button data-gate-type="andnor">Add AND/NOR</button>
+      <button data-gate-type="switch">Add Switch</button>
+      <button data-gate-type="pulser">Add Pulser</button>
+      <button data-gate-type="clock">Add Clock</button>
+      <button data-gate-type="led">Add Lamp</button>
+      <button data-gate-type="hi">Add HIGH</button>
+      <button data-gate-type="gnd">Add GND</button>
       <label style="margin-left: 1rem">
         <input type="checkbox" id="gridSnapToggle" />
         Snap to grid
