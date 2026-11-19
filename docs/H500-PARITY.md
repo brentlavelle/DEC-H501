@@ -188,6 +188,8 @@ on as in "Power-on" above, including ignoring its clock during that settle.
   range terminals and has a fine knob, fully counterclockwise slowest [W, p. XI]. The
   simulator itself accepts any rate; the limit is in the control.
 - Pulser: HI on mouse or touch down, LO on up, including an up that happens off the symbol.
+- A pulser that is held and a switch that is on glow, so a control's output level can be read
+  at a glance. The real panel has no such light.
 - When `settle` or `advance` reports an oscillation or `behind`, say so in the status area.
 
 ## 6. The H-500 layout and the board [D]

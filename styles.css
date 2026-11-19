@@ -109,6 +109,12 @@ body {
     filter: drop-shadow(0 0 4px #ffd875) brightness(0.8);
 }
 
+/* A switch that is on glows like a held pulser. It is not dimmed: the rocker already
+   shows which way it is thrown. */
+#board use[data-type="switch"][data-state="1"] {
+    filter: drop-shadow(0 0 4px #ffd875);
+}
+
 #board use[data-type="led"][data-state="1"] {
     filter: drop-shadow(0 0 3px #e64b35);
 }
