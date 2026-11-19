@@ -69,6 +69,36 @@ function renderSubcircuitBox(circuit, component, svgElement) {
 }
 
 // Clears the SVG and rebuilds it. Use updateCircuit when only pin values changed.
+// A nameplate is decoration from the layout: { x, y, width, height, text: [name, model] }.
+// The first line is drawn large, the rest small beneath it, all centred on the plate.
+function renderNameplate(plate, svgElement) {
+  const group = document.createElementNS(SVG_NS, 'g');
+  group.setAttribute('class', 'nameplate');
+  const rect = document.createElementNS(SVG_NS, 'rect');
+  rect.setAttribute('x', plate.x);
+  rect.setAttribute('y', plate.y);
+  rect.setAttribute('width', plate.width);
+  rect.setAttribute('height', plate.height);
+  rect.setAttribute('rx', 3);
+  rect.setAttribute('class', 'nameplate-plate');
+  group.appendChild(rect);
+  const [name, ...rest] = plate.text || [];
+  const centre = plate.x + plate.width / 2;
+  const lines = [[name, 'nameplate-name', plate.y + plate.height * 0.48],
+    ...rest.map((line, i) => [line, 'nameplate-model', plate.y + plate.height * 0.78 + i * 10])];
+  for (const [line, className, y] of lines) {
+    if (!line) continue;
+    const text = document.createElementNS(SVG_NS, 'text');
+    text.setAttribute('x', centre);
+    text.setAttribute('y', y);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('class', className);
+    text.textContent = line;
+    group.appendChild(text);
+  }
+  svgElement.appendChild(group);
+}
+
 function renderCircuit(circuit, svgElement, view) {
   // Clear existing SVG content
   while (svgElement.firstChild) {
@@ -76,6 +106,9 @@ function renderCircuit(circuit, svgElement, view) {
   }
 
   const level = levelReader(view);
+
+  // The panel's nameplate, if the layout has one, goes under everything else.
+  if (circuit.nameplate) renderNameplate(circuit.nameplate, svgElement);
 
   // Render wires first so components and pin labels remain visible above them.
   circuit.wires.forEach((wire, wireIndex) => {

@@ -1,6 +1,7 @@
 {
   "version": 2,
   "board": { "width": 600, "height": 970 },
+  "nameplate": { "x": 30, "y": 800, "width": 194, "height": 52, "text": ["DIGITAL", "H-500 LOGIC LABORATORY"] },
   "components": [
     {"id": "ff1", "type": "jk", "x": 40, "y": 105},
     {"id": "ff2", "type": "jk", "x": 185, "y": 105},

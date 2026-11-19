@@ -115,3 +115,18 @@ test('it powers on settled, with every lamp dark and every switch LO', () => {
   for (const sw of of('switch')) assert.equal(sim.read(sw.id, 'out'), false);
   for (const ff of of('jk')) assert.equal(sim.read(ff.id, 'q'), false);
 });
+
+test('the nameplate sits on the board, left of the lamps, clear of every part', () => {
+  const plate = panel.nameplate;
+  assert.ok(plate, 'the preset has a nameplate');
+  assert.deepEqual(plate.text, ['DIGITAL', 'H-500 LOGIC LABORATORY']);
+  const p = { left: plate.x, top: plate.y, right: plate.x + plate.width, bottom: plate.y + plate.height };
+  assert.ok(p.left >= 0 && p.top >= 0 && p.right <= panel.board.width && p.bottom <= panel.board.height, 'on the board');
+  const lamps = of('led').sort(byX);
+  assert.ok(p.right <= lamps[0].x, 'left of the first lamp');
+  assert.ok(p.top < lamps[0].y + GateLibrary.led.height && p.bottom > lamps[0].y, 'level with the lamps');
+  for (const b of panel.components.map(box)) {
+    const apart = p.right <= b.left || b.right <= p.left || p.bottom <= b.top || b.bottom <= p.top;
+    assert.ok(apart, `clear of ${b.id}`);
+  }
+});
