@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Logic Trainer</title>
+    <script type="module" src="boardEditor.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div
+      id="fileMenu"
+      style="border: 1px solid black; padding: 10px; margin-bottom: 8px"
+    >
+      <button id="newCircuitBtn">New</button>
+      <button id="saveCircuitBtn">Save</button>
+      <button id="loadCircuitBtn">Load</button>
+      <input
+        id="loadCircuitInput"
+        type="file"
+        accept="application/json,.json"
+        style="display: none"
+      />
+      <span id="fileStatus"></span>
+    </div>
+    <div
+      id="componentMenu"
+      style="border: 1px solid black; padding: 10px; margin-bottom: 8px"
+    >
+      <button id="makeComponentBtn">Make Component from Selection</button>
+      <button id="ungroupComponentBtn">Ungroup</button>
+      <span id="componentStatus"></span>
+    </div>
+    <div
+      id="bomMenu"
+      style="border: 1px solid black; padding: 10px; margin-bottom: 8px"
+    >
+      <button id="generateBomBtn">Generate BOM</button>
+      <div id="bomResults"></div>
+    </div>
+    <div id="breadcrumb"></div>
+    <div id="simStatus" role="status" aria-live="polite"></div>
+    <div id="palette" style="border: 1px solid black; padding: 10px">
+      <button data-gate-type="2nand">Add 2-NAND</button>
+      <button data-gate-type="3nand">Add 3-NAND</button>
+      <button data-gate-type="4nand">Add 4-NAND</button>
+      <button data-gate-type="and">Add AND</button>
+      <button data-gate-type="or">Add OR</button>
+      <button data-gate-type="nand">Add NAND</button>
+      <button data-gate-type="nor">Add NOR</button>
+      <button data-gate-type="xor">Add XOR</button>
+      <button data-gate-type="xnor">Add XNOR</button>
+      <button data-gate-type="not">Add NOT</button>
+      <button data-gate-type="jk">Add Flip-Flop</button>
+      <label style="margin-left: 1rem">
+        <input type="checkbox" id="gridSnapToggle" />
+        Snap to grid
+      </label>
+    </div>
+    <svg
+      id="board"
+      viewBox="0 0 1200 800"
+      role="img"
+      aria-label="Logic circuit board"
+    ></svg>
+    <div id="panelNameplate">DIGITAL H-500 LOGIC LABORATORY</div>
+  </body>
+</html>

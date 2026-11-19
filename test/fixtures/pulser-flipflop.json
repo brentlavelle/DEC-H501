@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "board": { "width": 1200, "height": 800 },
+  "components": [
+    {"id":"p","type":"pulser","x":40,"y":40},
+    {"id":"ff","type":"jk","x":340,"y":40},
+    {"id":"lamp","type":"led","x":640,"y":40}
+  ],
+  "wires": [
+    {"from":{"component":"p","pin":"out"},"to":{"component":"ff","pin":"c"}},
+    {"from":{"component":"ff","pin":"q"},"to":{"component":"lamp","pin":"in"}}
+  ],
+  "subcircuits": {}
+}

@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DEC H-500 Gate Study</title>
+    <style>
+      :root {
+        --paper: #d7d1c2;
+        --panel: #eee9dc;
+        --ink: #202525;
+        --muted: #5d625d;
+        --line: #a8a391;
+        --blue: #225a69;
+        --amber: #e4a62a;
+        --amber-glow: #ffd875;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-width: 320px;
+        color: var(--ink);
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(60, 55, 42, 0.06) 1px, transparent 1px),
+          var(--paper);
+        background-size:
+          22px 22px,
+          22px 22px,
+          auto;
+        font-family: "Courier New", Courier, monospace;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 42px 0 54px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 24px;
+        margin-bottom: 28px;
+      }
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--blue);
+        font-size: 12px;
+        letter-spacing: 2px;
+        font-weight: bold;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(25px, 5vw, 48px);
+        letter-spacing: 1px;
+        line-height: 1;
+      }
+      header p {
+        max-width: 340px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .plate {
+        padding: 20px;
+        border: 2px solid var(--ink);
+        background: rgba(238, 233, 220, 0.87);
+        box-shadow: 7px 7px 0 rgba(32, 37, 37, 0.16);
+      }
+      .plate-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding-bottom: 14px;
+        border-bottom: 2px solid var(--ink);
+      }
+      .plate-title h2 {
+        margin: 0;
+        font-size: 14px;
+        letter-spacing: 1px;
+      }
+      .plate-title span {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .catalog {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding-top: 16px;
+      }
+      .specimen {
+        min-height: 195px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.25);
+      }
+      .specimen h3 {
+        margin: 0 0 4px;
+        font-size: 13px;
+        letter-spacing: 1px;
+      }
+      .specimen p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .specimen svg {
+        display: block;
+        width: 100%;
+        height: 128px;
+        margin-top: 3px;
+        overflow: visible;
+      }
+
+      .outline {
+        fill: #f8f6ef;
+        stroke: var(--ink);
+        stroke-width: 6;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+      }
+      .detail {
+        fill: none;
+        stroke: var(--ink);
+        stroke-width: 6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .pin {
+        stroke: var(--blue);
+        stroke-width: 5;
+        stroke-linecap: round;
+      }
+      .pin-dot {
+        fill: var(--blue);
+      }
+      .label {
+        fill: var(--muted);
+        font-size: 10px;
+        font-family: "Courier New", monospace;
+      }
+      .light {
+        fill: #4b504d;
+        stroke: var(--ink);
+        stroke-width: 6;
+      }
+      .light.on {
+        fill: var(--amber);
+        filter: drop-shadow(0 0 8px var(--amber-glow));
+      }
+
+      .demo-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .control-panel {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 16px;
+        border: 2px solid var(--ink);
+        background: #c7c1b1;
+      }
+      .control-panel strong {
+        display: block;
+        font-size: 13px;
+      }
+      .control-panel small {
+        display: block;
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      button {
+        border: 2px solid var(--ink);
+        padding: 9px 13px;
+        color: var(--ink);
+        background: var(--amber);
+        font:
+          bold 12px "Courier New",
+          monospace;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 var(--ink);
+      }
+      button:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 var(--ink);
+      }
+      .light-readout {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+      }
+      .readout-lamp {
+        width: 22px;
+        height: 22px;
+        border: 3px solid var(--ink);
+        border-radius: 50%;
+        background: #4b504d;
+      }
+      .readout-lamp.on {
+        background: var(--amber);
+        box-shadow: 0 0 12px var(--amber-glow);
+      }
+
+      footer {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      @media (max-width: 760px) {
+        header {
+          display: block;
+        }
+        header p {
+          margin-top: 16px;
+        }
+        .catalog {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 480px) {
+        main {
+          width: min(100% - 20px, 1120px);
+          padding-top: 24px;
+        }
+        .plate {
+          padding: 12px;
+        }
+        .catalog,
+        .demo-strip {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">DEC H-500 / H-501 LOGIC TRAINER</p>
+          <h1>Gate Study No. 01</h1>
+        </div>
+        <p>
+          A visual direction for the next gate library: heavy instrument
+          outlines, open interiors, blue patch points, and warm indicator lamps.
+        </p>
+      </header>
+
+      <section class="plate" aria-labelledby="catalog-title">
+        <div class="plate-title">
+          <h2 id="catalog-title">LOGIC MODULE CATALOG</h2>
+          <span>ALL SYMBOLS / 6 PX OUTLINE</span>
+        </div>
+        <div class="catalog">
+          <article class="specimen">
+            <h3>AND</h3>
+            <p>ALL INPUTS HIGH</p>
+            <svg viewBox="0 0 260 130" aria-label="AND gate">
+              <line class="pin" x1="18" y1="42" x2="76" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="76" y2="88" />
+              <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+              <line class="pin" x1="161" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+            </svg>
+          </article>
+
+          <article class="specimen">
+            <h3>OR</h3>
+            <p>ANY INPUT HIGH</p>
+            <svg viewBox="0 0 260 130" aria-label="OR gate">
+              <line class="pin" x1="18" y1="42" x2="84" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="84" y2="88" />
+              <path
+                class="outline"
+                d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z"
+              />
+              <line class="pin" x1="164" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+            </svg>
+          </article>
+
+          <article class="specimen">
+            <h3>NAND</h3>
+            <p>AND + INVERT</p>
+            <svg viewBox="0 0 260 130" aria-label="NAND gate">
+              <line class="pin" x1="18" y1="42" x2="76" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="76" y2="88" />
+              <path class="outline" d="M76 22h42a43 43 0 0 1 0 86H76z" />
+              <circle class="outline" cx="169" cy="65" r="10" />
+              <line class="pin" x1="179" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+            </svg>
+          </article>
+
+          <article class="specimen">
+            <h3>NOR</h3>
+            <p>OR + INVERT</p>
+            <svg viewBox="0 0 260 130" aria-label="NOR gate">
+              <line class="pin" x1="18" y1="42" x2="84" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="84" y2="88" />
+              <path
+                class="outline"
+                d="M74 22c45 0 73 18 90 43-17 25-45 43-90 43 18-25 18-61 0-86z"
+              />
+              <circle class="outline" cx="174" cy="65" r="10" />
+              <line class="pin" x1="184" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+            </svg>
+          </article>
+
+          <article class="specimen">
+            <h3>NOT</h3>
+            <p>SINGLE INPUT INVERTER</p>
+            <svg viewBox="0 0 260 130" aria-label="NOT gate">
+              <line class="pin" x1="18" y1="65" x2="78" y2="65" />
+              <path class="outline" d="M78 24l78 41-78 41z" />
+              <circle class="outline" cx="168" cy="65" r="10" />
+              <line class="pin" x1="178" y1="65" x2="224" y2="65" />
+              <circle class="pin-dot" cx="18" cy="65" r="4" />
+            </svg>
+          </article>
+
+          <article class="specimen">
+            <h3>JK FLIP FLOP</h3>
+            <p>EDGE-TRIGGERED MEMORY</p>
+            <svg viewBox="0 0 260 130" aria-label="JK flip flop">
+              <rect class="outline" x="70" y="18" width="110" height="94" />
+              <line class="pin" x1="18" y1="42" x2="70" y2="42" />
+              <line class="pin" x1="18" y1="88" x2="70" y2="88" />
+              <line class="pin" x1="18" y1="65" x2="70" y2="65" />
+              <line class="pin" x1="180" y1="42" x2="224" y2="42" />
+              <line class="pin" x1="180" y1="88" x2="224" y2="88" />
+              <line class="pin" x1="125" y1="112" x2="125" y2="126" />
+              <path class="detail" d="M70 60l10 6-10 6" />
+              <text class="label" x="82" y="47">J</text>
+              <text class="label" x="82" y="96">K</text>
+              <text class="label" x="82" y="69">C</text>
+              <text class="label" x="153" y="47">Q</text>
+              <text class="label" x="148" y="96">Q'</text>
+              <text class="label" x="125" y="103" text-anchor="middle">
+                RESET
+              </text>
+              <circle class="pin-dot" cx="18" cy="42" r="4" />
+              <circle class="pin-dot" cx="18" cy="88" r="4" />
+              <circle class="pin-dot" cx="18" cy="65" r="4" />
+              <circle class="pin-dot" cx="125" cy="126" r="4" />
+            </svg>
+          </article>
+
+          <article class="specimen">
+            <h3>LIGHT</h3>
+            <p>OUTPUT INDICATOR</p>
+            <svg viewBox="0 0 260 130" aria-label="light indicator">
+              <line class="pin" x1="18" y1="65" x2="94" y2="65" />
+              <circle
+                id="catalog-light"
+                class="light"
+                cx="132"
+                cy="65"
+                r="38"
+              />
+              <path class="detail" d="M115 105h34M120 114h24" />
+              <circle class="pin-dot" cx="18" cy="65" r="4" />
+            </svg>
+          </article>
+        </div>
+      </section>
+
+      <section class="demo-strip" aria-label="Interactive light demonstration">
+        <div class="control-panel">
+          <div>
+            <strong>PATCH INPUT / SW1</strong
+            ><small>Toggle the input state.</small>
+          </div>
+          <button id="toggle" type="button">SET HIGH</button>
+        </div>
+        <div class="control-panel light-readout">
+          <div class="readout-lamp" id="readout-lamp" aria-hidden="true"></div>
+          <div>
+            <strong id="readout-state">LIGHT OFF</strong
+            ><small>Output indicator state</small>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        SPECIMEN ONLY / SELF-CONTAINED SVG STUDY / NO PROJECT FILES MODIFIED
+      </footer>
+    </main>
+
+    <script>
+      const toggle = document.getElementById("toggle");
+      const catalogLight = document.getElementById("catalog-light");
+      const readoutLamp = document.getElementById("readout-lamp");
+      const readoutState = document.getElementById("readout-state");
+      let high = false;
+
+      toggle.addEventListener("click", () => {
+        high = !high;
+        toggle.textContent = high ? "SET LOW" : "SET HIGH";
+        catalogLight.classList.toggle("on", high);
+        readoutLamp.classList.toggle("on", high);
+        readoutState.textContent = high ? "LIGHT ON" : "LIGHT OFF";
+      });
+    </script>
+  </body>
+</html>

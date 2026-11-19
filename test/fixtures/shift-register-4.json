@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "board": { "width": 1540, "height": 800 },
+  "components": [
+    {"id":"d","type":"switch","x":40,"y":40,"state":0,"label":"DATA"},
+    {"id":"p","type":"pulser","x":40,"y":200},
+    {"id":"g_inv","type":"2nand","x":40,"y":360},
+    {"id":"ff0","type":"jk","x":340,"y":40},
+    {"id":"ff1","type":"jk","x":640,"y":40},
+    {"id":"ff2","type":"jk","x":940,"y":40},
+    {"id":"ff3","type":"jk","x":1240,"y":40},
+    {"id":"l0","type":"led","x":340,"y":200},
+    {"id":"l1","type":"led","x":640,"y":200},
+    {"id":"l2","type":"led","x":940,"y":200},
+    {"id":"l3","type":"led","x":1240,"y":200}
+  ],
+  "wires": [
+    {"from":{"component":"d","pin":"out"},"to":{"component":"ff0","pin":"j"}},
+    {"from":{"component":"d","pin":"out"},"to":{"component":"g_inv","pin":"in0"}},
+    {"from":{"component":"g_inv","pin":"out"},"to":{"component":"ff0","pin":"k"}},
+    {"from":{"component":"ff0","pin":"q"},"to":{"component":"ff1","pin":"j"}},
+    {"from":{"component":"ff0","pin":"qbar"},"to":{"component":"ff1","pin":"k"}},
+    {"from":{"component":"ff1","pin":"q"},"to":{"component":"ff2","pin":"j"}},
+    {"from":{"component":"ff1","pin":"qbar"},"to":{"component":"ff2","pin":"k"}},
+    {"from":{"component":"ff2","pin":"q"},"to":{"component":"ff3","pin":"j"}},
+    {"from":{"component":"ff2","pin":"qbar"},"to":{"component":"ff3","pin":"k"}},
+    {"from":{"component":"p","pin":"out"},"to":{"component":"ff0","pin":"c"}},
+    {"from":{"component":"ff0","pin":"q"},"to":{"component":"l0","pin":"in"}},
+    {"from":{"component":"p","pin":"out"},"to":{"component":"ff1","pin":"c"}},
+    {"from":{"component":"ff1","pin":"q"},"to":{"component":"l1","pin":"in"}},
+    {"from":{"component":"p","pin":"out"},"to":{"component":"ff2","pin":"c"}},
+    {"from":{"component":"ff2","pin":"q"},"to":{"component":"l2","pin":"in"}},
+    {"from":{"component":"p","pin":"out"},"to":{"component":"ff3","pin":"c"}},
+    {"from":{"component":"ff3","pin":"q"},"to":{"component":"l3","pin":"in"}}
+  ],
+  "subcircuits": {}
+}
