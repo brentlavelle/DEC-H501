@@ -17,6 +17,18 @@ flowchart LR
 
 WP3 and WP4 can run at the same time. Nothing else can.
 
+**Status, 2026-11-16.** WP0, WP1 and WP2 are done. Branch `wp5-compact-panel`, cut from
+`wp2-editor-on-sim`, did part of WP3 and WP5 out of order at Brent's direction:
+
+- WP3 items 1 and 4: final half-size symbols for every type, one terminal per lead.
+- A `gnd` type, which no package had planned.
+- WP5 items 1, 2 and 5 and the first half of 7: `panels/h500.json`, the board sized from
+  `circuit.board`, labels, and start-up on the preset. Controls use compact 40 x 65 symbols.
+
+Still open in WP3: items 2, 3, 5 and 6 (palette buttons, pulser and clock controls, delete,
+the id generator). Still open in WP5: items 3, 4, 6 and the rest of 7 (board size control,
+free-spot placement, the white patch panel, "New" offering the preset).
+
 ## Prompts
 
 **Worker.** Replace `N`.
@@ -236,8 +248,8 @@ the new simulator.
 
 1. `icCatalog.js`: add `andnor` as 7450, two gates per package. Change `jk` to 7473, two per
    package, which is the part the H-500 used.
-2. `generateBOM`: `switch`, `led`, `pulser`, `clock` and `hi` are not ICs and are not counted
-   in `totalGates`.
+2. `generateBOM`: `switch`, `led`, `pulser`, `clock`, `hi` and `gnd` are not ICs and are not
+   counted in `totalGates`.
 3. Tests for `makeComponent` and `ungroupComponent`: build a full adder from loose gates,
    record the lamp outputs for all eight input combinations, group it, compare, ungroup it,
    compare. Repeat with a subcircuit placed inside another subcircuit.

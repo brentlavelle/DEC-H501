@@ -2,9 +2,11 @@
 // Converts JSON circuit model into SVG elements
 
 import GateLibrary from './gateLibrary.js';
-import { getComponentPins, isSubcircuitType } from './subcircuits.js';
+import { getComponentPins, getComponentSize, isSubcircuitType } from './subcircuits.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
+// Small enough that the hotspots of a 4-input gate's pins, 14 units apart, do not overlap.
+const PIN_HOTSPOT_RADIUS = 6;
 
 // Pin values come from a simulator; nothing is evaluated here.
 // `view` is { sim, rootPinMap }: the simulator built from the flattened circuit, and the
@@ -67,6 +69,36 @@ function renderSubcircuitBox(circuit, component, svgElement) {
 }
 
 // Clears the SVG and rebuilds it. Use updateCircuit when only pin values changed.
+// A nameplate is decoration from the layout: { x, y, width, height, text: [name, model] }.
+// The first line is drawn large, the rest small beneath it, all centred on the plate.
+function renderNameplate(plate, svgElement) {
+  const group = document.createElementNS(SVG_NS, 'g');
+  group.setAttribute('class', 'nameplate');
+  const rect = document.createElementNS(SVG_NS, 'rect');
+  rect.setAttribute('x', plate.x);
+  rect.setAttribute('y', plate.y);
+  rect.setAttribute('width', plate.width);
+  rect.setAttribute('height', plate.height);
+  rect.setAttribute('rx', 3);
+  rect.setAttribute('class', 'nameplate-plate');
+  group.appendChild(rect);
+  const [name, ...rest] = plate.text || [];
+  const centre = plate.x + plate.width / 2;
+  const lines = [[name, 'nameplate-name', plate.y + plate.height * 0.48],
+    ...rest.map((line, i) => [line, 'nameplate-model', plate.y + plate.height * 0.78 + i * 10])];
+  for (const [line, className, y] of lines) {
+    if (!line) continue;
+    const text = document.createElementNS(SVG_NS, 'text');
+    text.setAttribute('x', centre);
+    text.setAttribute('y', y);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('class', className);
+    text.textContent = line;
+    group.appendChild(text);
+  }
+  svgElement.appendChild(group);
+}
+
 function renderCircuit(circuit, svgElement, view) {
   // Clear existing SVG content
   while (svgElement.firstChild) {
@@ -74,6 +106,9 @@ function renderCircuit(circuit, svgElement, view) {
   }
 
   const level = levelReader(view);
+
+  // The panel's nameplate, if the layout has one, goes under everything else.
+  if (circuit.nameplate) renderNameplate(circuit.nameplate, svgElement);
 
   // Render wires first so components and pin labels remain visible above them.
   circuit.wires.forEach((wire, wireIndex) => {
@@ -114,34 +149,46 @@ function renderCircuit(circuit, svgElement, view) {
       const on = shownLevel(component, level);
       const useElement = document.createElementNS(SVG_NS, 'use');
       useElement.setAttribute('href', `gates.svg#${symbolFor(component, on)}`);
-      useElement.setAttribute('width', '260');
-      useElement.setAttribute('height', '130');
+      const size = getComponentSize(circuit, component.type);
+      useElement.setAttribute('width', size.width);
+      useElement.setAttribute('height', size.height);
       useElement.setAttribute('x', component.x);
       useElement.setAttribute('y', component.y);
       useElement.setAttribute('id', component.id);
       useElement.setAttribute('data-type', component.type);
       useElement.setAttribute('data-state', on ? '1' : '0');
       svgElement.appendChild(useElement);
+    }
 
-      if (component.type === 'switch') {
-        const switchHitArea = document.createElementNS(SVG_NS, 'rect');
-        switchHitArea.setAttribute('x', component.x - 26);
-        switchHitArea.setAttribute('y', component.y + 35);
-        switchHitArea.setAttribute('width', '312');
-        switchHitArea.setAttribute('height', '60');
-        switchHitArea.setAttribute('fill', 'transparent');
-        switchHitArea.setAttribute('class', 'switch-hit-area');
-        switchHitArea.setAttribute('data-switch-hit', 'true');
-        switchHitArea.setAttribute('data-component', component.id);
-        svgElement.appendChild(switchHitArea);
-      }
+    // The clock shows its rate under the knob; click the knob to change it.
+    if (component.type === 'clock') {
+      const size = getComponentSize(circuit, component.type);
+      const rate = document.createElementNS(SVG_NS, 'text');
+      rate.setAttribute('x', component.x + size.width / 2);
+      rate.setAttribute('y', component.y + size.height + (component.label ? 16 : 8));
+      rate.setAttribute('text-anchor', 'middle');
+      rate.setAttribute('class', 'part-label clock-rate');
+      rate.textContent = component.hz === 0 ? 'OFF' : `${component.hz ?? 1} Hz`;
+      svgElement.appendChild(rate);
+    }
+
+    // The optional label (a panel number, a legend) goes just under the part.
+    if (component.label) {
+      const size = getComponentSize(circuit, component.type);
+      const labelElement = document.createElementNS(SVG_NS, 'text');
+      labelElement.setAttribute('x', component.x + size.width / 2);
+      labelElement.setAttribute('y', component.y + size.height + 8);
+      labelElement.setAttribute('text-anchor', 'middle');
+      labelElement.setAttribute('class', 'part-label');
+      labelElement.textContent = component.label;
+      svgElement.appendChild(labelElement);
     }
 
     pins.forEach(pin => {
       const pinElement = document.createElementNS(SVG_NS, 'circle');
       pinElement.setAttribute('cx', component.x + pin.x);
       pinElement.setAttribute('cy', component.y + pin.y);
-      pinElement.setAttribute('r', '12');
+      pinElement.setAttribute('r', PIN_HOTSPOT_RADIUS);
       pinElement.setAttribute('class', 'pin-hotspot');
       pinElement.setAttribute('data-component', component.id);
       pinElement.setAttribute('data-pin', pin.name);
@@ -152,7 +199,7 @@ function renderCircuit(circuit, svgElement, view) {
 }
 
 function wirePath(x1, y1, x2, y2) {
-  const horizontalDistance = Math.max(40, Math.abs(x2 - x1) * 0.35);
+  const horizontalDistance = Math.max(20, Math.abs(x2 - x1) * 0.35);
   const direction = x2 >= x1 ? 1 : -1;
   return `M ${x1} ${y1} C ${x1 + direction * horizontalDistance} ${y1}, ${x2 - direction * horizontalDistance} ${y2}, ${x2} ${y2}`;
 }

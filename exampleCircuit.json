@@ -1,21 +1,21 @@
 {
   "version": 1,
-  "board": { "width": 1200, "height": 800 },
+  "board": { "width": 600, "height": 400 },
   "components": [
-    { "id": "sw1", "type": "switch", "x": 24, "y": 40, "state": 0 },
-    { "id": "sw2", "type": "switch", "x": 24, "y": 190, "state": 0 },
-    { "id": "sw3", "type": "switch", "x": 24, "y": 340, "state": 0 },
-    { "id": "sw4", "type": "switch", "x": 24, "y": 490, "state": 0 },
-    { "id": "nor1", "type": "nor", "x": 325, "y": 35 },
-    { "id": "nor2", "type": "nor", "x": 610, "y": 35 },
-    { "id": "nand1", "type": "2nand", "x": 325, "y": 205 },
-    { "id": "nand2", "type": "2nand", "x": 610, "y": 205 },
-    { "id": "ff1", "type": "jk", "x": 325, "y": 375 },
-    { "id": "ff2", "type": "jk", "x": 610, "y": 375 },
-    { "id": "light1", "type": "led", "x": 60, "y": 640 },
-    { "id": "light2", "type": "led", "x": 330, "y": 640 },
-    { "id": "light3", "type": "led", "x": 600, "y": 640 },
-    { "id": "light4", "type": "led", "x": 870, "y": 640 }
+    { "id": "sw1", "type": "switch", "x": 30, "y": 30, "state": 0 },
+    { "id": "sw2", "type": "switch", "x": 30, "y": 105, "state": 0 },
+    { "id": "sw3", "type": "switch", "x": 30, "y": 180, "state": 0 },
+    { "id": "sw4", "type": "switch", "x": 30, "y": 255, "state": 0 },
+    { "id": "nor1", "type": "nor", "x": 140, "y": 30 },
+    { "id": "nor2", "type": "nor", "x": 250, "y": 30 },
+    { "id": "nand1", "type": "2nand", "x": 140, "y": 105 },
+    { "id": "nand2", "type": "2nand", "x": 250, "y": 105 },
+    { "id": "ff1", "type": "jk", "x": 140, "y": 180 },
+    { "id": "ff2", "type": "jk", "x": 250, "y": 180 },
+    { "id": "light1", "type": "led", "x": 30, "y": 270 },
+    { "id": "light2", "type": "led", "x": 140, "y": 270 },
+    { "id": "light3", "type": "led", "x": 250, "y": 270 },
+    { "id": "light4", "type": "led", "x": 360, "y": 270 }
   ],
   "wires": []
 }

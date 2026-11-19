@@ -35,16 +35,17 @@ Each fact carries a tag:
 | Lamp | 8 | `led` | present, has a stray `return` pin |
 | Variable clock | 1 | `clock` | missing |
 | HI terminal | 6 | `hi` | missing |
+| GND terminal | 2 | `gnd` | missing |
 
-Quantities are [W] (specifications section), except the HI terminal count, which is
-counted from the panel photograph [R]. The chips behind them are [R]: 2 x SN7400,
+Quantities are [W] (specifications section), except the HI and GND terminal counts, which
+are counted from the panel photograph [R]. The chips behind them are [R]: 2 x SN7400,
 2 x SN7410, 2 x SN7420, 2 x SN7450, 4 x SN7473.
 
 Freeform-only types, not on the real panel: `and`, `or`, `nor`, `xor`, `xnor`, `not`, `nand`.
 They stay in the palette. The H-500 layout does not use them.
 
-GND terminals exist on the real panel for linking two units [W, p. 101]. They are not
-modelled.
+GND terminals exist on the real panel for linking two units [W, p. 101]. Linking units is
+not modelled, but the terminals are on the panel: see `gnd` in section 3.
 
 ## 3. Component behavior
 
@@ -81,10 +82,14 @@ carrying the same signal; one pin is enough here because one output can drive ma
 **Lamp (`led`).** Pin `in`. Lit when the input is HI, dark when it is LO, dark with nothing
 connected [W, p. XII]. Remove the `return` pin.
 
-**HI terminal (`hi`).** Pin `out`, always HI [W, p. XI].
+**HI terminal (`hi`).** Pin `out`, always HI [W, p. XI]. This is the panel's +5 V point.
+
+**GND terminal (`gnd`).** Pin `out`, always LO [D]. On the real panel it is the 0 V point
+used to join two units; here it is a LO source, the counterpart of the HI terminal, for
+tying an input LO.
 
 **Clock (`clock`).** Pin `out`. A continuous train of HI pulses [W, p. XI]. Persisted as
-`hz`. See section 5.
+`hz`; 0 is off. See section 5.
 
 **Open inputs.** An unconnected gate or flip-flop input reads HI [D]. The workbook does not
 say what an open input does; it tells the student to tie unused inputs to HI [W, p. XII].
@@ -102,8 +107,8 @@ form one net, so a cord chained from one input to the next carries the same sign
 reads the output on its net. With no output on the net it is open. With more than one output
 on the net it reads LO if any of them is LO.
 
-**Power-on.** Sources take their own value (switch state, HI terminal HI, pulser LO, clock
-LO). Flip-flops are reset. Gate outputs start LO. Then settle. During that first settle a
+**Power-on.** Sources take their own value (switch state, HI terminal HI, GND terminal LO,
+pulser LO, clock LO). Flip-flops are reset. Gate outputs start LO. Then settle. During that first settle a
 flip-flop obeys `reset` but ignores its clock, and its remembered clock value is taken when
 the settle ends. Gate outputs rising and falling on their way to their first stable value
 would otherwise clock flip-flops at power-on.
@@ -129,14 +134,21 @@ target anyway and report `behind: true`. A rise and a fall are one edge each, in
 against `maxEdges`: one second at 10 Hz is 20 edges. Edges skipped this way are discarded. A
 skipped clock keeps the level it had and carries on from the new time.
 
-**Clock waveform.** With period `T = 1000 / hz` ms, the output rises at `k * T - w` and falls
-at `k * T`, where `w = min(T / 2, 50)` ms, for k = 1, 2, 3 and so on, counted from when the
+**Clock waveform.** A square wave, changed from a narrow pulse at Brent's direction on
+2026-11-16. With period `T = 1000 / hz` ms, the output rises at `k * T - T / 2` and falls
+at `k * T`, for k = 1, 2, 3 and so on, counted from when the
 clock was created or its rate last set. Every whole period therefore ends on a trailing edge:
 N periods give exactly N trailing edges. An edge that lands exactly on the target time of
 `advance` belongs to that call, not the next one. A clock with no `hz` runs at 1 Hz.
 `setClockRate` restarts the count from the current time and leaves the output level alone: a
 HI output stays HI until the next fall of the new waveform, so changing the rate never
 clocks anything.
+
+**Clock off.** Added at Brent's direction on 2026-11-18. A rate of 0 Hz is off: the output
+is LO and has no edges. Setting a clock to 0 Hz drives it LO at once; if it was HI, that
+fall is a trailing edge, as it is when a real clock is stopped mid-pulse. A clock carried
+into a circuit where it is off is LO. Setting it to a running rate starts its count from
+that moment, as above. Negative rates are refused.
 
 **Contract.** These are the names WP1 shipped. `createSimulator` throws on an unknown type, a
 duplicate id, or a wire end that is not a pin; the methods throw on an unknown id or pin.
@@ -171,7 +183,7 @@ on as in "Power-on" above, including ignoring its clock during that settle.
   something changed. A redraw during a tick must not cancel a drag, a half-drawn wire or a
   selection, so ticks update lamp, wire and flip-flop appearance in place rather than calling
   the full `renderCircuit` rebuild.
-- Clock rate control: a four-position selector, 0.25, 0.5, 1 and 10 Hz. There is no fine
+- Clock rate control: a five-position selector, off, 0.25, 0.5, 1 and 10 Hz. Click the clock to step to the next position; the rate, or OFF, is drawn under it. There is no fine
   control in this generation. The real unit picks a coarse range with a patch cord between
   range terminals and has a fine knob, fully counterclockwise slowest [W, p. XI]. The
   simulator itself accepts any rate; the limit is in the control.
@@ -200,13 +212,16 @@ on as in "Power-on" above, including ignoring its clock during that settle.
   | 4 | 4 AND/NOR gates |
   |   | 3 HIGH terminals, in the gaps below row 4 |
   | 5 | the same as row 2 |
-  | 6 | 4 J-K flip-flops, with 2 GND terminals below them |
+  | 6 | 4 J-K flip-flops, with 2 GND terminals (`gnd`) below them |
   | 7 | Terminal strip: CLOCK RANGE - COARSE with a FINE marker, CLOCK OUTPUT, PULSER OUTPUTS, then SWITCH OUTPUTS above LAMP INPUTS |
 
 - The flip-flop symbol has J, C and K down the left side, the 1 output at the top right, the
   0 output at the bottom right, and R at the bottom. The AND/NOR symbol is two AND shapes
   feeding one NOR shape.
 - Every terminal on the real panel is a pair of eyelets. Here one pin stands for the pair.
+- Parts are drawn at one screen pixel per board unit. Gates and flip-flops have an 84 x 65
+  footprint, half the size of the first drawings; switches, pulsers, lamps and the clock are
+  40 x 65 with their terminal at the top; HIGH and GND terminals are 40 x 30.
 - On the real machine the switches, pulsers, lamps and clock reach the patch panel through
   the row 7 terminal strip. Here they are parts with their own pins, so the preset puts the
   parts themselves where the strip and the controls are: the clock at the lower left, then
@@ -224,20 +239,20 @@ on as in "Power-on" above, including ignoring its clock during that settle.
 
 | Hardware | Here |
 |----------|------|
-| Clock from under 1 to over 10 million pulses per second, 50 ns pulses [W] | 0.25, 0.5, 1 or 10 Hz, pulse stretched to 50 ms so it can be seen |
+| Clock from under 1 to over 10 million pulses per second, 50 ns pulses [W] | Off, 0.25, 0.5, 1 or 10 Hz, pulse stretched to 50 ms so it can be seen |
 | Coarse clock range set by a patch cord, fine knob within the range | Four fixed rates on a selector, no fine control |
 | Master-slave flip-flop catches J or K going HI while the clock is HI | J and K read at the trailing edge only |
 | Real gate delays, real hazards | One unit of delay per component |
 | Flip-flops power on in either state | Power on reset |
 | Rocker switches bounce; pulsers are filtered [W] | Nothing bounces |
 | Fan-out limits: 10 for logic outputs, 30 for switches, pulsers, clock and HI [W] | Not enforced |
-| Two units can be linked through GND terminals | Not modelled |
+| GND terminals link the grounds of two units | One unit only. A GND terminal is a LO source |
 | A fixed panel of 30 logic elements | The same panel as a starting layout that can be rearranged, extended and resized |
 
 ## 8. Schema version 2
 
 - `version: 2`.
-- New types: `andnor`, `pulser`, `clock` (with `hz`), `hi`.
+- New types: `andnor`, `pulser`, `clock` (with `hz`), `hi`, `gnd`.
 - `board.width` and `board.height` are set by the user and saved.
 - Optional `label` string on any component, drawn beside it.
 - Removed from saved files: `previousClock`, `previousJ`, `previousK`, `internalState`, any

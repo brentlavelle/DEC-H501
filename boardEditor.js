@@ -3,10 +3,14 @@
 
 import renderCircuit, { updateCircuit } from './renderer.js';
 import { createEmptyCircuit, parseCircuitFile, serializeCircuit } from './circuitModel.js';
-import { flattenCircuit, makeComponent, ungroupComponent, isSubcircuitType } from './subcircuits.js';
+import { flattenCircuit, makeComponent, ungroupComponent, getComponentSize } from './subcircuits.js';
 import { generateBOM } from './bomGenerator.js';
 import { createSimulator } from './sim/core.js';
 import { createDriver } from './simDriver.js';
+import {
+  nextClockRate, nextComponentId, deleteComponents, moveComponents,
+  carryControlSettings, createHistory
+} from './editing.js';
 
 const board = document.getElementById('board');
 const fileStatus = document.getElementById('fileStatus');
@@ -100,6 +104,58 @@ function activeView() {
   return { components: def.components, wires: def.wires, subcircuits: circuit.subcircuits };
 }
 
+// --- Undo ---
+// A snapshot is the whole circuit plus where the user is zoomed into. Switch positions and
+// clock rates are not edits: an undo keeps them where the user last set them.
+const history = createHistory();
+const undoBtn = document.getElementById('undoBtn');
+const redoBtn = document.getElementById('redoBtn');
+
+const snapshot = () => ({ circuit: structuredClone(circuit), navStack: [...navStack] });
+
+function updateHistoryButtons() {
+  if (undoBtn) undoBtn.disabled = !history.canUndo;
+  if (redoBtn) redoBtn.disabled = !history.canRedo;
+}
+
+// Runs a change to the circuit and, if it did not throw, makes it undoable.
+function edit(change) {
+  const before = snapshot();
+  const result = change();
+  history.record(before);
+  updateHistoryButtons();
+  return result;
+}
+
+function restore(snap) {
+  carryControlSettings(circuit, snap.circuit);
+  const sameView = snap.navStack.join('/') === navStack.join('/');
+  circuit = snap.circuit;
+  navStack = snap.navStack;
+  selectedIds.clear();
+  clearWireSelection();
+  rebuildSim({ carry: sameView });
+  render();
+  updateHistoryButtons();
+}
+
+function undo() {
+  const snap = history.undo(snapshot());
+  if (!snap) return setStatus('Nothing to undo.');
+  restore(snap);
+  setStatus('Undone.');
+}
+
+function redo() {
+  const snap = history.redo(snapshot());
+  if (!snap) return setStatus('Nothing to redo.');
+  restore(snap);
+  setStatus('Redone.');
+}
+
+undoBtn?.addEventListener('click', undo);
+redoBtn?.addEventListener('click', redo);
+
 function updateBreadcrumb() {
   if (!breadcrumbEl) return;
   breadcrumbEl.innerHTML = '';
@@ -129,23 +185,40 @@ function applySelectionHighlight() {
 }
 
 
+// The board is as big as the circuit says, drawn at BOARD_SCALE screen pixels per board unit.
+// A bigger board does not make the parts smaller; the page scrolls, and the terminal widens
+// with it. Pointer positions go through the SVG's own transform (screenToSvg), so the scale
+// never reaches the circuit's coordinates.
+const BOARD_SCALE = 1.2;
+function applyBoardSize() {
+  const { width, height } = circuit?.board?.width > 0 && circuit?.board?.height > 0
+    ? circuit.board
+    : { width: 1200, height: 800 };
+  board.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  board.style.width = `${width * BOARD_SCALE}px`;
+  board.style.height = `${height * BOARD_SCALE}px`;
+  // The terminal above takes the board's width so the two line up (styles.css, .vt).
+  document.documentElement.style.setProperty('--board-width', `${width * BOARD_SCALE}px`);
+}
+
 function render() {
+  applyBoardSize();
   renderCircuit(activeView(), board, { sim, rootPinMap });
   applySelectionHighlight();
   updateBreadcrumb();
 }
 
-// Optional snap to the H-500's module-bay grid (gate footprint + a small gutter).
-const GRID_CELL_X = 285;
-const GRID_CELL_Y = 150;
+// Optional snap to a module-bay grid (gate footprint + a small gutter).
+const GRID_CELL_X = 100;
+const GRID_CELL_Y = 80;
 const gridSnapToggle = document.getElementById('gridSnapToggle');
 
 function snapToGrid(value, cellSize) {
   return Math.round(value / cellSize) * cellSize;
 }
 
-// Fetch the circuit JSON dynamically
-fetch('./exampleCircuit.json')
+// Opens on the H-500 panel: the real inventory, laid out like the real machine.
+fetch('./panels/h500.json')
   .then(response => response.json())
   .then(data => {
     circuit = parseCircuitFile(JSON.stringify(data));
@@ -157,12 +230,14 @@ fetch('./exampleCircuit.json')
 // --- File menu: New / Save / Load ---
 
 document.getElementById('newCircuitBtn')?.addEventListener('click', () => {
-  if (!confirm('Start a new circuit? Unsaved changes will be lost.')) return;
+  if (!confirm('Start a new circuit? You can still undo this.')) return;
+  history.record(snapshot());
   circuit = createEmptyCircuit();
   navStack = [];
   selectedIds.clear();
   rebuildSim();
   render();
+  updateHistoryButtons();
   setStatus('New circuit created.');
 });
 
@@ -208,12 +283,15 @@ loadCircuitInput?.addEventListener('change', async () => {
 
   try {
     const text = await file.text();
-    circuit = parseCircuitFile(text);
+    const loaded = parseCircuitFile(text);
+    history.record(snapshot());
+    circuit = loaded;
     navStack = [];
     selectedIds.clear();
     clearWireSelection();
     rebuildSim();
     render();
+    updateHistoryButtons();
     setStatus(`Loaded ${file.name}.`);
   } catch (error) {
     setStatus(`Load failed: ${error.message}`, true);
@@ -231,7 +309,7 @@ document.getElementById('makeComponentBtn')?.addEventListener('click', () => {
   if (!name || !name.trim()) return;
 
   try {
-    makeComponent(activeView(), [...selectedIds], name.trim());
+    edit(() => makeComponent(activeView(), [...selectedIds], name.trim()));
     selectedIds.clear();
     rebuildSim({ carry: true });
     render();
@@ -248,7 +326,7 @@ document.getElementById('ungroupComponentBtn')?.addEventListener('click', () => 
   }
   const [id] = selectedIds;
   try {
-    ungroupComponent(activeView(), id);
+    edit(() => ungroupComponent(activeView(), id));
     selectedIds.clear();
     rebuildSim({ carry: true });
     render();
@@ -312,10 +390,9 @@ document.getElementById('generateBomBtn')?.addEventListener('click', () => {
   }
 });
 
-// Drag state
-let draggedElement = null;
-let offsetX = 0;
-let offsetY = 0;
+// Interaction state
+let moveState = null; // a right-button drag of the selected parts
+let heldPulser = null; // id of the pulser being held down
 let pendingWire = null;
 let selectedWireIndex = null;
 let selectionRectStart = null;
@@ -328,19 +405,84 @@ function clearWireSelection() {
   });
 }
 
-// Enable dragging for gates
+function selectOnly(ids) {
+  selectedIds.clear();
+  ids.forEach(id => selectedIds.add(id));
+  applySelectionHighlight();
+}
+
+// The clock knob: each click moves it to the next of off, 0.25, 0.5, 1 and 10 Hz.
+function turnClock(component) {
+  component.hz = nextClockRate(component.hz ?? 1);
+  if (sim) reportSim(sim.setClockRate(component.id, component.hz));
+  render(); // the rate legend under the knob is drawn by the full render
+}
+
+function pressPulser(component) {
+  heldPulser = component.id;
+  if (sim) reportSim(sim.setInput(component.id, true));
+  refresh();
+}
+
+function releasePulser() {
+  if (heldPulser === null) return;
+  const id = heldPulser;
+  heldPulser = null;
+  if (sim) {
+    try {
+      reportSim(sim.setInput(id, false));
+    } catch {
+      // The pulser was deleted or the circuit replaced while it was held.
+    }
+  }
+  refresh();
+}
+
+function deleteSelectedComponents() {
+  if (selectedIds.size === 0) {
+    setComponentStatus('Select one or more components first.', true);
+    return;
+  }
+  const ids = [...selectedIds];
+  const removed = edit(() => deleteComponents(circuit, navStack, ids));
+  selectedIds.clear();
+  rebuildSim({ carry: true });
+  render();
+  setComponentStatus(`Deleted ${removed} component${removed === 1 ? '' : 's'} and their wires.`);
+}
+
+document.getElementById('deleteSelectedBtn')?.addEventListener('click', deleteSelectedComponents);
+
+// Left button: select, or operate a switch, pulser or clock knob. Right button (or
+// ctrl-click): move the selected parts. Dragging with the left button never moves anything.
+board.addEventListener('contextmenu', event => event.preventDefault());
+
 board.addEventListener('mousedown', (event) => {
-  const switchHitArea = event.target.closest('[data-switch-hit]');
-  if (switchHitArea) {
-    const component = activeView()?.components.find(c => c.id === switchHitArea.dataset.component);
-    if (component) toggleSwitch(component);
+  const moveButton = event.button === 2 || (event.button === 0 && event.ctrlKey);
+  if (!moveButton && event.button !== 0) return;
+
+  if (moveButton) {
     event.preventDefault();
+    const target = event.target.closest('[data-type]');
+    const id = target?.getAttribute('id');
+    if (!target) return;
+    if (!selectedIds.has(id)) {
+      setComponentStatus('Click a part to select it, then right-drag to move it.', true);
+      return;
+    }
+    const view = activeView();
+    const origins = new Map();
+    view.components.forEach(component => {
+      if (selectedIds.has(component.id)) origins.set(component.id, { x: component.x, y: component.y });
+    });
+    moveState = { start: screenToSvg(event), origins, before: snapshot() };
     return;
   }
 
   const wire = event.target.closest('.wire');
   if (wire) {
     clearWireSelection();
+    selectOnly([]);
     selectedWireIndex = Number(wire.dataset.wireIndex);
     wire.classList.add('wire-selected');
     event.preventDefault();
@@ -372,6 +514,7 @@ board.addEventListener('mousedown', (event) => {
   if (!target) {
     // Clicked empty board: start a rubber-band selection rectangle.
     const point = screenToSvg(event);
+    clearWireSelection();
     if (!event.shiftKey) selectedIds.clear();
     selectionRectStart = point;
     applySelectionHighlight();
@@ -381,12 +524,13 @@ board.addEventListener('mousedown', (event) => {
 
   const componentId = target.getAttribute('id');
   const component = activeView()?.components.find(c => c.id === componentId);
+  event.preventDefault();
 
   if (event.shiftKey) {
+    clearWireSelection();
     if (selectedIds.has(componentId)) selectedIds.delete(componentId);
     else selectedIds.add(componentId);
     applySelectionHighlight();
-    event.preventDefault();
     return;
   }
 
@@ -394,17 +538,17 @@ board.addEventListener('mousedown', (event) => {
     toggleSwitch(component);
     return;
   }
-
-  if (!selectedIds.has(componentId)) {
-    selectedIds.clear();
-    selectedIds.add(componentId);
-    applySelectionHighlight();
+  if (component?.type === 'pulser') {
+    pressPulser(component);
+    return;
+  }
+  if (component?.type === 'clock') {
+    turnClock(component);
+    return;
   }
 
-  draggedElement = target;
-  const point = screenToSvg(event);
-  offsetX = point.x - parseFloat(target.getAttribute('x'));
-  offsetY = point.y - parseFloat(target.getAttribute('y'));
+  clearWireSelection();
+  selectOnly([componentId]);
 });
 
 function screenToSvg(event) {
@@ -447,17 +591,37 @@ document.addEventListener('mousemove', (event) => {
     return;
   }
 
-  if (!draggedElement) return;
-
-  const point = screenToSvg(event);
-  const newX = point.x - offsetX;
-  const newY = point.y - offsetY;
-
-  draggedElement.setAttribute('x', newX);
-  draggedElement.setAttribute('y', newY);
+  if (moveState) {
+    const point = screenToSvg(event);
+    const snap = gridSnapToggle?.checked
+      ? (x, y) => [snapToGrid(x, GRID_CELL_X), snapToGrid(y, GRID_CELL_Y)]
+      : undefined;
+    const moved = moveComponents(
+      activeView().components, new Set(moveState.origins.keys()), moveState.origins,
+      point.x - moveState.start.x, point.y - moveState.start.y, snap
+    );
+    // Redraw so the wires and pins follow the parts while they move.
+    if (moved) render();
+  }
 });
 
 document.addEventListener('mouseup', (event) => {
+  releasePulser();
+
+  if (moveState) {
+    const { before, origins } = moveState;
+    moveState = null;
+    const anyMoved = activeView().components.some(component => {
+      const origin = origins.get(component.id);
+      return origin && (origin.x !== component.x || origin.y !== component.y);
+    });
+    if (anyMoved) {
+      history.record(before);
+      updateHistoryButtons();
+    }
+    return;
+  }
+
   if (pendingWire) {
     const target = pendingWire.targetPin || findPinTarget(event);
     if (
@@ -470,13 +634,13 @@ document.addEventListener('mouseup', (event) => {
         wire.to.component === target.dataset.component && wire.to.pin === target.dataset.pin
       );
       if (!alreadyConnected) {
-        wires.push({
+        edit(() => wires.push({
           from: pendingWire.from,
           to: {
             component: target.dataset.component,
             pin: target.dataset.pin
           }
-        });
+        }));
       }
     }
 
@@ -491,8 +655,7 @@ document.addEventListener('mouseup', (event) => {
     const rect = selectionRectEl?.getBBox();
     if (rect && (rect.width > 2 || rect.height > 2)) {
       activeView().components.forEach(component => {
-        const width = isSubcircuitType(activeView(), component.type) ? (circuit.subcircuits[component.type].width) : 260;
-        const height = isSubcircuitType(activeView(), component.type) ? (circuit.subcircuits[component.type].height) : 130;
+        const { width, height } = getComponentSize(activeView(), component.type);
         const intersects = component.x < rect.x + rect.width && component.x + width > rect.x &&
           component.y < rect.y + rect.height && component.y + height > rect.y;
         if (intersects) selectedIds.add(component.id);
@@ -502,44 +665,41 @@ document.addEventListener('mouseup', (event) => {
     selectionRectEl = null;
     selectionRectStart = null;
     applySelectionHighlight();
+  }
+});
+
+window.addEventListener('blur', releasePulser);
+
+document.addEventListener('keydown', (event) => {
+  if (event.target?.closest?.('input, textarea, select, [contenteditable]')) return;
+
+  const modifier = event.metaKey || event.ctrlKey;
+  const key = event.key.toLowerCase();
+  if (modifier && key === 'z') {
+    event.preventDefault();
+    if (event.shiftKey) redo();
+    else undo();
+    return;
+  }
+  if (modifier && key === 'y') {
+    event.preventDefault();
+    redo();
     return;
   }
 
-  if (!draggedElement) return;
-
-  // Update circuit model
-  const id = draggedElement.getAttribute('id');
-  const component = activeView().components.find(c => c.id === id);
-  let moved = false;
-  if (component) {
-    let newX = parseFloat(draggedElement.getAttribute('x'));
-    let newY = parseFloat(draggedElement.getAttribute('y'));
-    if (gridSnapToggle?.checked) {
-      newX = snapToGrid(newX, GRID_CELL_X);
-      newY = snapToGrid(newY, GRID_CELL_Y);
-    }
-    moved = newX !== component.x || newY !== component.y;
-    component.x = newX;
-    component.y = newY;
-  }
-
-  draggedElement = null;
-  clearWireSelection();
-  // Only re-render if something actually moved: a plain click just selecting a
-  // component shouldn't tear down and rebuild the whole board (it also preserves the
-  // clicked DOM node so native dblclick detection keeps working).
-  if (moved) render();
-});
-
-document.addEventListener('keydown', (event) => {
-  if (selectedWireIndex === null) return;
   if (event.key !== 'Delete' && event.key !== 'Backspace') return;
 
-  activeView().wires.splice(selectedWireIndex, 1);
-  clearWireSelection();
-  rebuildSim({ carry: true });
-  render();
-  event.preventDefault();
+  if (selectedWireIndex !== null) {
+    const index = selectedWireIndex;
+    edit(() => activeView().wires.splice(index, 1));
+    clearWireSelection();
+    rebuildSim({ carry: true });
+    render();
+    event.preventDefault();
+  } else if (selectedIds.size > 0) {
+    deleteSelectedComponents();
+    event.preventDefault();
+  }
 });
 
 function drawPendingWire() {
@@ -550,7 +710,7 @@ function drawPendingWire() {
     board.appendChild(preview);
   }
 
-  const horizontalDistance = Math.max(40, Math.abs(pendingWire.endX - pendingWire.startX) * 0.35);
+  const horizontalDistance = Math.max(20, Math.abs(pendingWire.endX - pendingWire.startX) * 0.35);
   const direction = pendingWire.endX >= pendingWire.startX ? 1 : -1;
   preview.setAttribute(
     'd',
@@ -558,24 +718,27 @@ function drawPendingWire() {
   );
 }
 
-// Palette for adding new gates
+// Palette for adding new parts. The new part is selected, so it can be right-dragged
+// straight away.
 const palette = document.getElementById('palette');
 palette.addEventListener('click', (event) => {
   const gateType = event.target.dataset.gateType;
   if (!gateType) return;
 
   const view = activeView();
-  // Add new gate to circuit model
   const newGate = {
-    id: `g${view.components.length + 1}`,
+    id: nextComponentId(view.components),
     type: gateType,
     x: 100,
     y: 100
   };
-  view.components.push(newGate);
+  if (gateType === 'clock') newGate.hz = 1;
+  if (gateType === 'switch') newGate.state = 0;
+  edit(() => view.components.push(newGate));
 
   rebuildSim({ carry: true });
   render();
+  selectOnly([newGate.id]);
 });
 
 // Runs the clock. A frame only touches logic levels, never the elements themselves.

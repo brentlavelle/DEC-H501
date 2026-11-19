@@ -5,64 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Logic Trainer</title>
     <script type="module" src="boardEditor.js"></script>
+    <script type="module" src="menus.js"></script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div
-      id="fileMenu"
-      style="border: 1px solid black; padding: 10px; margin-bottom: 8px"
-    >
-      <button id="newCircuitBtn">New</button>
-      <button id="saveCircuitBtn">Save</button>
-      <button id="loadCircuitBtn">Load</button>
+    <!-- The control terminal: menus and status lines in the style of a DEC VT220. -->
+    <header id="terminal" class="vt">
+      <nav class="vt-menubar" aria-label="Menus">
+        <div class="vt-menu">
+          <button class="vt-menu-title" aria-haspopup="true" aria-expanded="false">File</button>
+          <div class="vt-menu-items" role="menu">
+            <button id="newCircuitBtn" role="menuitem">New</button>
+            <button id="loadCircuitBtn" role="menuitem">Load...</button>
+            <button id="saveCircuitBtn" role="menuitem">Save</button>
+          </div>
+        </div>
+        <div class="vt-menu">
+          <button class="vt-menu-title" aria-haspopup="true" aria-expanded="false">Edit</button>
+          <div class="vt-menu-items" role="menu">
+            <button id="undoBtn" role="menuitem" disabled>Undo</button>
+            <button id="redoBtn" role="menuitem" disabled>Redo</button>
+            <hr />
+            <button id="deleteSelectedBtn" role="menuitem">Delete Selected</button>
+            <hr />
+            <label class="vt-check">
+              <input type="checkbox" id="gridSnapToggle" />
+              Snap to grid
+            </label>
+          </div>
+        </div>
+        <div class="vt-menu">
+          <button class="vt-menu-title" aria-haspopup="true" aria-expanded="false">Component</button>
+          <div class="vt-menu-items" role="menu">
+            <button id="makeComponentBtn" role="menuitem">Make Component from Selection</button>
+            <button id="ungroupComponentBtn" role="menuitem">Ungroup</button>
+          </div>
+        </div>
+        <div class="vt-menu">
+          <button class="vt-menu-title" aria-haspopup="true" aria-expanded="false">Add</button>
+          <div id="palette" class="vt-menu-items vt-menu-columns" role="menu">
+            <div class="vt-menu-group">
+              <span class="vt-menu-heading">H-500 parts</span>
+              <button data-gate-type="jk" role="menuitem">Flip-Flop</button>
+              <button data-gate-type="2nand" role="menuitem">2-NAND</button>
+              <button data-gate-type="3nand" role="menuitem">3-NAND</button>
+              <button data-gate-type="4nand" role="menuitem">4-NAND</button>
+              <button data-gate-type="andnor" role="menuitem">AND/NOR</button>
+              <button data-gate-type="switch" role="menuitem">Switch</button>
+              <button data-gate-type="pulser" role="menuitem">Pulser</button>
+              <button data-gate-type="led" role="menuitem">Lamp</button>
+              <button data-gate-type="clock" role="menuitem">Clock</button>
+              <button data-gate-type="hi" role="menuitem">HIGH</button>
+              <button data-gate-type="gnd" role="menuitem">GND</button>
+            </div>
+            <div class="vt-menu-group">
+              <span class="vt-menu-heading">Other gates</span>
+              <button data-gate-type="and" role="menuitem">AND</button>
+              <button data-gate-type="or" role="menuitem">OR</button>
+              <button data-gate-type="not" role="menuitem">NOT</button>
+              <button data-gate-type="nand" role="menuitem">NAND</button>
+              <button data-gate-type="nor" role="menuitem">NOR</button>
+              <button data-gate-type="xor" role="menuitem">XOR</button>
+              <button data-gate-type="xnor" role="menuitem">XNOR</button>
+            </div>
+          </div>
+        </div>
+        <div class="vt-menu">
+          <button class="vt-menu-title" aria-haspopup="true" aria-expanded="false">Tools</button>
+          <div class="vt-menu-items" role="menu">
+            <button id="generateBomBtn" role="menuitem">Generate BOM</button>
+          </div>
+        </div>
+        <div class="vt-menu">
+          <button class="vt-menu-title" aria-haspopup="true" aria-expanded="false">Screen</button>
+          <div class="vt-menu-items" role="menu">
+            <button data-phosphor-choice="amber" role="menuitemradio">Amber</button>
+            <button data-phosphor-choice="green" role="menuitemradio">Green</button>
+            <button data-phosphor-choice="white" role="menuitemradio">White</button>
+          </div>
+        </div>
+        <span class="vt-title">H-500 COMPUTER LAB</span>
+      </nav>
       <input
         id="loadCircuitInput"
         type="file"
         accept="application/json,.json"
         style="display: none"
       />
-      <span id="fileStatus"></span>
-    </div>
-    <div
-      id="componentMenu"
-      style="border: 1px solid black; padding: 10px; margin-bottom: 8px"
-    >
-      <button id="makeComponentBtn">Make Component from Selection</button>
-      <button id="ungroupComponentBtn">Ungroup</button>
-      <span id="componentStatus"></span>
-    </div>
-    <div
-      id="bomMenu"
-      style="border: 1px solid black; padding: 10px; margin-bottom: 8px"
-    >
-      <button id="generateBomBtn">Generate BOM</button>
+      <div class="vt-status">
+        <div id="breadcrumb"></div>
+        <span id="fileStatus"></span>
+        <span id="componentStatus"></span>
+        <div id="simStatus" role="status" aria-live="polite"></div>
+      </div>
       <div id="bomResults"></div>
-    </div>
-    <div id="breadcrumb"></div>
-    <div id="simStatus" role="status" aria-live="polite"></div>
-    <div id="palette" style="border: 1px solid black; padding: 10px">
-      <button data-gate-type="2nand">Add 2-NAND</button>
-      <button data-gate-type="3nand">Add 3-NAND</button>
-      <button data-gate-type="4nand">Add 4-NAND</button>
-      <button data-gate-type="and">Add AND</button>
-      <button data-gate-type="or">Add OR</button>
-      <button data-gate-type="nand">Add NAND</button>
-      <button data-gate-type="nor">Add NOR</button>
-      <button data-gate-type="xor">Add XOR</button>
-      <button data-gate-type="xnor">Add XNOR</button>
-      <button data-gate-type="not">Add NOT</button>
-      <button data-gate-type="jk">Add Flip-Flop</button>
-      <label style="margin-left: 1rem">
-        <input type="checkbox" id="gridSnapToggle" />
-        Snap to grid
-      </label>
-    </div>
+    </header>
     <svg
       id="board"
-      viewBox="0 0 1200 800"
+      viewBox="0 0 600 970"
       role="img"
       aria-label="Logic circuit board"
     ></svg>
-    <div id="panelNameplate">DIGITAL H-500 LOGIC LABORATORY</div>
   </body>
 </html>

@@ -1,16 +1,16 @@
 {
   "version": 2,
-  "board": { "width": 1240, "height": 800 },
+  "board": { "width": 600, "height": 400 },
   "components": [
-    {"id":"p","type":"pulser","x":40,"y":40},
-    {"id":"ff0","type":"jk","x":340,"y":40},
-    {"id":"ff1","type":"jk","x":640,"y":40},
-    {"id":"ff2","type":"jk","x":940,"y":40},
-    {"id":"g_nand","type":"2nand","x":340,"y":200},
-    {"id":"g_inv","type":"2nand","x":640,"y":200},
-    {"id":"l0","type":"led","x":340,"y":360,"label":"1"},
-    {"id":"l1","type":"led","x":640,"y":360,"label":"2"},
-    {"id":"l2","type":"led","x":940,"y":360,"label":"4"}
+    {"id":"p","type":"pulser","x":30,"y":30},
+    {"id":"ff0","type":"jk","x":140,"y":30},
+    {"id":"ff1","type":"jk","x":250,"y":30},
+    {"id":"ff2","type":"jk","x":360,"y":30},
+    {"id":"g_nand","type":"2nand","x":140,"y":115},
+    {"id":"g_inv","type":"2nand","x":250,"y":115},
+    {"id":"l0","type":"led","x":140,"y":200,"label":"1"},
+    {"id":"l1","type":"led","x":250,"y":200,"label":"2"},
+    {"id":"l2","type":"led","x":360,"y":200,"label":"4"}
   ],
   "wires": [
     {"from":{"component":"p","pin":"out"},"to":{"component":"ff0","pin":"c"}},

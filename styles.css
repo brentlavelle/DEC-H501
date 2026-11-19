@@ -10,34 +10,11 @@ body {
     color: #17212b;
 }
 
-#palette {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    max-width: 1200px;
-    padding: 0.75rem;
-    border: 1px solid #9aa8b5;
-    background: #d8e0e7;
-}
-
-button {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #536575;
-    border-radius: 3px;
-    background: #f7f9fa;
-    color: inherit;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #ffffff;
-}
-
 #board {
+    /* Sized in script from circuit.board, at BOARD_SCALE pixels per board unit. */
     display: block;
-    width: min(1200px, 100%);
-    height: auto;
-    min-height: 500px;
+    box-sizing: content-box;
+    max-width: none;
     margin-top: 1rem;
     border: 4px solid #6b7480;
     border-radius: 6px;
@@ -45,40 +22,56 @@ button:hover {
     box-shadow: inset 0 0 0 2px #1a1e22, 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
-#panelNameplate {
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    display: inline-block;
-    background: #23282d;
-    color: #d8e0e7;
-    letter-spacing: 0.15em;
+/* The nameplate on the board, drawn by renderer.js from the layout's "nameplate". */
+.nameplate {
+    pointer-events: none;
+}
+
+.nameplate-plate {
+    fill: #1d2227;
+    stroke: #6b7480;
+    stroke-width: 1.5;
+}
+
+.nameplate-name,
+.nameplate-model {
+    fill: #d8e0e7;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-weight: bold;
-    border: 2px solid #6b7480;
-    border-radius: 4px;
+}
+
+.nameplate-name {
+    font-size: 17px;
+    letter-spacing: 0.3em;
+}
+
+.nameplate-model {
+    font-size: 8px;
+    letter-spacing: 0.12em;
 }
 
 .wire {
     stroke: #c7cdd3;
-    stroke-width: 4;
+    stroke-width: 2;
     fill: none;
     cursor: pointer;
 }
 
 .wire-energized {
     stroke: #e4a62a;
-    filter: drop-shadow(0 0 4px #ffd875);
+    filter: drop-shadow(0 0 2px #ffd875);
 }
 
 .wire-selected {
     stroke: #e64b35;
-    stroke-width: 4;
+    stroke-width: 3;
 }
 
 .wire-preview {
     stroke: #e64b35;
-    stroke-width: 5;
+    stroke-width: 2.5;
     fill: none;
-    stroke-dasharray: 6 4;
+    stroke-dasharray: 4 3;
     pointer-events: none;
 }
 
@@ -92,45 +85,50 @@ button:hover {
 .pin-hotspot:hover {
     fill: #e64b35;
     stroke: #ffffff;
-    stroke-width: 2;
+    stroke-width: 1;
 }
 
-#board use[data-type="switch"] {
+#board use[data-type="switch"],
+#board use[data-type="pulser"],
+#board use[data-type="clock"] {
     cursor: pointer;
 }
 
-.switch-hit-area {
-    cursor: pointer;
-    pointer-events: all;
-}
-
-#board use[data-type="switch"][data-state="1"] {
-    filter: hue-rotate(90deg);
+#board use[data-type="pulser"][data-state="1"] {
+    filter: drop-shadow(0 0 4px #ffd875) brightness(0.8);
 }
 
 #board use[data-type="led"][data-state="1"] {
-    filter: drop-shadow(0 0 5px #e64b35);
+    filter: drop-shadow(0 0 3px #e64b35);
 }
 
 .ic-box {
     fill: #24313d;
     stroke: #9aa8b5;
-    stroke-width: 2;
-    cursor: move;
+    stroke-width: 1.5;
+    cursor: pointer;
 }
 
 .ic-box.selected {
     stroke: #e64b35;
-    stroke-width: 3;
+    stroke-width: 2;
 }
 
 #board use.selected {
-    filter: drop-shadow(0 0 6px #e64b35);
+    filter: drop-shadow(0 0 4px #e64b35);
 }
 
 .ic-label {
     fill: #f7f9fa;
-    font-size: 20px;
+    font-size: 11px;
+    pointer-events: none;
+}
+
+.part-label {
+    fill: #d8e0e7;
+    font-family: sans-serif;
+    font-size: 7.5px;
+    font-weight: 700;
     pointer-events: none;
 }
 
@@ -159,4 +157,254 @@ button:hover {
     stroke: black;
     fill: white;
     stroke-width: 3px;
+}
+
+
+/* --- The control terminal: a DEC VT220 screen -------------------------------------------
+   One phosphor colour on black, a soft glow, scanlines, and reverse video for whatever is
+   selected. The colour is set by data-phosphor on <html> (menus.js). The typeface is Glass
+   TTY VT220 when fonts/Glass_TTY_VT220.ttf is present, otherwise the system monospace. */
+
+@font-face {
+    font-family: "Glass TTY VT220";
+    src: url("fonts/Glass_TTY_VT220.ttf") format("truetype");
+    font-display: swap;
+}
+
+:root {
+    --phosphor: #ffb000;
+    --phosphor-dim: #a36f00;
+    --phosphor-glow: rgba(255, 176, 0, 0.55);
+    --screen: #120c00;
+}
+
+:root[data-phosphor="green"] {
+    --phosphor: #41ff6a;
+    --phosphor-dim: #1f9c3c;
+    --phosphor-glow: rgba(65, 255, 106, 0.5);
+    --screen: #021006;
+}
+
+:root[data-phosphor="white"] {
+    --phosphor: #e6ece8;
+    --phosphor-dim: #8b938e;
+    --phosphor-glow: rgba(230, 236, 232, 0.45);
+    --screen: #0a0c0b;
+}
+
+.vt {
+    position: relative;
+    /* As wide as the board and its 4px frame, so the terminal and the board line up.
+       --board-width is set by boardEditor.js from circuit.board. */
+    width: calc(var(--board-width, 720px) + 8px);
+    padding: 0.5rem 0.9rem 0.6rem;
+    border: 10px solid #cfc8b4;
+    border-bottom-width: 14px;
+    border-radius: 14px;
+    background:
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 3px),
+        radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%),
+        var(--screen);
+    box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.9), 0 3px 8px rgba(0, 0, 0, 0.35);
+    color: var(--phosphor);
+    font-family: "Glass TTY VT220", "DEC Terminal", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 20px;
+    line-height: 1.2;
+    text-shadow: 0 0 6px var(--phosphor-glow);
+}
+
+.vt button,
+.vt label {
+    font: inherit;
+    color: inherit;
+    text-shadow: inherit;
+}
+
+.vt-menubar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.4rem;
+    border-bottom: 1px solid var(--phosphor-dim);
+    padding-bottom: 0.2rem;
+}
+
+.vt-title {
+    margin-left: auto;
+    color: var(--phosphor-dim);
+    letter-spacing: 0.08em;
+}
+
+.vt-menu {
+    position: relative;
+}
+
+.vt button {
+    padding: 0 0.6rem;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* Reverse video: the VT220's way of showing the selection. */
+.vt-menu.open > .vt-menu-title,
+.vt-menu-title:hover,
+.vt-menu-title:focus-visible,
+.vt-menu-items button:hover:not(:disabled),
+.vt-menu-items button:focus-visible,
+.vt-menu-items button[aria-checked="true"],
+.vt-check:hover {
+    background: var(--phosphor);
+    color: var(--screen);
+    text-shadow: none;
+    outline: none;
+}
+
+.vt-menu-items {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 20;
+    min-width: 100%;
+    padding: 0.25rem 0;
+    border: 1px solid var(--phosphor);
+    background: var(--screen);
+    box-shadow: 0 0 14px var(--phosphor-glow), 0 8px 18px rgba(0, 0, 0, 0.6);
+}
+
+.vt-menu.open > .vt-menu-items {
+    display: flex;
+    flex-direction: column;
+}
+
+.vt-menu.open > .vt-menu-columns {
+    flex-direction: row;
+}
+
+.vt-menu-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.vt-menu-group + .vt-menu-group {
+    border-left: 1px solid var(--phosphor-dim);
+}
+
+.vt-menu-heading {
+    padding: 0 0.6rem 0.15rem;
+    color: var(--phosphor-dim);
+    white-space: nowrap;
+}
+
+.vt-menu-items button:disabled {
+    color: var(--phosphor-dim);
+    cursor: default;
+}
+
+.vt-menu-items hr {
+    width: 100%;
+    margin: 0.25rem 0;
+    border: 0;
+    border-top: 1px dashed var(--phosphor-dim);
+}
+
+.vt-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.6rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.vt-check input {
+    appearance: none;
+    width: 0.7em;
+    height: 0.7em;
+    margin: 0;
+    border: 2px solid currentColor;
+    background: transparent;
+}
+
+.vt-check input:checked {
+    background: currentColor;
+}
+
+.vt-status {
+    min-height: 2.5em;
+    padding-top: 0.25rem;
+}
+
+.vt-status #breadcrumb {
+    display: inline-block;
+    margin: 0 1.2rem 0 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: inherit;
+}
+
+.vt-status #breadcrumb::before {
+    content: "$ ";
+    color: var(--phosphor-dim);
+}
+
+.vt-status #fileStatus,
+.vt-status #componentStatus {
+    margin-right: 1.2rem;
+}
+
+/* The editor marks errors by colouring the text itself; on this screen they blink in bold. */
+.vt-status [style*="crimson"] {
+    color: var(--phosphor) !important;
+    font-weight: bold;
+    animation: vt-blink 1s steps(2, start) infinite;
+}
+
+.vt-status [style*="crimson"]::before {
+    content: "?";
+    margin-right: 0.4rem;
+}
+
+@keyframes vt-blink {
+    to {
+        visibility: hidden;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vt-status [style*="crimson"] {
+        animation: none;
+        text-decoration: underline;
+    }
+}
+
+#bomResults:not(:empty) {
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--phosphor-dim);
+}
+
+#bomResults table {
+    border-collapse: collapse;
+}
+
+#bomResults th,
+#bomResults td {
+    padding: 0 1.2rem 0 0;
+    text-align: left;
+    font-weight: normal;
+}
+
+#bomResults th {
+    border-bottom: 1px solid var(--phosphor-dim);
+}
+
+#bomResults p {
+    margin: 0.3rem 0 0;
+    color: var(--phosphor) !important;
 }

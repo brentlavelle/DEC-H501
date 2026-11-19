@@ -56,16 +56,26 @@ test('advance is additive', () => {
   assert.deepEqual(state(half), { time: 500, clock: false, count: 5 });
 });
 
-test('the pulse is half the period, at most 50 ms, and ends each period', () => {
-  const slow = withRate(0.25); // period 4000 ms, HI from 3950 to 4000
-  slow.advance(3949);
+test('the clock is a square wave: LO for half the period, HI for half, ending each period', () => {
+  const slow = withRate(0.25); // period 4000 ms, HI from 2000 to 4000
+  slow.advance(1999);
   assert.equal(slow.read('clk', 'out'), false);
   slow.advance(1);
   assert.equal(slow.read('clk', 'out'), true);
-  slow.advance(49);
+  slow.advance(1999);
   assert.deepEqual(state(slow), { time: 3999, clock: true, count: 0 });
   slow.advance(1);
   assert.deepEqual(state(slow), { time: 4000, clock: false, count: 1 });
+
+  const one = withRate(1); // rises at 500, falls at 1000
+  one.advance(499);
+  assert.equal(one.read('clk', 'out'), false);
+  one.advance(1);
+  assert.equal(one.read('clk', 'out'), true);
+  one.advance(499);
+  assert.equal(one.read('clk', 'out'), true);
+  one.advance(1);
+  assert.deepEqual(state(one), { time: 1000, clock: false, count: 1 });
 
   const fast = withRate(100); // period 10 ms, HI from 5 to 10
   fast.advance(4);
@@ -74,6 +84,16 @@ test('the pulse is half the period, at most 50 ms, and ends each period', () => 
   assert.equal(fast.read('clk', 'out'), true);
   fast.advance(5);
   assert.deepEqual(state(fast), { time: 10, clock: false, count: 1 });
+});
+
+test('1 Hz: one full second shows exactly one rise and one fall', () => {
+  const sim = withRate(1);
+  const levels = [];
+  for (let t = 0; t < 2000; t += 100) {
+    sim.advance(100);
+    levels.push(sim.read('clk', 'out') ? 1 : 0);
+  }
+  assert.deepEqual(levels, [0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0]);
 });
 
 for (const hz of [0.25, 0.5, 1, 10]) {
@@ -117,13 +137,13 @@ test('the default maxEdges is 10 000', () => {
 test('setClockRate restarts the pulse count from now', () => {
   const sim = counter();
   sim.advance(30);
-  const result = sim.setClockRate('clk', 1); // rises at 980, falls at 1030
+  const result = sim.setClockRate('clk', 1); // rises at 530, falls at 1030
   assert.equal(result.settled, true);
-  sim.advance(949);
+  sim.advance(499);
   assert.equal(sim.read('clk', 'out'), false);
   sim.advance(1);
   assert.equal(sim.read('clk', 'out'), true);
-  sim.advance(50);
+  sim.advance(500);
   assert.deepEqual(state(sim), { time: 1030, clock: false, count: 1 });
 });
 
@@ -137,6 +157,54 @@ test('setClockRate while the output is HI does not clock anything', () => {
   assert.deepEqual(state(sim), { time: 1059, clock: true, count: 0 });
   sim.advance(1);
   assert.deepEqual(state(sim), { time: 1060, clock: false, count: 1 });
+});
+
+test('a clock at 0 Hz is off: it powers on LO and never changes', () => {
+  const sim = withRate(0);
+  const result = sim.advance(60_000);
+  assert.equal(result.edges, 0);
+  assert.deepEqual(state(sim), { time: 60_000, clock: false, count: 0 });
+});
+
+test('turning the clock off while it is LO changes nothing, and it stays off', () => {
+  const sim = counter();
+  sim.advance(30); // LO until 50
+  sim.setClockRate('clk', 0);
+  assert.deepEqual(state(sim), { time: 30, clock: false, count: 0 });
+  assert.equal(sim.advance(10_000).edges, 0);
+  assert.deepEqual(state(sim), { time: 10_030, clock: false, count: 0 });
+});
+
+test('turning the clock off while it is HI drops it LO at once: one trailing edge, then nothing', () => {
+  const sim = counter();
+  sim.advance(60); // rose at 50
+  assert.equal(sim.read('clk', 'out'), true);
+  sim.setClockRate('clk', 0);
+  assert.deepEqual(state(sim), { time: 60, clock: false, count: 1 });
+  sim.advance(10_000);
+  assert.deepEqual(state(sim), { time: 10_060, clock: false, count: 1 });
+});
+
+test('turning the clock back on starts its count from that moment', () => {
+  const sim = withRate(0);
+  sim.advance(5_000);
+  sim.setClockRate('clk', 1); // rises at 5500, falls at 6000
+  sim.advance(499);
+  assert.equal(sim.read('clk', 'out'), false);
+  sim.advance(1);
+  assert.equal(sim.read('clk', 'out'), true);
+  sim.advance(500);
+  assert.deepEqual(state(sim), { time: 6_000, clock: false, count: 1 });
+});
+
+test('carrying a running clock into a circuit where it is off leaves it LO', () => {
+  const sim = counter();
+  sim.advance(60); // HI
+  const flat = fixture('clock-counter');
+  flat.components.find(c => c.id === 'clk').hz = 0;
+  const next = createSimulator(flat, { carryFrom: sim });
+  assert.equal(next.read('clk', 'out'), false);
+  assert.equal(next.advance(10_000).edges, 0);
 });
 
 test('two clocks: edges are taken in time order', () => {

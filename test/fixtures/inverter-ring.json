@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "board": { "width": 1240, "height": 800 },
+  "board": { "width": 600, "height": 400 },
   "components": [
-    {"id":"a","type":"not","x":40,"y":40},
-    {"id":"b","type":"not","x":340,"y":40},
-    {"id":"c","type":"not","x":640,"y":40},
-    {"id":"lamp","type":"led","x":940,"y":40}
+    {"id":"a","type":"not","x":30,"y":30},
+    {"id":"b","type":"not","x":140,"y":30},
+    {"id":"c","type":"not","x":250,"y":30},
+    {"id":"lamp","type":"led","x":360,"y":30}
   ],
   "wires": [
     {"from":{"component":"a","pin":"out"},"to":{"component":"b","pin":"in"}},
