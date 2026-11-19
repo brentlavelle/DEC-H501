@@ -42,3 +42,16 @@ test('every menu has a title and a list of items, and there are three phosphor c
   const css = read('styles.css');
   for (const colour of ['green', 'white']) assert.ok(css.includes(`:root[data-phosphor="${colour}"]`), colour);
 });
+
+test('a switch that is on glows with the same light as a held pulser', () => {
+  const css = read('styles.css');
+  const rule = selector => {
+    const start = css.indexOf(selector);
+    assert.ok(start >= 0, `styles.css has ${selector}`);
+    return css.slice(start, css.indexOf('}', start));
+  };
+  const glow = block => block.match(/drop-shadow\([^)]*\)/)?.[0];
+  const pulser = glow(rule('#board use[data-type="pulser"][data-state="1"]'));
+  assert.ok(pulser, 'the pulser glows');
+  assert.equal(glow(rule('#board use[data-type="switch"][data-state="1"]')), pulser);
+});

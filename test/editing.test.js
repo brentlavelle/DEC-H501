@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  CLOCK_RATES, nextClockRate, nextComponentId, deleteComponents, moveComponents,
+  CLOCK_RATES, nextClockRate, breadcrumbPath, nextComponentId, deleteComponents, moveComponents,
   carryControlSettings, createHistory
 } from '../editing.js';
 import { makeComponent, ungroupComponent, flattenCircuit } from '../subcircuits.js';
@@ -214,4 +214,10 @@ test('carryControlSettings copies clock rates and switch states by id, inside su
   assert.equal(to.components[1].hz, 10);
   assert.equal(to.components[3].state, 0, 'a part that was not there keeps its own setting');
   assert.equal(to.subcircuits.box.components[0].state, 1);
+});
+
+test('the breadcrumb is empty on the board and appears only inside a subcircuit', () => {
+  assert.deepEqual(breadcrumbPath([]), []);
+  assert.deepEqual(breadcrumbPath(['Adder']), ['Root', 'Adder']);
+  assert.deepEqual(breadcrumbPath(['Adder', 'HalfAdder']), ['Root', 'Adder', 'HalfAdder']);
 });
