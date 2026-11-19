@@ -7,6 +7,8 @@ import { getComponentPins, getComponentSize, isSubcircuitType } from './subcircu
 const SVG_NS = 'http://www.w3.org/2000/svg';
 // Small enough that the hotspots of a 4-input gate's pins, 14 units apart, do not overlap.
 const PIN_HOTSPOT_RADIUS = 6;
+// Covers the white centre of a terminal ring, which is 3.5 units across its middle.
+const WIRE_END_RADIUS = 3.5;
 
 // Pin values come from a simulator; nothing is evaluated here.
 // `view` is { sim, rootPinMap }: the simulator built from the flattened circuit, and the
@@ -196,6 +198,41 @@ function renderCircuit(circuit, svgElement, view) {
       svgElement.appendChild(pinElement);
     });
   });
+
+  // A filled dot on every terminal that has a wire on it, so a wire that only passes over a
+  // terminal cannot be mistaken for one that ends there. Drawn last, above the parts; the
+  // pin hotspots underneath still take the clicks.
+  for (const end of wireEnds(circuit)) {
+    const dot = document.createElementNS(SVG_NS, 'circle');
+    const energized = level(end.source.component, end.source.pin);
+    dot.setAttribute('cx', end.x);
+    dot.setAttribute('cy', end.y);
+    dot.setAttribute('r', WIRE_END_RADIUS);
+    dot.setAttribute('class', `wire-end${energized ? ' wire-end-energized' : ''}`);
+    dot.setAttribute('data-source-component', end.source.component);
+    dot.setAttribute('data-source-pin', end.source.pin);
+    svgElement.appendChild(dot);
+  }
+}
+
+// The terminals that have a wire on them: one entry per terminal, however many wires it
+// carries, with its position on the board and the output that drives it. A wire whose part
+// or pin cannot be found is skipped, as it is when wires are drawn.
+export function wireEnds(circuit) {
+  const ends = new Map();
+  for (const wire of circuit.wires) {
+    const located = [wire.from, wire.to].map(end => {
+      const component = circuit.components.find(c => c.id === end.component);
+      const pin = component && getComponentPins(circuit, component.type)?.find(p => p.name === end.pin);
+      return pin ? { component: end.component, pin: end.pin, x: component.x + pin.x, y: component.y + pin.y } : null;
+    });
+    if (located.includes(null)) continue;
+    for (const end of located) {
+      const key = `${end.component}.${end.pin}`;
+      if (!ends.has(key)) ends.set(key, { ...end, source: { component: wire.from.component, pin: wire.from.pin } });
+    }
+  }
+  return [...ends.values()];
 }
 
 function wirePath(x1, y1, x2, y2) {
@@ -216,6 +253,11 @@ export function updateCircuit(circuit, svgElement, view) {
     const energized = level(wire.from.component, wire.from.pin);
     path.classList.toggle('wire-energized', energized);
     path.setAttribute('data-energized', energized ? '1' : '0');
+  });
+
+  svgElement.querySelectorAll('circle.wire-end').forEach(dot => {
+    const energized = level(dot.getAttribute('data-source-component'), dot.getAttribute('data-source-pin'));
+    dot.classList.toggle('wire-end-energized', energized);
   });
 
   const byId = new Map(circuit.components.map(component => [component.id, component]));
