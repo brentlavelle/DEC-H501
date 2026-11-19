@@ -11,7 +11,7 @@ body {
 }
 
 #board {
-    /* Sized in script from circuit.board, one pixel per board unit. */
+    /* Sized in script from circuit.board, at BOARD_SCALE pixels per board unit. */
     display: block;
     box-sizing: content-box;
     max-width: none;
@@ -178,7 +178,9 @@ body {
 
 .vt {
     position: relative;
-    max-width: 1200px;
+    /* As wide as the board and its 4px frame, so the terminal and the board line up.
+       --board-width is set by boardEditor.js from circuit.board. */
+    width: calc(var(--board-width, 720px) + 8px);
     padding: 0.5rem 0.9rem 0.6rem;
     border: 10px solid #cfc8b4;
     border-bottom-width: 14px;

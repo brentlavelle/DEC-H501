@@ -185,15 +185,20 @@ function applySelectionHighlight() {
 }
 
 
-// The board is as big as the circuit says, at one screen pixel per board unit. A bigger
-// board does not make the parts smaller; the page scrolls.
+// The board is as big as the circuit says, drawn at BOARD_SCALE screen pixels per board unit.
+// A bigger board does not make the parts smaller; the page scrolls, and the terminal widens
+// with it. Pointer positions go through the SVG's own transform (screenToSvg), so the scale
+// never reaches the circuit's coordinates.
+const BOARD_SCALE = 1.2;
 function applyBoardSize() {
   const { width, height } = circuit?.board?.width > 0 && circuit?.board?.height > 0
     ? circuit.board
     : { width: 1200, height: 800 };
   board.setAttribute('viewBox', `0 0 ${width} ${height}`);
-  board.style.width = `${width}px`;
-  board.style.height = `${height}px`;
+  board.style.width = `${width * BOARD_SCALE}px`;
+  board.style.height = `${height * BOARD_SCALE}px`;
+  // The terminal above takes the board's width so the two line up (styles.css, .vt).
+  document.documentElement.style.setProperty('--board-width', `${width * BOARD_SCALE}px`);
 }
 
 function render() {
