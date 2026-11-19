@@ -62,6 +62,17 @@ body {
     filter: drop-shadow(0 0 2px #ffd875);
 }
 
+/* A terminal with a wire on it is filled in; an empty ring has nothing connected.
+   The fill follows the wire: teal like the terminal, amber when the wire is HI. */
+.wire-end {
+    fill: #225a69;
+    pointer-events: none;
+}
+
+.wire-end-energized {
+    fill: #e4a62a;
+}
+
 .wire-selected {
     stroke: #e64b35;
     stroke-width: 3;
