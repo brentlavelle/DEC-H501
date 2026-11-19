@@ -6,15 +6,16 @@ import GateLibrary from './gateLibrary.js';
 import { flattenCircuit } from './subcircuits.js';
 import IC_CATALOG from './icCatalog.js';
 
-// Switches and LEDs are physical peripherals (toggle switches, indicator lamps), not ICs.
-const NON_IC_TYPES = new Set(['switch', 'led']);
+// The panel's controls and terminals are not built from ICs: switches, lamps, pulsers,
+// the clock, and the HIGH and GND terminals.
+const NON_IC_TYPES = new Set(['switch', 'led', 'pulser', 'clock', 'hi', 'gnd']);
 
 function inputCountFor(type) {
   const pins = GateLibrary[type]?.pins || [];
   return pins.filter(pin => (pin.direction || (pin.name.startsWith('in') ? 'input' : 'output')) === 'input').length;
 }
 
-// Returns { rows, unsupported, totalGates }.
+// Returns { rows, unsupported, totalGates }. totalGates counts logic parts only, not controls.
 // rows: [{ type, inputs, count, part, gatesPerPackage, packages }]
 // unsupported: gate types with no matching catalog entry, so they're called out instead
 // of silently omitted.
@@ -22,8 +23,10 @@ export function generateBOM(circuit) {
   const { components } = flattenCircuit(circuit);
 
   const tally = new Map(); // "type:inputCount" -> count
+  let totalGates = 0;
   components.forEach(component => {
     if (NON_IC_TYPES.has(component.type)) return;
+    totalGates++;
     const inputs = inputCountFor(component.type);
     const key = `${component.type}:${inputs}`;
     tally.set(key, (tally.get(key) || 0) + 1);
@@ -54,5 +57,5 @@ export function generateBOM(circuit) {
 
   rows.sort((a, b) => a.part.localeCompare(b.part));
 
-  return { rows, unsupported, totalGates: components.length };
+  return { rows, unsupported, totalGates };
 }

@@ -46,10 +46,7 @@ file name and the Add menu's "H-500 parts".
 
 ## Known defects
 
-1. `generateBOM` counts switches, lamps, pulsers, the clock and the HIGH and GND terminals as
-   gates, does not know the AND/NOR part, and names the flip-flop 74LS76 where the H-500 used
-   the 7473. WP4 fixes it.
-2. "New" makes a 1200 x 800 board, which no longer matches the H-500's 600 x 970. WP9 fixes
+1. "New" makes a 1200 x 800 board, which no longer matches the H-500's 600 x 970. WP9 fixes
    it.
 
 ## Rules
