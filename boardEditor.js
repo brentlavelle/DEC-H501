@@ -9,7 +9,7 @@ import { createSimulator } from './sim/core.js';
 import { createDriver } from './simDriver.js';
 import {
   nextClockRate, nextComponentId, deleteComponents, moveComponents,
-  carryControlSettings, createHistory
+  carryControlSettings, createHistory, breadcrumbPath
 } from './editing.js';
 
 const board = document.getElementById('board');
@@ -159,7 +159,7 @@ redoBtn?.addEventListener('click', redo);
 function updateBreadcrumb() {
   if (!breadcrumbEl) return;
   breadcrumbEl.innerHTML = '';
-  const path = ['Root', ...navStack];
+  const path = breadcrumbPath(navStack);
   path.forEach((name, index) => {
     const span = document.createElement('span');
     span.textContent = name;

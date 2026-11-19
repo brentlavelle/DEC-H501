@@ -365,6 +365,10 @@ body {
     font-size: inherit;
 }
 
+.vt-status #breadcrumb:empty {
+    display: none;
+}
+
 .vt-status #breadcrumb::before {
     content: "$ ";
     color: var(--phosphor-dim);
