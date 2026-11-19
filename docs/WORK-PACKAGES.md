@@ -15,7 +15,7 @@ list passes.
 | WP5 H-500 layout | Closed. The preset, board size from `circuit.board`, labels, the panel look and the nameplate landed. Its open items moved: free-spot placement to WP10, "New" offering the preset to WP9, the board size control to WP11 |
 | WP7 open-source release | Next |
 | WP4 BOM and subcircuits | Open |
-| WP8 lighter board, glowing switches | Open |
+| WP8 lighter board, glowing switches | Done. Two unplanned changes landed with it: the machine is named H-501 on the nameplate, terminal and page title (the original hardware stays H-500 everywhere else), and the breadcrumb shows only inside a subcircuit, where it is the way back out |
 | WP9 examples and New | Open |
 | WP10 parts land in the top strip | Open |
 | WP11 supersize | Open, one design question below |
@@ -325,4 +325,5 @@ the audit has either a fix merged or a line added to section 7 of the parity spe
 ## After parity
 
 Not part of this plan: autosave, netlist export, fan-out warnings, transcribing the rest of
-the workbook.
+the workbook, and a second way out of a subcircuit (double-click empty board, or Escape) so the
+breadcrumb is not the only one.

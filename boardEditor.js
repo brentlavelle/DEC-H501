@@ -336,7 +336,7 @@ document.getElementById('ungroupComponentBtn')?.addEventListener('click', () => 
   }
 });
 
-// Double-click a component box to zoom into its definition; double-click empty board to zoom out.
+// Double-click a component box to zoom into its definition. The breadcrumb is the way back out.
 board.addEventListener('dblclick', (event) => {
   const box = event.target.closest('.ic-box');
   if (box) {
