@@ -4,13 +4,13 @@
 // - deleteComponents: removes parts and every wire (and subcircuit pin) that touched them.
 // - createHistory: undo and redo over whole-circuit snapshots.
 // - carryControlSettings: keeps switch positions and clock rates across an undo.
-// - CLOCK_RATES, nextClockRate: the clock's selector positions.
+// - CLOCK_RATES, nextClockRate: the clock's selector positions, 0 being off.
 // - moveComponents: shifts a set of parts together.
 
-export const CLOCK_RATES = [0.25, 0.5, 1, 10];
+export const CLOCK_RATES = [0, 0.25, 0.5, 1, 10];
 
 // The position after `hz`. A rate that is not on the selector goes to the first position
-// above it, so a hand-edited 3 Hz moves on to 10 Hz rather than snapping back to 0.25.
+// above it, so a hand-edited 3 Hz moves on to 10 Hz rather than snapping back to off.
 export function nextClockRate(hz) {
   const next = CLOCK_RATES.find(rate => rate > hz);
   return next ?? CLOCK_RATES[0];

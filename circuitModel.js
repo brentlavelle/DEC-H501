@@ -134,8 +134,8 @@ export function validateCircuit(circuit) {
       throw new Error(`The label on "${component.id}" must be text.`);
     }
     if (component.type === 'clock' && 'hz' in component) {
-      if (typeof component.hz !== 'number' || !Number.isFinite(component.hz) || component.hz <= 0) {
-        throw new Error(`Clock "${component.id}" needs a rate above 0 Hz.`);
+      if (typeof component.hz !== 'number' || !Number.isFinite(component.hz) || component.hz < 0) {
+        throw new Error(`Clock "${component.id}" needs a rate of 0 Hz (off) or more.`);
       }
     }
   }

@@ -159,6 +159,54 @@ test('setClockRate while the output is HI does not clock anything', () => {
   assert.deepEqual(state(sim), { time: 1060, clock: false, count: 1 });
 });
 
+test('a clock at 0 Hz is off: it powers on LO and never changes', () => {
+  const sim = withRate(0);
+  const result = sim.advance(60_000);
+  assert.equal(result.edges, 0);
+  assert.deepEqual(state(sim), { time: 60_000, clock: false, count: 0 });
+});
+
+test('turning the clock off while it is LO changes nothing, and it stays off', () => {
+  const sim = counter();
+  sim.advance(30); // LO until 50
+  sim.setClockRate('clk', 0);
+  assert.deepEqual(state(sim), { time: 30, clock: false, count: 0 });
+  assert.equal(sim.advance(10_000).edges, 0);
+  assert.deepEqual(state(sim), { time: 10_030, clock: false, count: 0 });
+});
+
+test('turning the clock off while it is HI drops it LO at once: one trailing edge, then nothing', () => {
+  const sim = counter();
+  sim.advance(60); // rose at 50
+  assert.equal(sim.read('clk', 'out'), true);
+  sim.setClockRate('clk', 0);
+  assert.deepEqual(state(sim), { time: 60, clock: false, count: 1 });
+  sim.advance(10_000);
+  assert.deepEqual(state(sim), { time: 10_060, clock: false, count: 1 });
+});
+
+test('turning the clock back on starts its count from that moment', () => {
+  const sim = withRate(0);
+  sim.advance(5_000);
+  sim.setClockRate('clk', 1); // rises at 5500, falls at 6000
+  sim.advance(499);
+  assert.equal(sim.read('clk', 'out'), false);
+  sim.advance(1);
+  assert.equal(sim.read('clk', 'out'), true);
+  sim.advance(500);
+  assert.deepEqual(state(sim), { time: 6_000, clock: false, count: 1 });
+});
+
+test('carrying a running clock into a circuit where it is off leaves it LO', () => {
+  const sim = counter();
+  sim.advance(60); // HI
+  const flat = fixture('clock-counter');
+  flat.components.find(c => c.id === 'clk').hz = 0;
+  const next = createSimulator(flat, { carryFrom: sim });
+  assert.equal(next.read('clk', 'out'), false);
+  assert.equal(next.advance(10_000).edges, 0);
+});
+
 test('two clocks: edges are taken in time order', () => {
   const sim = createSimulator({
     components: [

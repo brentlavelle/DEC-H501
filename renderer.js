@@ -168,7 +168,7 @@ function renderCircuit(circuit, svgElement, view) {
       rate.setAttribute('y', component.y + size.height + (component.label ? 16 : 8));
       rate.setAttribute('text-anchor', 'middle');
       rate.setAttribute('class', 'part-label clock-rate');
-      rate.textContent = `${component.hz ?? 1} Hz`;
+      rate.textContent = component.hz === 0 ? 'OFF' : `${component.hz ?? 1} Hz`;
       svgElement.appendChild(rate);
     }
 

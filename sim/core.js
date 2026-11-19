@@ -7,8 +7,8 @@ const internals = new WeakMap();
 const byId = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
 function checkHz(hz, id) {
-  if (typeof hz !== 'number' || !Number.isFinite(hz) || hz <= 0) {
-    throw new Error(`Clock "${id}" needs a rate above 0 Hz.`);
+  if (typeof hz !== 'number' || !Number.isFinite(hz) || hz < 0) {
+    throw new Error(`Clock "${id}" needs a rate of 0 Hz (off) or more.`);
   }
   return hz;
 }
@@ -206,6 +206,7 @@ export function createSimulator(flat, options = {}) {
       let next = null;
       let nextTime = Infinity;
       for (const clock of clocks) {
+        if (clock.hz === 0) continue; // off: no edges
         const t = edgeTime(clock, clock.edge);
         if (t <= target && t < nextTime) {
           next = clock;
@@ -215,7 +216,7 @@ export function createSimulator(flat, options = {}) {
       if (!next) break;
       if (edges >= maxEdges) {
         behind = true;
-        for (const clock of clocks) skipEdgesThrough(clock, target);
+        for (const clock of clocks) if (clock.hz > 0) skipEdgesThrough(clock, target);
         break;
       }
       next.out.out = next.edge % 2 === 0;
@@ -260,6 +261,7 @@ export function createSimulator(flat, options = {}) {
           comp.origin = old.origin;
           comp.edge = old.edge;
         }
+        if (comp.hz === 0) comp.out.out = false; // a clock that is off is LO
       }
     }
     // A clock that is new, or whose rate differs, starts its count now.
@@ -280,12 +282,15 @@ export function createSimulator(flat, options = {}) {
     },
     // Restarts the pulse count from now. The output keeps its level until the
     // next edge of the new waveform, so changing the rate never clocks anything.
+    // 0 Hz is off: the output goes LO at once and stays there. If it was HI, that
+    // fall is a trailing edge, as it is when a real clock is stopped mid-pulse.
     setClockRate(id, hz) {
       const comp = get(id);
       if (comp.type !== 'clock') throw new Error(`"${id}" is a ${comp.type}, not a clock.`);
       comp.hz = checkHz(hz, id);
       comp.origin = time;
       comp.edge = 0;
+      if (comp.hz === 0) comp.out.out = false;
       return settle();
     },
     settle,

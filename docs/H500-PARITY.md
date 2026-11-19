@@ -89,7 +89,7 @@ used to join two units; here it is a LO source, the counterpart of the HI termin
 tying an input LO.
 
 **Clock (`clock`).** Pin `out`. A continuous train of HI pulses [W, p. XI]. Persisted as
-`hz`. See section 5.
+`hz`; 0 is off. See section 5.
 
 **Open inputs.** An unconnected gate or flip-flop input reads HI [D]. The workbook does not
 say what an open input does; it tells the student to tie unused inputs to HI [W, p. XII].
@@ -144,6 +144,12 @@ N periods give exactly N trailing edges. An edge that lands exactly on the targe
 HI output stays HI until the next fall of the new waveform, so changing the rate never
 clocks anything.
 
+**Clock off.** Added at Brent's direction on 2026-11-18. A rate of 0 Hz is off: the output
+is LO and has no edges. Setting a clock to 0 Hz drives it LO at once; if it was HI, that
+fall is a trailing edge, as it is when a real clock is stopped mid-pulse. A clock carried
+into a circuit where it is off is LO. Setting it to a running rate starts its count from
+that moment, as above. Negative rates are refused.
+
 **Contract.** These are the names WP1 shipped. `createSimulator` throws on an unknown type, a
 duplicate id, or a wire end that is not a pin; the methods throw on an unknown id or pin.
 
@@ -177,7 +183,7 @@ on as in "Power-on" above, including ignoring its clock during that settle.
   something changed. A redraw during a tick must not cancel a drag, a half-drawn wire or a
   selection, so ticks update lamp, wire and flip-flop appearance in place rather than calling
   the full `renderCircuit` rebuild.
-- Clock rate control: a four-position selector, 0.25, 0.5, 1 and 10 Hz. Click the clock to step to the next position; the rate is drawn under it. There is no fine
+- Clock rate control: a five-position selector, off, 0.25, 0.5, 1 and 10 Hz. Click the clock to step to the next position; the rate, or OFF, is drawn under it. There is no fine
   control in this generation. The real unit picks a coarse range with a patch cord between
   range terminals and has a fine knob, fully counterclockwise slowest [W, p. XI]. The
   simulator itself accepts any rate; the limit is in the control.
@@ -233,7 +239,7 @@ on as in "Power-on" above, including ignoring its clock during that settle.
 
 | Hardware | Here |
 |----------|------|
-| Clock from under 1 to over 10 million pulses per second, 50 ns pulses [W] | 0.25, 0.5, 1 or 10 Hz, pulse stretched to 50 ms so it can be seen |
+| Clock from under 1 to over 10 million pulses per second, 50 ns pulses [W] | Off, 0.25, 0.5, 1 or 10 Hz, pulse stretched to 50 ms so it can be seen |
 | Coarse clock range set by a patch cord, fine knob within the range | Four fixed rates on a selector, no fine control |
 | Master-slave flip-flop catches J or K going HI while the clock is HI | J and K read at the trailing edge only |
 | Real gate delays, real hazards | One unit of delay per component |

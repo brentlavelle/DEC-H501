@@ -117,14 +117,15 @@ test('ids: never returns an id in the circuit, over many adds and deletes, and a
   assert.equal(new Set(ids).size, ids.length);
 });
 
-test('clock selector: 0.25, 0.5, 1 and 10 Hz in a ring', () => {
-  assert.deepEqual(CLOCK_RATES, [0.25, 0.5, 1, 10]);
+test('clock selector: off, 0.25, 0.5, 1 and 10 Hz in a ring', () => {
+  assert.deepEqual(CLOCK_RATES, [0, 0.25, 0.5, 1, 10]);
+  assert.equal(nextClockRate(0), 0.25, 'off turns on at the slowest rate');
   assert.equal(nextClockRate(0.25), 0.5);
   assert.equal(nextClockRate(0.5), 1);
   assert.equal(nextClockRate(1), 10);
-  assert.equal(nextClockRate(10), 0.25);
+  assert.equal(nextClockRate(10), 0, 'the fastest rate turns it off');
   assert.equal(nextClockRate(3), 10, 'a rate off the selector moves up to the next position');
-  assert.equal(nextClockRate(50), 0.25);
+  assert.equal(nextClockRate(50), 0);
 });
 
 test('a chosen clock rate survives save and load', () => {

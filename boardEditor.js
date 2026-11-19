@@ -411,7 +411,7 @@ function selectOnly(ids) {
   applySelectionHighlight();
 }
 
-// The clock knob: each click moves it to the next of 0.25, 0.5, 1 and 10 Hz.
+// The clock knob: each click moves it to the next of off, 0.25, 0.5, 1 and 10 Hz.
 function turnClock(component) {
   component.hz = nextClockRate(component.hz ?? 1);
   if (sim) reportSim(sim.setClockRate(component.id, component.hz));

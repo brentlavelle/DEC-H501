@@ -153,12 +153,16 @@ test('what the user set survives save and load: switch position, clock rate, lab
 test('validation rejects a bad clock rate and a label that is not text', () => {
   const base = { version: 2, wires: [], subcircuits: {} };
   assert.throws(
-    () => validateCircuit({ ...base, components: [{ id: 'c', type: 'clock', x: 0, y: 0, hz: 0 }] }),
-    /above 0 Hz/
+    () => validateCircuit({ ...base, components: [{ id: 'c', type: 'clock', x: 0, y: 0, hz: -1 }] }),
+    /0 Hz \(off\) or more/
   );
   assert.throws(
     () => validateCircuit({ ...base, components: [{ id: 'c', type: 'clock', x: 0, y: 0, hz: '10' }] }),
-    /above 0 Hz/
+    /0 Hz \(off\) or more/
+  );
+  assert.doesNotThrow(
+    () => validateCircuit({ ...base, components: [{ id: 'c', type: 'clock', x: 0, y: 0, hz: 0 }] }),
+    '0 Hz is the off position'
   );
   assert.throws(
     () => validateCircuit({ ...base, components: [{ id: 's', type: 'switch', x: 0, y: 0, label: 7 }] }),
