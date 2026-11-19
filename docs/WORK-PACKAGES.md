@@ -13,8 +13,8 @@ list passes.
 | WP2 editor on the simulator | Done |
 | WP3 missing H-500 parts | Done. Undo and redo, and a clock off position, landed with it |
 | WP5 H-500 layout | Closed. The preset, board size from `circuit.board`, labels, the panel look and the nameplate landed. Its open items moved: free-spot placement to WP10, "New" offering the preset to WP9, the board size control to WP11 |
-| WP7 open-source release | Next |
-| WP4 BOM and subcircuits | Open |
+| WP7 open-source release | Done. Apache 2.0 licence and NOTICE, new README with a dedication and screenshot, AGENTS.md refreshed, non-project files removed |
+| WP4 BOM and subcircuits | Next |
 | WP8 lighter board, glowing switches | Done. Two unplanned changes landed with it: the machine is named H-501 on the nameplate, terminal and page title (the original hardware stays H-500 everywhere else), and the breadcrumb shows only inside a subcircuit, where it is the way back out |
 | WP9 examples and New | Open |
 | WP10 parts land in the top strip | Open |
@@ -208,7 +208,8 @@ choice of starting points.
 
 **Do.**
 
-1. Move `binary-counter.json` into `examples/` unchanged. Add `examples/index.json`, a list
+1. Move `binary-counter.json` into `examples/`, changing only its nameplate text to
+   "H-501 LOGIC LABORATORY"; it was saved before the rename. Add `examples/index.json`, a list
    of `{ "file", "title" }`, because a static server cannot list a folder.
 2. File menu: "New H-500" (the preset, as at start-up), "New empty board", and one item per
    example. Each asks for confirmation as New does now, and each can be undone.

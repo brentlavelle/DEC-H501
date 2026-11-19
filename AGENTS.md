@@ -5,64 +5,52 @@ Read this file, then `docs/H500-PARITY.md`, then the one work package you were a
 
 ## The project
 
-A browser recreation of the DEC H-500 "Computer Lab" logic trainer (1968): patch-cord wiring,
-rocker switches, pulsers, lamps, a variable clock, NAND and AND/NOR gates, J-K flip-flops.
-Vanilla JavaScript ES modules and SVG. No framework, no build step, no runtime dependencies.
+The H-501: a browser recreation of the DEC H-500 "Computer Lab" logic trainer (1968), and one
+step beyond it. Patch-cord wiring, rocker switches, pulsers, lamps, a variable clock, NAND and
+AND/NOR gates, J-K flip-flops. Vanilla JavaScript ES modules and SVG. No framework, no build
+step, no runtime dependencies. Apache License 2.0.
 
-The current goal is behavioral parity with the real H-500. The freeform editor, subcircuits
-("Make Component") and the BOM generator stay, and must keep working.
+The goal is behavioral parity with the real H-500, defined in `docs/H500-PARITY.md`, plus the
+additions that make it the H-501: the freeform editor, subcircuits ("Make Component") and the
+BOM generator. Those stay, and must keep working. The machine is called H-501 on screen; the
+original hardware is called H-500 everywhere else, including the parity spec, the preset's
+file name and the Add menu's "H-500 parts".
 
-## Repo state on 2026-11-15
+## Repo state on 2026-11-19
 
-- Work sits on stacked branches: `claude-restart` -> `track1-save-load` -> `track2-components`
-  -> `track3-ic-bom` (checked out). `track4-panel-look` forks from `claude-restart` and was
-  never merged. `main` is a 2025 prototype commit. WP0 puts everything on one branch,
-  `h500-parity`.
-- `README.md` is untracked.
-- There are no tests.
-- `context.md`, the "Current baseline" paragraph of `PLAN.md`, and
-  `.github/agents/dec-h501.agent.md` describe an older codebase. Where they disagree with this
-  file or with the code, they are wrong.
+- One branch, `main`. Work packages branch from it and merge back with `--no-ff`. The older
+  `track*`, `wp*`, `claude-restart` and `h500-parity` branches are fully merged into `main`.
+- `node --test` runs the whole suite on Node 20 or later, with nothing installed.
+- `docs/WORK-PACKAGES.md` holds the plan and the status of every package.
 
-## Module map (track3-ic-bom)
+## Module map
 
 | File | Role |
 |------|------|
-| `index.html` | Menus, palette, `<svg id="board">`. The board's size comes from `circuit.board`, one screen pixel per board unit |
-| `boardEditor.js` | All interaction: file menu, make/ungroup, BOM button, drag, wiring, selection, palette. Owns `circuit`, `navStack`, `selectedIds` |
-| `renderer.js` | `evaluateCircuit` (the simulator, to be replaced) and `renderCircuit(circuit, svg)`, which clears and rebuilds the whole SVG on every call |
+| `index.html` | The VT220-style terminal (menus, status line) and `<svg id="board">` |
+| `menus.js` | Opens and closes the terminal's menus and sets the phosphor colour. Knows nothing about what the items do |
+| `boardEditor.js` | All interaction: menus' actions, wiring, selection, moving, the controls, make/ungroup, BOM. Owns `circuit`, `navStack`, `selectedIds` and the simulator. Draws the board at `BOARD_SCALE` (1.2) screen pixels per board unit |
+| `editing.js` | Editing rules with no DOM: ids, delete, move, undo history, clock positions, breadcrumb |
+| `renderer.js` | `renderCircuit` rebuilds the SVG; `updateCircuit` updates levels in place each clock tick; `wireEnds` lists the terminals that get a connection dot. Draws the layout's nameplate. Reads levels from the simulator and computes nothing |
+| `sim/core.js`, `sim/components.js` | The simulator: `createSimulator(flat, { carryFrom })`, settle, virtual-time `advance`, the behavior of each primitive. No DOM, no timers, no wall clock |
+| `simDriver.js` | The only place wall-clock time enters: calls `sim.advance` once per animation frame |
 | `gateLibrary.js` | type -> `{ svgId, width, height, pins: [{ name, x, y, direction? }] }`. A pin with no `direction` is an input if its name starts with `in`, otherwise an output |
 | `gates.svg` | Symbol sprite sheet. Gates and the flip-flop are 84 x 65, controls 40 x 65, HIGH and GND terminals 40 x 30. One terminal per lead |
-| `panels/h500.json` | The H-500 preset, loaded at startup |
-| `circuitModel.js` | `createEmptyCircuit`, `migrateCircuit`, `validateCircuit`, `parseCircuitFile`, `serializeCircuit`. Schema version 1 |
-| `subcircuits.js` | `flattenCircuit`, `makeComponent`, `ungroupComponent`, `getComponentPins`, `isSubcircuitType` |
+| `panels/h500.json` | The H-500 layout, loaded at startup, with its board size and nameplate |
+| `circuitModel.js` | `createEmptyCircuit`, `migrateCircuit`, `validateCircuit`, `parseCircuitFile`, `serializeCircuit`. Schema version 2 |
+| `subcircuits.js` | `flattenCircuit`, `makeComponent`, `ungroupComponent`, `getComponentPins`, `getComponentSize`, `isSubcircuitType` |
 | `bomGenerator.js`, `icCatalog.js` | `generateBOM(circuit)` and the 7400-series catalog |
-| `exampleCircuit.json` | A small version 1 sample. No longer loaded at startup |
+| `fonts/` | Glass TTY VT220, public domain, with its own licence |
+| `exampleCircuit.json` | A small version 1 sample, used by tests |
+| `test/`, `test/fixtures/` | The test suite and the circuits it runs |
 
 ## Known defects
 
-Items 1, 2 and 9 were reproduced on 2026-11-15 by running the code headless in Node. The rest
-come from reading the code.
-
-1. `evaluateCircuit` leaves `and`, `or` and `not` out of its gate list. Their outputs are
-   always LO.
-2. Evaluation is one pass in array order and gate outputs are not kept between passes. A
-   three-gate NAND chain gives a wrong answer when the gates were placed in reverse order, and
-   a cross-coupled NAND latch can neither reset nor hold.
-3. The J-K flip-flop triggers on the rising clock edge, and also whenever J or K changes while
-   the clock is HI. Its reset is active HI. The real part triggers on the trailing edge and
-   resets on LO.
-4. Unconnected inputs read LO. See `docs/H500-PARITY.md` for the rule to implement.
-5. No clock, pulser, AND/NOR gate or HI terminal exists.
-6. Simulation runs inside `renderCircuit`. Runtime state is written onto circuit objects
-   (`state`, `previousClock`, `previousJ`, `previousK`, and `internalState` on subcircuit
-   instances), and `flattenCircuit` mutates its argument.
-7. The palette creates ids as `g${components.length + 1}`, which can collide after Make
-   Component shrinks the array, or after a load.
-8. Wires can be deleted. Components cannot.
-9. `generateBOM` returns `totalGates` as the flattened component count, so switches and lamps
-   are counted as gates.
-10. The lamp (`led`) declares a second input pin, `return`, that nothing reads.
+1. `generateBOM` counts switches, lamps, pulsers, the clock and the HIGH and GND terminals as
+   gates, does not know the AND/NOR part, and names the flip-flop 74LS76 where the H-500 used
+   the 7473. WP4 fixes it.
+2. "New" makes a 1200 x 800 board, which no longer matches the H-500's 600 x 970. WP9 fixes
+   it.
 
 ## Rules
 
@@ -79,7 +67,7 @@ come from reading the code.
 - Every behavior change comes with a test. A bug fix starts with a test that fails.
 - Never delete, skip or loosen a test to get to green. If a test contradicts
   `docs/H500-PARITY.md`, stop and report it.
-- Leave these alone: `.bak/`, `copilot-demo.html`, `qwen3-demo.html`, `draggable.html`.
+- Leave `.bak/` alone. It is ignored by git.
 - Git: one branch per work package, cut from `main` and named `wp<N>-<slug>`. Small
   commits. Commit only when `node --test` passes. Merge into `main` with `--no-ff` after the
   package's acceptance list passes. Do not push and do not rewrite history.

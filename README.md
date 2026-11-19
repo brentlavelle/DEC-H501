@@ -1,150 +1,110 @@
-# DEC H-501 Digital Logic Trainer
+# H-501 Computer Lab
 
-An interactive, browser-based recreation of the classic **DEC H-500/H-501** digital logic trainer — a hands-on educational instrument from the 1970s that let engineers and students build real digital circuits using physical logic gate modules, toggle switches, patch cables, and indicator lamps.
+A browser recreation of DEC's H-500 Computer Lab, the patch-cord logic trainer of the late
+1960s, and one step beyond it. Wire NAND gates, AND/NOR gates and J-K flip-flops together,
+flip the switches, press the pulsers, run the clock and watch the lamps.
 
-## What Is This?
+![The H-501 running an 8-bit binary counter](docs/images/h501.png)
 
-The DEC H-500/H-501 was a benchtop training system used in the 1970s–80s to teach digital electronics. Users would plug physical logic gate cards into the chassis, route patch cables between pins, flip toggle switches for inputs, and watch indicator lamps light up to see how signals propagated through their circuits.
+## Dedication
 
-This project recreates that experience entirely in the browser. No server required, no frameworks, no dependencies — just vanilla HTML, CSS, JavaScript, and SVG running directly from your computer.
+To my father. He managed DEC Field Service in the 1970s, and he brought an H-500 home so I
+could learn logic on it. He taught me truth tables, digital circuits, and math in general.
+This board is for him.
 
-## Features
+## What it is
 
-### Circuit Editor
-- **Drag-and-drop gates** from a side palette onto an SVG canvas board
-- **Patch cord wiring** — click an output pin, drag to an input pin, and release to create a connection
-- **Move gates freely** — grab any placed gate and reposition it; wires update automatically
-- **Delete wires** — select a wire and press Delete/Backspace to remove it
+The H-500 was a teaching panel: eight J-K flip-flops, a field of NAND and AND/NOR gates,
+eight switches, three pulsers, eight lamps and a variable clock, all wired together with patch
+cords. Students built counters, shift registers and adders on it from a workbook.
 
-### Logic Gates & Components
-- **AND, OR, NAND, NOR, XOR, XNOR** — all standard two-input gates
-- **NOT (Inverter)** — single-input gate
-- **JK Flip-Flop** — sequential logic with clock, J/K inputs, and reset
-- **2-input, 3-input, and 4-input NANDs** — for building larger combinational circuits
-- **Toggle Switches** — set a binary input high or low; click to flip state
-- **LED Indicators** — show the output state of any wire in your circuit
+This project puts that panel in a browser, laid out the way the real one was, with a
+simulator that behaves the way the real parts did. It also goes a little further, which is
+why it is called the H-501: a free-form editor, extra gate types, reusable components built
+from your own circuits, and a parts list in real 7400-series chips.
 
-### Live Simulation
-- **Real-time boolean evaluation** — change a switch and watch the effect ripple through the entire circuit instantly
-- **Energized wires glow amber** when their signal is high, making signal flow visually obvious
-- **Flip-flops track state** — JK flip-flops remember their Q output across clock edges
+## Run it
 
-### Advanced Tools
-- **Save & Load circuits** as JSON files with full schema versioning, validation, and migration
-- **Subcircuit creation** — select multiple gates, collapse them into a named IC block, then zoom in to edit the internals
-- **BOM Generator** — analyze your finished circuit and get a bill of materials mapping every gate to real 7400-series IC part numbers with quantities
-
-## Getting Started
-
-### Run Locally
-
-The simplest way is to serve the files from a local directory so the browser's ES module system loads correctly:
+There is nothing to install and nothing to build. Serve the folder with any static web server
+and open it in a browser:
 
 ```bash
 python3 -m http.server
-# Then open http://localhost:8000 in your browser
+# then open http://localhost:8000
 ```
 
-Any of these work too — they all do the same thing for static files:
+Opening `index.html` straight from disk does not work: the page loads JavaScript modules and
+reads the panel layout from a file, and browsers block both for local files.
+
+## Using it
+
+| To | Do this |
+|----|---------|
+| Wire two parts | Press on an output terminal, drag to an input terminal and let go. A filled terminal has a wire on it; an open ring has nothing connected |
+| Flip a switch | Click it. A switch that is on glows |
+| Pulse a pulser | Press and hold. It is HI while held and glows |
+| Set the clock | Click the knob to step through off, 0.25, 0.5, 1 and 10 Hz. The rate is shown under it |
+| Add a part | Pick it from the **Add** menu |
+| Select | Click a part. Shift-click to add more, or drag a box on empty board |
+| Move | Select, then right-drag (or Ctrl-drag) the selection. **Edit → Snap to grid** lines parts up |
+| Delete | Select a wire or parts and press Delete or Backspace, or use **Edit → Delete Selected** |
+| Undo and redo | Ctrl-Z and Ctrl-Shift-Z (Cmd on a Mac), or the **Edit** menu |
+| Build a component | Select some parts, then **Component → Make Component from Selection**. The parts become one box. Double-click the box to edit inside it; the line under the menus is the way back out |
+| Save and load | **File → Save** and **File → Load...** use plain JSON files |
+| Get a parts list | **Tools → Generate BOM** lists the 7400-series chips your circuit would need |
+| Change the screen | **Screen** switches the terminal between amber, green and white phosphor |
+
+An input with nothing connected reads HI, as it does on real TTL. The flip-flops change on
+the trailing edge of the clock, and their reset is active LO, as on the original.
+
+## Parts
+
+From the H-500: J-K flip-flops, 2-, 3- and 4-input NAND gates, AND/NOR gates, switches,
+pulsers, lamps, the clock, and HIGH and GND terminals. Also available: AND, OR, NOT, NAND,
+NOR, XOR and XNOR.
+
+How the simulation differs from the hardware, and why, is written down in
+[section 7 of the parity specification](docs/H500-PARITY.md#7-deliberate-differences-from-the-hardware).
+
+## How it is built
+
+Plain JavaScript modules and SVG. No framework, no dependencies, no build step.
+
+- `sim/` is the simulator. It never touches the page or the system clock; time is passed in,
+  which is what makes it testable.
+- `renderer.js` draws the board, `boardEditor.js` handles everything you do to it, and
+  `editing.js` holds the editing rules as plain functions.
+- `panels/h500.json` is the starting layout. `gates.svg` holds the part symbols.
+- `docs/H500-PARITY.md` defines what "behaves like an H-500" means. The tests are written
+  against it.
+
+Run the tests with Node 20 or later. Nothing needs installing:
 
 ```bash
-npx serve .           # Node.js
-ruby -run -e httpd .  # Ruby (Mac default)
-php -S localhost:8000   # PHP
+node --test
 ```
 
-Or just open `index.html` directly in most browsers. Some features like the file-save picker may need a server origin, but the core editor works fine either way.
+Much of this project was built with AI coding agents. `AGENTS.md` is the brief they work
+from and `docs/WORK-PACKAGES.md` is the plan; both are kept current, and they are the best
+place to start if you want to contribute, with or without an agent.
 
-### First Steps
+## Sources
 
-1. Open the palette panel on the left side of the screen
-2. Click **Add AND** (or any gate) to drop it onto the board
-3. Add another gate and wire them together by dragging from one pin to another
-4. Add a switch and connect it to drive your first gate
-5. Flip the switch — watch the output update live!
+- [Digital Computer Lab Workbook, 1969](https://cdn.hackaday.io/files/1702327283205888/Digital_Computer_Lab_Workbook_1969.pdf)
+- [Specifications, transcribed](https://mail.smecc.org/logic_trainers_%26_simple_computers.htm)
+- [DEC H-500 Computer Lab reproduction, project logs](https://hackaday.io/project/170232-dec-h-500-computer-lab-reproduction)
+- [DEC H-500 Computer Lab reproduction, write-up and photographs](https://www.instructables.com/DEC-H-500-Computer-Lab-Reproduction/)
+- [Museum catalogue entry, Ingenium](https://collection.ingenium.ca/en/id/1977.0049.001)
 
-## How the Editor Works
+The terminal uses [Glass TTY VT220](https://github.com/svofski/glasstty) by Viacheslav
+Slavinsky, which is in the public domain.
 
-| Feature | How to Use It |
-|---------|---------------|
-| **Place a gate** | Click its button in the left palette; it appears on the board |
-| **Move a gate** | Click and drag it to a new position |
-| **Wire two pins** | Click an output pin, drag your mouse to an input pin, release |
-| **Toggle a switch** | Click directly on the switch icon on the board |
-| **Delete a wire** | Click the wire to select it (turns red), then press Delete/Backspace |
-| **Select multiple gates** | Drag a rubber-band rectangle over the empty board |
-| **Create an IC box** | Select a group of gates, click "Make Component from Selection", name it |
+## Trademarks
 
-## Digital Logic Quick Reference
-
-| Gate | Behavior | Meaning |
-|------|----------|---------|
-| **AND** | Output 1 only when both inputs are 1 | Both conditions met |
-| **OR** | Output 1 when either input is 1 | At least one condition met |
-| **NAND** | AND with inverted output | Universal gate — build anything from just NANDs |
-| **NOR** | OR with inverted output | Also universal |
-| **XOR** | Output 1 when inputs differ | "Exclusive or" — different signals pass through |
-| **XNOR** | Output 1 when inputs are the same | Equality detector |
-| **NOT** | Flips the input bit (0 to 1, 1 to 0) | Inversion |
-| **JK Flip-Flop** | Q changes on clock edge based on J,K; holds state otherwise | Memory element |
-
-### Fun Fact
-NAND gates are *functionally complete* — any logic circuit can be built from NAND gates alone. The original H-501 shipped with a "nand trainer" card as its core module. This editor lets you explore that same principle: build any gate type by chaining NANDs together.
-
-## Project Structure
-
-```
-DEC-H501/
-├── index.html              # Main entry point; loads boardEditor.js as ES module
-├── styles.css              # Board, palette, wire styling, SVG gate look
-├── boardEditor.js          # Core editor: palette clicks, drag-and-drop, wiring, save/load
-├── renderer.js             # SVG rendering engine; circuit evaluation + draws gates and wires
-├── gateLibrary.js          # Gate definitions: type to SVG symbol ID, pin names and coordinates
-├── circuitModel.js         # Schema versioning (v1), validation, migration for JSON files
-├── subcircuits.js          # Subcircuit creation, flattening, and ungrouping logic
-├── bomGenerator.js         # Bill-of-materials calculation from circuit gate counts
-├── icCatalog.js            # 7400-series part lookup: part number to gates-per-package mapping
-├── exampleCircuit.json     # Sample circuit that loads on startup
-└── gates.svg               # SVG sprite sheet; symbol definitions for all gate visuals
-```
-
-### Key Architecture Decisions
-
-- **Zero dependencies** — no build step, no package manager. Just files in a folder.
-- **ES module imports** provide clean separation between editor logic, rendering, simulation, and BOM generation.
-- **Deterministic pin coordinates** in `gateLibrary.js` — every gate's input/output pins have known `(x, y)` values so wires always align correctly.
-- **Boolean evaluation engine** runs on every board update. Handles both combinational logic (all gates) and sequential logic (JK flip-flop state machine).
-- **Circuit data model** is a plain JSON object (`components[]`, `wires[]`, `subcircuits{}`), making save/load and BOM generation trivial and future-proof.
-
-## Build-A-Circuit Workflow
-
-The BOM generator bridges the gap between simulation and building circuits for real:
-
-1. Design your circuit in the editor
-2. Click **Generate BOM** (top panel)
-3. The tool counts every gate type across all levels of your circuit
-4. Results show which 7400-series ICs you need, how many packages, and leftover capacity
-5. Order those exact part numbers from any electronics distributor (DigiKey, Mouser, Arrow, etc.)
-
-## Roadmap
-
-| Feature | Status |
-|---------|--------|
-| Save/Load circuits with JSON versioning | Complete |
-| Full simulation engine (combinational + JK flip-flops) | Complete |
-| Subcircuit creation and zoom into IC boxes | Complete |
-| BOM generator with 7400-series part suggestions | Complete |
-| Pre-built demo circuits (half-adder, SR latch, counter) | Planned |
-| Undo/Redo for board edits | Planned |
-| Import/export SPICE netlists for breadboard wiring | Planned |
-| H-500/H-501 retro panel aesthetic (dark background, chrome bezels) | Planned |
-
-## Ideas to Try
-
-- **Half Adder** — XOR + AND from two switches driving two LEDs. Teaches binary addition of single bits.
-- **SR Latch** — Cross-couple two NAND gates with two switches and one LED. The classic memory element.
-- **3-Bit Counter** — Three JK flip-flops as a ripple counter, clocked by one toggle switch. Counts 0–7 on three LEDs.
+DEC, Digital and H-500 are trademarks of HP. They are used here only to identify the original
+hardware. This project is not affiliated with or endorsed by HP. H-501 is this project's own
+name; DEC made no H-501.
 
 ## License
 
-This project is open-source educational software. Feel free to modify, share, and build upon it.
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
