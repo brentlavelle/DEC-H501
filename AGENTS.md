@@ -80,9 +80,9 @@ come from reading the code.
 - Never delete, skip or loosen a test to get to green. If a test contradicts
   `docs/H500-PARITY.md`, stop and report it.
 - Leave these alone: `.bak/`, `copilot-demo.html`, `qwen3-demo.html`, `draggable.html`.
-- Git: one branch per work package, cut from `h500-parity` and named `wp<N>-<slug>`. Small
-  commits. Commit only when `node --test` passes. Do not push, do not rewrite history, do not
-  touch `main`.
+- Git: one branch per work package, cut from `main` and named `wp<N>-<slug>`. Small
+  commits. Commit only when `node --test` passes. Merge into `main` with `--no-ff` after the
+  package's acceptance list passes. Do not push and do not rewrite history.
 
 ## When to stop and ask
 

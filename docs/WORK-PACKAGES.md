@@ -1,33 +1,46 @@
-# Work packages: H-500 parity
+# Work packages
 
-Seven packages. Each is sized for one agent session on one branch. Run them in the order the
-graph allows, one agent per package, and merge a package into `h500-parity` only after its
-acceptance list passes.
+Each package is sized for one agent session on one branch. Cut the branch from `main`, name it
+`wp<N>-<slug>`, and merge it into `main` with `git merge --no-ff` only after its acceptance
+list passes.
+
+## Status, 2026-11-19
+
+| Package | State |
+|---------|-------|
+| WP0 one trunk | Done |
+| WP1 simulator core | Done |
+| WP2 editor on the simulator | Done |
+| WP3 missing H-500 parts | Done. Undo and redo, and a clock off position, landed with it |
+| WP5 H-500 layout | Closed. The preset, board size from `circuit.board`, labels, the panel look and the nameplate landed. Its open items moved: free-spot placement to WP10, "New" offering the preset to WP9, the board size control to WP11 |
+| WP7 open-source release | Next |
+| WP4 BOM and subcircuits | Open |
+| WP8 lighter board, glowing switches | Open |
+| WP9 examples and New | Open |
+| WP10 parts land in the top strip | Open |
+| WP11 supersize | Open, one design question below |
+| WP6 parity audit | Open, last |
+
+The text of the finished packages is in git history (`git show 751d8be:docs/WORK-PACKAGES.md`).
+
+## Order
 
 ```mermaid
 flowchart LR
-  WP0[WP0 one trunk] --> WP1[WP1 simulator core]
-  WP1 --> WP2[WP2 editor on the simulator]
-  WP2 --> WP3[WP3 missing H-500 parts]
-  WP2 --> WP4[WP4 BOM and subcircuits]
-  WP3 --> WP5[WP5 H-500 layout]
-  WP4 --> WP5
-  WP5 --> WP6[WP6 parity audit]
+  WP7[WP7 open-source release] --> PUSH([push to GitHub])
+  WP4[WP4 BOM and subcircuits] --> PUSH
+  PUSH --> WP8[WP8 lighter board, glowing switches]
+  PUSH --> WP9[WP9 examples and New]
+  WP8 --> WP10[WP10 top-strip placement]
+  WP9 --> WP10
+  WP10 --> WP11[WP11 supersize]
+  WP11 --> WP6[WP6 parity audit]
 ```
 
-WP3 and WP4 can run at the same time. Nothing else can.
-
-**Status, 2026-11-16.** WP0, WP1 and WP2 are done. Branch `wp5-compact-panel`, cut from
-`wp2-editor-on-sim`, did part of WP3 and WP5 out of order at Brent's direction:
-
-- WP3 items 1 and 4: final half-size symbols for every type, one terminal per lead.
-- A `gnd` type, which no package had planned.
-- WP5 items 1, 2 and 5 and the first half of 7: `panels/h500.json`, the board sized from
-  `circuit.board`, labels, and start-up on the preset. Controls use compact 40 x 65 symbols.
-
-Still open in WP3: items 2, 3, 5 and 6 (palette buttons, pulser and clock controls, delete,
-the id generator). Still open in WP5: items 3, 4, 6 and the rest of 7 (board size control,
-free-spot placement, the white patch panel, "New" offering the preset).
+WP7 comes first because nothing can be published without it. WP4 fixes the one wrong number
+a visitor will see (the BOM) and is fully gated by tests, so it goes in before the push.
+WP8 and WP9 touch different files and can run at the same time. WP10 goes before WP11 because
+the doubled top strip is the first real test of the free-spot search.
 
 ## Prompts
 
@@ -65,177 +78,76 @@ Do not fix anything. Report.
 
 | Package | Cost of getting it wrong | Use |
 |---------|--------------------------|-----|
-| WP0 | Low. Mechanical | Claude Sonnet 5.5, the Copilot coding agent, or Codex |
-| WP1 | High. Everything else stands on it | Claude Opus 5.5 or Fable 5.2 writes it. Codex's strongest model reviews it with the reviewer prompt |
-| WP2 | Medium. Touches most files | Claude Opus 5.5 or Sonnet 5.5 |
-| WP3 | Low to medium | Sonnet 5.5, Copilot or Codex |
-| WP4 | Low. Fully gated by tests | A local coding model on the M4 Max is acceptable here and only here |
-| WP5 | Medium | Claude Opus 5.5 or Sonnet 5.5. The layout is written down in the spec; a model that can read images can refine the spacing from the photographs |
+| WP7 | Medium. It is the project's public face | Claude Opus 5.5 or Sonnet 5.5. A human reads the README before the push |
+| WP4 | Low. Fully gated by tests | A local coding model on the M4 Max is acceptable |
+| WP8 | Low. Visual only | Sonnet 5.5, Copilot or Codex |
+| WP9 | Low to medium | Sonnet 5.5, Copilot or Codex |
+| WP10 | Medium. Pure function, easy to test, easy to get subtly wrong | Sonnet 5.5 or Codex, reviewed by the other |
+| WP11 | Medium. Layout and ids | Claude Opus 5.5 or Sonnet 5.5 |
 | WP6 | It is the audit | A different vendor from whoever wrote WP1 |
 
 ---
 
-## WP 0: one trunk
+## WP 7: open-source release
 
-**Goal.** One branch holding all landed work, with a test runner that runs.
-
-A step-by-step version of this package, written for a local model, is in
-`docs/prompts/WP0-local.md`. Items 4 and 5 below are already done: `package.json` and
-`test/smoke.test.js` exist and pass.
+**Goal.** A repository that can be pushed to a public GitHub repo as it stands: licensed,
+explained, and holding only the project, its tests and its docs.
 
 **Do.**
 
-1. Create `h500-parity` from `track3-ic-bom`.
-2. Merge `track4-panel-look` into it. Expect two conflict hunks, both in `boardEditor.js`;
-   `index.html`, `styles.css` and `gates.svg` merge cleanly. Keep the track 3 structure
-   (`activeView()`, the `moved` check in the mouseup handler) and re-apply track 4's grid
-   snap inside it.
-3. Commit the untracked `README.md`.
-4. Add `package.json` containing only `"private": true`, `"type": "module"` and a `test`
-   script that runs `node --test`. No dependencies.
-5. Add `test/smoke.test.js`: every `svgId` in `gateLibrary.js`, and every symbol id the
-   renderer builds by hand (`switch-open`, `switch-closed`, `light-on`, `light-off`,
-   `jk-high`), exists as a `<symbol id>` in `gates.svg`; every type in `icCatalog.js` exists
-   in `gateLibrary.js`; `exampleCircuit.json` passes `parseCircuitFile`.
-6. Replace the stale "current state" material in `context.md` and
-   `.github/agents/dec-h501.agent.md` with a pointer to `AGENTS.md`. Keep the "I found a
-   similar tool" note in `context.md`. Add one status line to `PLAN.md` saying tracks 1 to 4
-   have landed and that `docs/WORK-PACKAGES.md` is the current plan.
+1. Add `LICENSE` with the unmodified Apache License 2.0 text, copyright 2026 Brent LaVelle.
+   Add `"license": "Apache-2.0"` to `package.json`. The VT220 font keeps its own licence in
+   `fonts/` (the Unlicense, compatible).
+2. Rewrite `README.md` for the app as it is now. It still describes the August 2026
+   prototype: a side palette, drag to move, "open index.html directly". Cover:
+   - What the H-500 was, in two or three sentences, and a screenshot of the board
+     (`docs/images/`).
+   - Running it: any static server (`python3 -m http.server`). Opening `index.html` from disk
+     does not work, because the page loads ES modules and fetches `panels/h500.json`.
+   - Using it: the menus, click to select, right-drag or Ctrl-drag to move, drag from an
+     output to an input to wire, Delete, undo and redo, the clock knob and its positions, the
+     pulsers and switches, Make Component, Generate BOM, the phosphor colours.
+   - The parts, and how they differ from the hardware (link to section 7 of the parity spec).
+   - Development: no dependencies, no build, `node --test` on Node 20 or later; where the
+     simulator, editor and renderer live; `AGENTS.md` and `docs/` for anyone working with AI
+     agents.
+   - Credits and sources: the workbook, the reproduction project and the museum entry the
+     spec cites; Glass TTY VT220 by Viacheslav Slavinsky.
+   - A trademark note: DEC, Digital and H-500 are used to identify the original hardware;
+     the project is not affiliated with HP, which owns them.
+   - The licence.
+3. Remove from the tree the files listed under "Files that are not the project" below that
+   Brent confirms.
+4. Refresh `AGENTS.md`: the repo state paragraph, the module map (add `editing.js`,
+   `menus.js`, `simDriver.js`, `sim/`, `panels/`, `fonts/`), the known defects (only the BOM
+   one, item 9, is still open; it is WP4), and the "leave these alone" line once the demo
+   files are gone.
+5. Do not change any `.js`, `.css`, `.svg` or `.json` file. This package is documentation
+   and housekeeping.
+
+**Files that are not the project.** Brent decides; the default is the recommendation.
+
+| File | What it is | Recommendation |
+|------|------------|----------------|
+| `copilot-demo.html`, `qwen3-demo.html` | Gate-symbol studies from a model comparison | Remove |
+| `draggable.html` | The 2025 one-gate prototype page | Remove |
+| `PLAN.md` | Roadmap for tracks 1 to 4, all landed | Remove |
+| `context.md` | A pointer to `AGENTS.md` and a personal note | Remove. Keep the note somewhere private if wanted |
+| `.github/agents/dec-h501.agent.md` | Copilot agent definition describing the old code | Remove, or replace with a three-line pointer to `AGENTS.md` |
+| `docs/prompts/WP0-local.md` | Step-by-step WP0 for a local model; WP0 is done | Remove |
+| `AGENTS.md`, `CLAUDE.md`, `docs/WORK-PACKAGES.md` | How the project is built with agents | Keep; refresh as in item 4 |
+| `exampleCircuit.json` | Small version 1 sample, used by two tests | Keep |
+| `binary-counter.json` | Untracked; Brent's 8-bit counter | Leave for WP9 |
+| `.bak/` | Old scratch files, ignored by git | Not affected; never pushed |
 
 **Acceptance.**
 
 - `node --test` passes.
-- `git log --oneline --graph h500-parity` shows both lines of work.
-- `main` and the `track*` branches are unchanged.
-- The app loads from a static server; a gate can be placed, wired, dragged with grid snap on
-  and off, saved and loaded.
-
----
-
-## WP 1: simulator core
-
-**Goal.** A DOM-free simulator that implements sections 3 and 4 of the parity spec, proven by
-tests. The UI is not touched in this package and keeps using the old evaluator.
-
-**Files.** New: `sim/core.js`, `sim/components.js` (the behavior of each primitive type),
-`test/sim-*.test.js`, `test/fixtures/*.json`. Changed: none outside those.
-
-**Notes.**
-
-- Input is an already-flat circuit. Do not import `subcircuits.js`.
-- Write fixtures in the circuit file schema, version 2, with real `x` and `y` values, so each
-  one can also be opened in the editor as an example.
-- The types `andnor`, `pulser`, `clock` and `hi` are implemented here as behavior. Their
-  symbols and palette entries are WP3.
-
-**Acceptance.** One or more tests for each line.
-
-1. Exhaustive truth tables for `and`, `or`, `not`, `nand`, `nor`, `xor`, `xnor`, `2nand`,
-   `3nand`, `4nand`, `andnor`.
-2. Open inputs: an unwired `2nand` outputs LO. An `andnor` with one AND section unwired
-   outputs LO whatever the other section sees. A lamp with nothing connected is dark.
-3. Order independence: every fixture gives identical pin values under at least 20 random
-   shuffles of its `components` and `wires` arrays.
-4. NAND latch: set, hold, reset, hold. Powered on with both inputs HI it settles with
-   `raceResolved: true`, and to the same state under every shuffle.
-5. A ring of three inverters returns `settled: false`, names the three gates, and returns in
-   bounded time.
-6. J-K: hold, set, clear and complement happen on the trailing edge and only there. Nothing
-   happens on the rising edge. Nothing happens when J or K changes while the clock is steady
-   HI or steady LO. `reset` LO forces `q` LO at once, with no clock, and wins over a
-   simultaneous trailing edge. `reset` open is inactive. J and K open complement.
-7. Four-bit ripple counter: 16 pulses take it through 0 to 15 and back to 0.
-8. Three-bit synchronous counter with gated J-K inputs counts 0 to 7 and wraps. This checks
-   that all flip-flops sample their inputs before any of them changes.
-9. Four-bit shift register: one position per pulse, never two.
-10. Clock: at 10 Hz, `advance(1000)` produces exactly 10 trailing edges and a counter on it
-    reads 10. `advance(500)` twice leaves the same state as `advance(1000)` once. Exceeding
-    `maxEdges` returns `behind: true` and still moves `time` to the target.
-11. Pulser: press gives HI, release gives LO, and one press and release advances a flip-flop
-    exactly once.
-12. `carryFrom`: add a wire to a counter that has counted to 5; it still reads 5. Power-on:
-    a flip-flop clocked from a gate whose output rises and falls during the first settle
-    is still reset afterwards.
-13. Half adder and full adder built from NANDs match binary addition for every input.
-14. A test reads every file under `sim/` and fails on `document`, `window`, `setTimeout`,
-    `setInterval`, `requestAnimationFrame`, `Date.now` or `performance.now`.
-
-**Review.** This package gets the reviewer prompt before it is merged.
-
----
-
-## WP 2: editor on the simulator
-
-**Goal.** The browser uses `sim/core.js`. The old evaluator is gone. The clock can run
-without breaking interaction.
-
-**Do.**
-
-1. Make `flattenCircuit` pure: it must not write to its argument. Remove `internalState`
-   everywhere, including `ungroupComponent`.
-2. Delete `evaluateCircuit`, `readInput` and `readOutput` from `renderer.js`.
-   `renderCircuit` takes a simulator and reads pin values from it. Keep the `rootPinMap`
-   lookup so wires and pins on a collapsed subcircuit box still show their state.
-3. `boardEditor.js` owns one simulator for the active view. Rebuild it with `carryFrom` when
-   components or wires change, when the view changes, and on load. Switch clicks call
-   `sim.setInput`.
-4. When zoomed into a subcircuit definition, simulate that definition on its own, as the
-   code does today.
-5. Add a browser driver module, outside `sim/`, that calls `sim.advance(elapsed)` per
-   animation frame, clamps `elapsed` to 100 ms so a background tab does not replay minutes,
-   and updates lamp, wire and flip-flop appearance in place. A tick must not cancel a drag,
-   a half-drawn wire, a rubber-band selection or a selected wire.
-6. Schema version 2 and the version 1 migration, as in section 8 of the parity spec. Remove
-   the lamp's `return` pin from `gateLibrary.js`.
-7. Report oscillation and `behind` in the status area.
-8. Add `gateLibrary.js` entries and plain placeholder symbols for `andnor`, `pulser`,
-   `clock` and `hi`, with their final pin names, so the WP1 fixtures load and draw. No
-   palette buttons and no controls yet. WP3 replaces the placeholders.
-
-**Acceptance.**
-
-- All WP1 tests still pass, unchanged.
-- New tests: `flattenCircuit` leaves a deep copy of its input equal to the input. Two
-  instances of one subcircuit containing a flip-flop hold different states. A version 1 file
-  with a wire to `led.return` migrates to version 2 without that wire and validates.
-  `serializeCircuit` output contains none of the removed fields.
-- `grep -n "evaluateCircuit\|previousClock\|internalState" *.js` finds nothing outside the
-  migration code in `circuitModel.js`.
-- By hand: AND, OR and NOT give correct outputs. A NAND latch sets, holds and resets. With a
-  clock fixture from WP1 loaded, lamps blink while a gate is being
-  dragged and while a wire is being drawn, and neither action is interrupted.
-
----
-
-## WP 3: missing H-500 parts
-
-**Goal.** The clock, pulser, AND/NOR gate and HI terminal can be placed and used, and the
-editor gaps that block real use are closed.
-
-**Do.**
-
-1. Final symbols in `gates.svg` for `andnor`, `pulser`, `clock` and `hi`, replacing the WP2
-   placeholders. Use the 260 x 130 footprint and the existing pin columns (inputs at x = 18, outputs
-   at x = 224). `andnor` inputs are `in0` to `in3`, drawn as two pairs.
-2. Palette buttons for the four new types.
-3. Pulser interaction and clock rate control as in section 5 of the parity spec. The clock's
-   `hz` is saved with the circuit.
-4. Redraw the `jk` symbol to match the real part: an inversion bubble on `reset`, a
-   trailing-edge marker on `c`, outputs labelled 1 and 0. Pin names and coordinates do not
-   change.
-5. Delete selected components with Delete or Backspace, removing their wires.
-6. Replace `g${components.length + 1}` with an id generator that cannot collide. Put it in a
-   module with no DOM access so it can be tested.
-
-**Acceptance.**
-
-- The WP0 smoke test covers the new symbols and still passes.
-- Tests: the id generator never returns an id already in the circuit, including after
-  Make Component and after Ungroup. Deleting a component leaves no wire that refers to it. A circuit holding each new
-  type survives save and load unchanged.
-- By hand: one clock, one flip-flop and one lamp divide the clock by two, visibly, at 1 Hz.
-  A pulser clocks a flip-flop once per press. An AND/NOR gate with one section unwired holds
-  its output LO.
+- `LICENSE` is the Apache License 2.0 text, unmodified apart from the appendix fields.
+- From a fresh clone, the README's run instructions open the board, and every control the
+  README names does what it says.
+- `git ls-files` shows nothing from the removed list, and every remaining file is code,
+  tests, fixtures, assets, or a doc that describes the current code.
 
 ---
 
@@ -266,49 +178,124 @@ the new simulator.
 
 ---
 
-## WP 5: H-500 layout and resizable board
+## WP 8: lighter board, glowing switches
 
-**Goal.** The app opens looking like an H-500 and stays a freeform editor, as specified in
-section 6 of the parity spec.
+**Goal.** The board reads a little lighter, and a switch that is on glows the way a held
+pulser already does.
 
 **Do.**
 
-1. Lay out `panels/h500.json` following the row table in section 6 of the parity spec. If
-   you can view images, open the two photographs listed in section 9 and match the spacing
-   and proportions. The real panel is portrait.
-2. `circuit.board` drives the board size. The full inventory will not fit in 1200 x 800, so
-   the preset sets its own size. Twelve controls will not fit in one row at the 260-wide
-   footprint: either draw compact symbols for the switch, pulser, lamp and clock, or wrap
-   them. Say which you chose.
-3. Board size control: the user can set width and height. Put the rule in a function with no
-   DOM access, for example `resizeBoard(circuit, width, height)`, which refuses a size that
-   would leave any part outside the board. The screen scale does not change with board size;
-   the board scrolls.
-4. Palette placement: put the search for empty space in a function with no DOM access, for
-   example `findFreeSpot(circuit, footprint)`, which returns a position that overlaps no
-   existing part, or nothing when the board is full.
-5. Optional `label` on components, drawn beside the part. The preset labels switches,
-   pulsers and lamps with their numbers, and the terminal groups with the real legends.
-6. Use track 4's dark faceplate, switch and lamp skins and nameplate for the board.
-7. Start-up loads `panels/h500.json` instead of `exampleCircuit.json`. "New" offers the
-   H-500 layout or an empty board. The palette, Make Component, Ungroup, Save, Load and BOM
-   all work on the preset exactly as on any other circuit.
+1. Lighten the board's grey faceplate a step (`#board` background in `styles.css`). Check the
+   white symbols, the pin dots, energized wires and the lamp glow still stand out.
+2. A switch whose output is HI gets the same glow treatment as a pressed pulser
+   (`#board use[data-type="pulser"][data-state="1"]`). The renderer already sets
+   `data-state` on every part, so this should be CSS only.
+3. Add one line to section 5 of `docs/H500-PARITY.md`: a switch that is on glows.
 
 **Acceptance.**
 
-- Test: `panels/h500.json` validates and holds exactly the section 2 inventory, including
-  six HI terminals.
-- Test: reading the preset's logic parts row by row, top to bottom and left to right, gives
-  the sequence of types in the section 6 table.
-- Test: no two parts in the preset overlap, and all of them lie inside its board.
-- Test: the BOM of the preset equals the WP4 result.
-- Test: `resizeBoard` accepts a board twice as wide and one slightly taller, and refuses one
-  smaller than the parts on it. `findFreeSpot` never returns a position that overlaps a
-  part, and returns nothing on a full board.
-- By hand, starting from the preset: a NAND latch from two 2-input NANDs and two switches;
-  a 4-bit ripple counter on the clock showing on four lamps; the same counter stepped with a
-  pulser. Then make the board twice as wide, add four more gates from the palette, wire
-  them into the circuit, save, reload, and find the size, the parts and the wires intact.
+- `node --test` passes. Extend `test/page.test.js`: `styles.css` has a rule for
+  `use[data-type="switch"][data-state="1"]`.
+- By hand: switches 1 to 8 on and off are told apart at a glance at 1.2x; a lamp that is on
+  is still obvious on the lighter board; amber, green and white phosphor all still read.
+
+---
+
+## WP 9: examples and New
+
+**Goal.** Brent's 8-bit binary counter ships as a ready-made example, and New offers a
+choice of starting points.
+
+**Do.**
+
+1. Move `binary-counter.json` into `examples/` unchanged. Add `examples/index.json`, a list
+   of `{ "file", "title" }`, because a static server cannot list a folder.
+2. File menu: "New H-500" (the preset, as at start-up), "New empty board", and one item per
+   example. Each asks for confirmation as New does now, and each can be undone.
+3. An empty board takes the H-500's size, 600 x 970, so the terminal and board line up as
+   they do on the preset. Today it is 1200 x 800.
+4. Start-up still loads the blank H-500.
+
+**Acceptance.**
+
+- Test: every file in `examples/index.json` exists, validates, flattens and builds a
+  simulator.
+- Test: the binary counter counts. After N clock periods at its saved rate the lamps read N
+  in binary, lamp 1 the least significant bit, for N = 1, 2, 3, 8 and 255, and wrap at 256.
+- `test/page.test.js` still passes with the new menu items.
+- By hand: each New item gives what it says, and Undo returns the previous circuit.
+
+---
+
+## WP 10: new parts land in the top strip
+
+**Goal.** A part added from the Add menu lands in the empty strip along the top of the
+board, in the first space that fits, instead of on top of whatever is at (100, 100).
+
+**Do.**
+
+1. Add `findFreeSpot(view, footprint, board)` to `editing.js`, with no DOM access. It
+   scans the strip along the top of the board, 80 units tall, from left to right, and
+   returns the first position where the footprint overlaps no part, keeping a small gap
+   between parts. When nothing fits it returns the upper-right corner, even if that
+   overlaps.
+2. The search looks at what is on the board now, so a gap left by a part the user moved is
+   reused before anything further right.
+3. Footprints come from `getComponentSize`, so subcircuit boxes and 40 x 30 terminals pack
+   as well as 84 x 65 gates.
+4. Inside a subcircuit definition the same rule applies to that definition's area.
+5. The Add menu uses it. The new part stays selected, as now.
+
+**Acceptance.** Tests:
+
+- The first part on the H-500 lands at the left of the strip; the next lands to its right.
+- Moving a part out of the strip opens a gap, and the next part of a size that fits goes
+  into that gap, not after the last part.
+- A full strip sends the next part to the upper-right corner.
+- A mix of gates, terminals and a subcircuit box never overlaps.
+- The function does not modify its arguments.
+
+By hand: add ten parts to the H-500, move one out of the strip, add one more, and see it
+fill the gap.
+
+---
+
+## WP 11: supersize
+
+**Goal.** One menu action turns the board into two H-500 units side by side, for circuits
+that need more than one panel's worth of parts.
+
+**Do.**
+
+1. Edit menu: "Supersize: add a second unit". It doubles the board width to 1200 units and
+   adds a fresh copy of the H-500 inventory, taken from `panels/h500.json` rather than from
+   whatever the user has moved, in the new right-hand half.
+2. The copy leaves out the nameplate and the clock. One clock and one nameplate serve the
+   whole machine.
+3. New parts continue the numbering: flip-flops 9 to 16, lamps and switches labelled 9 to
+   16, pulsers 4 to 6. Ids follow the preset's pattern and must not collide.
+4. The bottom row of the new half: three pulsers, the slightly larger gap, eight switches,
+   with each lamp over its switch. **Open question for Brent:** copy it straight across
+   (aligned under the logic above, leaving the clock's spot empty at the start of the row),
+   or slide it left into that spot so the row starts at the seam.
+5. Existing parts and wires do not move. No wires are copied. The action can be undone.
+   It is offered only while the board is one unit wide.
+6. The top strip now runs across both halves; WP10's search uses all of it.
+7. Put the rule in a function with no DOM access, for example `supersize(circuit)`.
+8. Record the second unit in section 6 of `docs/H500-PARITY.md` as a deliberate departure
+   from the hardware, in the same section as the other departures.
+
+**Acceptance.** Tests:
+
+- Counts double except the clock and the nameplate, which stay at one.
+- Every part lies on the 1200-wide board, no two overlap, and each new lamp is over its
+  switch.
+- Labels and ids are as in item 3, and every id is unique.
+- The original parts and wires are unchanged, and the result builds a simulator.
+- Calling it a second time is refused.
+
+By hand: supersize the binary counter, wire switch 9 to lamp 9, and see both halves work
+from the one clock; the terminal and board widen together.
 
 ---
 
@@ -337,5 +324,5 @@ the audit has either a fix merged or a line added to section 7 of the parity spe
 
 ## After parity
 
-Not part of this plan: undo and redo, autosave, an examples menu built from
-`test/fixtures`, netlist export, fan-out warnings, transcribing the rest of the workbook.
+Not part of this plan: autosave, netlist export, fan-out warnings, transcribing the rest of
+the workbook.
