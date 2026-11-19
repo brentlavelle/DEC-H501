@@ -14,7 +14,7 @@ list passes.
 | WP3 missing H-500 parts | Done. Undo and redo, and a clock off position, landed with it |
 | WP5 H-500 layout | Closed. The preset, board size from `circuit.board`, labels, the panel look and the nameplate landed. Its open items moved: free-spot placement to WP10, "New" offering the preset to WP9, the board size control to WP11 |
 | WP7 open-source release | Done. Apache 2.0 licence and NOTICE, new README with a dedication and screenshot, AGENTS.md refreshed, non-project files removed |
-| WP4 BOM and subcircuits | Next |
+| WP4 BOM and subcircuits | Done. The H-500 inventory comes to 2 x 74LS00, 2 x 74LS10, 2 x 74LS20, 2 x 74LS51 and 4 x 74LS73A, 30 gates. The catalog keeps LS parts: 74LS73A for the 7473, and 74LS51 for the obsolete 7450, its 3-input section serving as the second gate |
 | WP8 lighter board, glowing switches | Done. Two unplanned changes landed with it: the machine is named H-501 on the nameplate, terminal and page title (the original hardware stays H-500 everywhere else), and the breadcrumb shows only inside a subcircuit, where it is the way back out |
 | WP9 examples and New | Open |
 | WP10 parts land in the top strip | Open |
