@@ -1,0 +1,12 @@
+DEC-H501: a browser recreation of the DEC H-500 Computer Lab logic trainer
+Copyright 2026 Brent LaVelle
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+This product bundles the Glass TTY VT220 font by Viacheslav Slavinsky
+(https://github.com/svofski/glasstty), released into the public domain under
+the Unlicense. Its licence text is in fonts/LICENSE.
+
+DEC, Digital and H-500 are trademarks of HP. They are used here only to
+identify the original hardware. This project is not affiliated with or
+endorsed by HP.
