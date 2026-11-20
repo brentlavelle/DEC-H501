@@ -6,6 +6,7 @@
 // - carryControlSettings: keeps switch positions and clock rates across an undo.
 // - CLOCK_RATES, nextClockRate: the clock's selector positions, 0 being off.
 // - breadcrumbPath: the way back out of a subcircuit, shown only while inside one.
+// - findFreeSpot, PLACEMENT: where a part added from the Add menu lands.
 // - moveComponents: shifts a set of parts together.
 
 export const CLOCK_RATES = [0, 0.25, 0.5, 1, 10];
@@ -163,4 +164,25 @@ export function createHistory({ limit = 100 } = {}) {
 // back to, so it is empty and the editor hides it.
 export function breadcrumbPath(navStack) {
   return navStack.length === 0 ? [] : ['Root', ...navStack];
+}
+
+// Where a newly added part goes: the first free space along the top of the board, working
+// left to right, so parts fill the strip above the panel and a gap left by a part moved away
+// is used before anything further right. With no free space it goes to the upper-right
+// corner, even on top of something, where the user can see it and drag it.
+// `boxes` are the parts already on the board, { x, y, width, height }; `footprint` is
+// { width, height } of the new part; `board` is { width, height }. Returns { x, y }.
+export const PLACEMENT = { margin: 8, gap: 6 };
+
+export function findFreeSpot(boxes, footprint, board) {
+  const { margin, gap } = PLACEMENT;
+  const { width, height } = footprint;
+  const y = margin;
+  const clearAt = x => boxes.every(b =>
+    x + width + gap <= b.x || b.x + b.width + gap <= x ||
+    y + height + gap <= b.y || b.y + b.height + gap <= y);
+  for (let x = margin; x + width <= board.width - margin; x++) {
+    if (clearAt(x)) return { x, y };
+  }
+  return { x: Math.max(margin, board.width - width - margin), y };
 }
