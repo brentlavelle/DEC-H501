@@ -9,7 +9,7 @@ import { createSimulator } from './sim/core.js';
 import { createDriver } from './simDriver.js';
 import {
   nextClockRate, nextComponentId, deleteComponents, moveComponents,
-  carryControlSettings, createHistory, breadcrumbPath
+  carryControlSettings, createHistory, breadcrumbPath, findFreeSpot
 } from './editing.js';
 
 const board = document.getElementById('board');
@@ -190,10 +190,14 @@ function applySelectionHighlight() {
 // with it. Pointer positions go through the SVG's own transform (screenToSvg), so the scale
 // never reaches the circuit's coordinates.
 const BOARD_SCALE = 1.2;
-function applyBoardSize() {
-  const { width, height } = circuit?.board?.width > 0 && circuit?.board?.height > 0
+function boardSize() {
+  return circuit?.board?.width > 0 && circuit?.board?.height > 0
     ? circuit.board
     : { width: 1200, height: 800 };
+}
+
+function applyBoardSize() {
+  const { width, height } = boardSize();
   board.setAttribute('viewBox', `0 0 ${width} ${height}`);
   board.style.width = `${width * BOARD_SCALE}px`;
   board.style.height = `${height * BOARD_SCALE}px`;
@@ -725,12 +729,16 @@ palette.addEventListener('click', (event) => {
   const gateType = event.target.dataset.gateType;
   if (!gateType) return;
 
+  // The new part lands in the first free space along the top of the board (findFreeSpot).
   const view = activeView();
+  const sizeOf = type => getComponentSize(circuit, type) ?? { width: 0, height: 0 };
+  const boxes = view.components.map(c => ({ x: c.x, y: c.y, ...sizeOf(c.type) }));
+  const spot = findFreeSpot(boxes, sizeOf(gateType), boardSize());
   const newGate = {
     id: nextComponentId(view.components),
     type: gateType,
-    x: 100,
-    y: 100
+    x: spot.x,
+    y: spot.y
   };
   if (gateType === 'clock') newGate.hz = 1;
   if (gateType === 'switch') newGate.state = 0;

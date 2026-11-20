@@ -17,7 +17,7 @@ list passes.
 | WP4 BOM and subcircuits | Done. The H-500 inventory comes to 2 x 74LS00, 2 x 74LS10, 2 x 74LS20, 2 x 74LS51 and 4 x 74LS73A, 30 gates. The catalog keeps LS parts: 74LS73A for the 7473, and 74LS51 for the obsolete 7450, its 3-input section serving as the second gate |
 | WP8 lighter board, glowing switches | Done. Two unplanned changes landed with it: the machine is named H-501 on the nameplate, terminal and page title (the original hardware stays H-500 everywhere else), and the breadcrumb shows only inside a subcircuit, where it is the way back out |
 | WP9 examples and New | Open |
-| WP10 parts land in the top strip | Open |
+| WP10 parts land in the top strip | Done. `findFreeSpot` in `editing.js`: first free space along the top, left to right, 6 units between parts, the upper-right corner when full |
 | WP11 supersize | Open, one design question below |
 | WP6 parity audit | Open, last |
 
