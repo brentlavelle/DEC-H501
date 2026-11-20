@@ -221,29 +221,70 @@ function snapToGrid(value, cellSize) {
   return Math.round(value / cellSize) * cellSize;
 }
 
-// Opens on the H-500 panel: the real inventory, laid out like the real machine.
-fetch('./panels/h500.json')
-  .then(response => response.json())
-  .then(data => {
-    circuit = parseCircuitFile(JSON.stringify(data));
-    rebuildSim();
-    render();
-  })
-  .catch(error => console.error('Error loading circuit JSON:', error));
+// Reads a circuit file that ships with the page: the H-500 panel or an example.
+async function fetchCircuit(path) {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`Could not load ${path} (${response.status}).`);
+  return parseCircuitFile(await response.text());
+}
 
-// --- File menu: New / Save / Load ---
-
-document.getElementById('newCircuitBtn')?.addEventListener('click', () => {
-  if (!confirm('Start a new circuit? You can still undo this.')) return;
+// Swaps in a whole new circuit after asking. Undo brings the old one back.
+function replaceCircuit(next, question, message) {
+  if (!confirm(`${question} You can still undo this.`)) return;
   history.record(snapshot());
-  circuit = createEmptyCircuit();
+  circuit = next;
   navStack = [];
   selectedIds.clear();
   rebuildSim();
   render();
   updateHistoryButtons();
-  setStatus('New circuit created.');
+  setStatus(message);
+}
+
+// Opens on the H-500 panel: the real inventory, laid out like the real machine.
+fetchCircuit('./panels/h500.json')
+  .then(loaded => {
+    circuit = loaded;
+    rebuildSim();
+    render();
+  })
+  .catch(error => console.error('Error loading circuit JSON:', error));
+
+// --- File menu: New / Save / Load / Examples ---
+
+document.getElementById('newH501Btn')?.addEventListener('click', async () => {
+  try {
+    replaceCircuit(await fetchCircuit('./panels/h500.json'), 'Start again from a blank H-501?', 'New H-501.');
+  } catch (error) {
+    setStatus(error.message, true);
+  }
 });
+
+document.getElementById('newCircuitBtn')?.addEventListener('click', () => {
+  replaceCircuit(createEmptyCircuit(), 'Start a new empty board?', 'New empty board.');
+});
+
+// One menu item per entry in examples/index.json. A static server cannot list a folder,
+// so the index is the list.
+const exampleItems = document.getElementById('exampleItems');
+fetch('./examples/index.json')
+  .then(response => (response.ok ? response.json() : []))
+  .then(entries => {
+    for (const { file, title } of entries) {
+      const item = document.createElement('button');
+      item.setAttribute('role', 'menuitem');
+      item.textContent = title;
+      item.addEventListener('click', async () => {
+        try {
+          replaceCircuit(await fetchCircuit(`./examples/${file}`), `Open the example "${title}"?`, `Opened ${title}.`);
+        } catch (error) {
+          setStatus(error.message, true);
+        }
+      });
+      exampleItems?.appendChild(item);
+    }
+  })
+  .catch(error => console.error('Error loading the examples index:', error));
 
 document.getElementById('saveCircuitBtn')?.addEventListener('click', async () => {
   if (!circuit) return;

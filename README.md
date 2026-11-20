@@ -68,6 +68,10 @@ local files.
 - **Build a component:** Select some parts, then **Component → Make Component
   from Selection**. The parts become one box. Double-click the box to edit
   inside it; the line under the menus is the way back out.
+- **Start over or open an example:** **File → New H-501** gives a fresh panel,
+  **File → New empty board** a blank one, and **File → Examples** opens a
+  ready-built circuit: an 8-bit binary counter, or the 4-bit shift register
+  from experiment 3.5 of the 1969 workbook.
 - **Save and load:** **File → Save** and **File → Load...** use plain JSON
   files.
 - **Get a parts list:** **Tools → Generate BOM** lists the 7400-series chips

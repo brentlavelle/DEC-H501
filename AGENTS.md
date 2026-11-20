@@ -41,13 +41,13 @@ file name and the Add menu's "H-500 parts".
 | `subcircuits.js` | `flattenCircuit`, `makeComponent`, `ungroupComponent`, `getComponentPins`, `getComponentSize`, `isSubcircuitType` |
 | `bomGenerator.js`, `icCatalog.js` | `generateBOM(circuit)` and the 7400-series catalog |
 | `fonts/` | Glass TTY VT220, public domain, with its own licence |
+| `examples/` | Circuits on the File menu's Examples list. `examples/index.json` names them, because a static server cannot list a folder |
 | `exampleCircuit.json` | A small version 1 sample, used by tests |
 | `test/`, `test/fixtures/` | The test suite and the circuits it runs |
 
 ## Known defects
 
-1. "New" makes a 1200 x 800 board, which no longer matches the H-500's 600 x 970. WP9 fixes
-   it.
+None known.
 
 ## Rules
 

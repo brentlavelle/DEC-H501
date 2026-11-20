@@ -16,7 +16,7 @@ list passes.
 | WP7 open-source release | Done. Apache 2.0 licence and NOTICE, new README with a dedication and screenshot, AGENTS.md refreshed, non-project files removed |
 | WP4 BOM and subcircuits | Done. The H-500 inventory comes to 2 x 74LS00, 2 x 74LS10, 2 x 74LS20, 2 x 74LS51 and 4 x 74LS73A, 30 gates. The catalog keeps LS parts: 74LS73A for the 7473, and 74LS51 for the obsolete 7450, its 3-input section serving as the second gate |
 | WP8 lighter board, glowing switches | Done. Two unplanned changes landed with it: the machine is named H-501 on the nameplate, terminal and page title (the original hardware stays H-500 everywhere else), and the breadcrumb shows only inside a subcircuit, where it is the way back out |
-| WP9 examples and New | Open |
+| WP9 examples and New | In progress. Done: Brent's 8-bit binary counter ships in `examples/`, File offers New H-501, New empty board and the examples, and an empty board is the H-500's size. Also done: workbook experiment 3.5, the 4-bit shift register, built from the workbook's description (its wiring figure could not be read). Possible second: 2.7, the parity bit generator |
 | WP10 parts land in the top strip | Done. `findFreeSpot` in `editing.js`: first free space along the top, left to right, 6 units between parts, the upper-right corner when full |
 | WP11 supersize | Open, one design question below |
 | WP6 parity audit | Open, last |
@@ -211,7 +211,7 @@ choice of starting points.
 1. Move `binary-counter.json` into `examples/`, changing only its nameplate text to
    "H-501 LOGIC LABORATORY"; it was saved before the rename. Add `examples/index.json`, a list
    of `{ "file", "title" }`, because a static server cannot list a folder.
-2. File menu: "New H-500" (the preset, as at start-up), "New empty board", and one item per
+2. File menu: "New H-501" (the preset, as at start-up), "New empty board", and one item per
    example. Each asks for confirmation as New does now, and each can be undone.
 3. An empty board takes the H-500's size, 600 x 970, so the terminal and board line up as
    they do on the preset. Today it is 1200 x 800.
