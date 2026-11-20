@@ -5,6 +5,9 @@ of the late 1960s, and one step beyond it. Wire NAND gates, AND/NOR gates and
 J-K flip-flops together, flip the switches, press the pulsers, run the clock and
 watch the lamps.
 
+**[Try it in your browser](https://brentlavelle.github.io/DEC-H501/)**. Nothing
+to install.
+
 ![The H-501 running an 8-bit binary counter](docs/images/h501.png)
 
 ## Dedication
@@ -28,8 +31,12 @@ real 7400-series chips.
 
 ## Run it
 
-There is nothing to install and nothing to build. Serve the folder with any
-static web server and open it in a browser:
+The live version is at
+[brentlavelle.github.io/DEC-H501](https://brentlavelle.github.io/DEC-H501/). It
+is served by GitHub Pages straight from `main`, so it is always the latest.
+
+To run your own copy there is nothing to install and nothing to build. Serve the
+folder with any static web server and open it in a browser:
 
 ```bash
 python3 -m http.server
