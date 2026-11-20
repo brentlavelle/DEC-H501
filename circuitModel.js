@@ -16,10 +16,12 @@ const RUNTIME_FIELDS = ['previousClock', 'previousJ', 'previousK', 'internalStat
 // Types whose `state` was runtime state, not something the user set.
 const STATELESS_TYPES = new Set(['jk', 'pulser']);
 
+// An empty board is the size of the H-500 panel (panels/h500.json), so the terminal above
+// it lines up the same way.
 export function createEmptyCircuit() {
   return {
     version: CURRENT_VERSION,
-    board: { width: 1200, height: 800 },
+    board: { width: 600, height: 970 },
     components: [],
     wires: [],
     subcircuits: {}
