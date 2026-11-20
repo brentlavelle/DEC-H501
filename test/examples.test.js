@@ -78,3 +78,18 @@ test('the shift register moves the data switch one lamp per pulse, never two', (
   sim.setInput('p1', 0);
   assert.equal(lamps(), '0110');
 });
+
+test('the parity generator lights lamp 5 so that the five lamps always show an even number lit', () => {
+  assert.ok(index.some(entry => entry.file === 'parity-generator.json'), 'listed on the menu');
+  const sim = createSimulator(flattenCircuit(example('parity-generator.json')));
+  for (let n = 0; n < 16; n++) {
+    const bits = [0, 1, 2, 3].map(i => (n >> i) & 1);
+    bits.forEach((bit, i) => sim.setInput(`sw${i + 1}`, bit));
+    const label = bits.join('');
+    bits.forEach((bit, i) => assert.equal(sim.readInput(`l${i + 1}`, 'in'), Boolean(bit), `lamp ${i + 1} shows switch ${i + 1} for ${label}`));
+    const ones = bits.reduce((a, b) => a + b, 0);
+    assert.equal(sim.readInput('l5', 'in'), ones % 2 === 1, `parity lamp for ${label}`);
+    const lit = [1, 2, 3, 4, 5].filter(i => sim.readInput(`l${i}`, 'in')).length;
+    assert.equal(lit % 2, 0, `even number lit for ${label}`);
+  }
+});

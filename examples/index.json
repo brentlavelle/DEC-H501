@@ -1,4 +1,5 @@
 [
-  {"file": "binary-counter.json", "title": "8-bit binary counter"},
-  {"file": "shift-register.json", "title": "4-bit shift register (workbook 3.5)"}
+  {"file": "parity-generator.json", "title": "Parity bit generator (workbook 2.7)"},
+  {"file": "shift-register.json", "title": "4-bit shift register (workbook 3.5)"},
+  {"file": "binary-counter.json", "title": "8-bit binary counter"}
 ]
