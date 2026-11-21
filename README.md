@@ -87,8 +87,10 @@ local files.
   pulser or the clock) to add column A, then B, and so on; the rows of T and F
   follow. Drag the right **?** onto an output (the right side of a gate, or a
   lamp) and its column fills in: **T** or **F** when the answer is always that,
-  **?** when it depends on something outside the table or on what a flip-flop
-  remembers. Click a letter to take it off; the arrow hides the sheet.
+  **Q** when the output stays as it was, **Q̄** when it flips, and **?** when it
+  depends on something outside the table. A flip-flop's column is its value
+  after one clock pulse, so J, K and its 1 output give the textbook JK table.
+  Click a letter to take it off; the arrow hides the sheet.
 - **Get a parts list:** **Tools → Generate BOM** lists the 7400-series chips
   your circuit would need.
 - **Change the screen:** **Screen** switches the terminal between amber, green

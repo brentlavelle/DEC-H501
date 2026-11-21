@@ -8,7 +8,7 @@ import { generateBOM } from './bomGenerator.js';
 import { createSimulator } from './sim/core.js';
 import { createDriver } from './simDriver.js';
 import { addBlankUnit, copyGates, copyAll, resizeBoard } from './units.js';
-import { addColumn, removeColumn, liveTable, columnNames, fillTable, MAX_COLUMNS } from './truthTable.js';
+import { addColumn, removeColumn, liveTable, columnNames, fillTable, logicKey, MAX_COLUMNS } from './truthTable.js';
 import {
   nextClockRate, nextComponentId, deleteComponents, moveComponents,
   carryControlSettings, createHistory, breadcrumbPath, findFreeSpot
@@ -352,8 +352,18 @@ function cell(tag, text, className) {
   return element;
 }
 
+// The sheet is rebuilt only when what it depends on changes (logicKey): dragging a part or
+// flipping a switch redraws the board many times a second, and filling a big table is not free.
+let truthPanelKey = null;
+
 function renderTruthPanel() {
-  if (!truthGrid || !truthPanel?.classList.contains('open') || !circuit) return;
+  if (!truthGrid || !truthPanel?.classList.contains('open') || !circuit) {
+    truthPanelKey = null;
+    return;
+  }
+  const keyNow = logicKey(circuit);
+  if (keyNow === truthPanelKey) return;
+  truthPanelKey = keyNow;
   const table = liveTable(circuit);
   const names = columnNames(table);
   const inputChip = table.inputs.length < MAX_COLUMNS;
@@ -380,10 +390,26 @@ function renderTruthPanel() {
     inputs.forEach(value => row.appendChild(cell('td', value ? 'T' : 'F')));
     if (inputChip) row.appendChild(cell('td', ''));
     first = true;
-    outputs.forEach(value => row.appendChild(split(cell('td', value, value === '?' ? 'tt-unknown' : undefined))));
+    outputs.forEach(value => row.appendChild(split(outputCell(value))));
     if (outputChip) row.appendChild(split(cell('td', '')));
   }
   truthGrid.replaceChildren(grid);
+}
+
+// T and F are certain. Q stays as it was, Q̄ flips (for a flip-flop: after one clock pulse),
+// and ? depends on something outside the table.
+const OUTPUT_MEANINGS = {
+  T: 'Always T',
+  F: 'Always F',
+  Q: 'Stays as it was',
+  'Q\u0304': 'Flips to the opposite',
+  '?': 'Depends on something outside the table'
+};
+
+function outputCell(value) {
+  const td = cell('td', value, value === '?' ? 'tt-unknown' : undefined);
+  td.title = OUTPUT_MEANINGS[value] ?? '';
+  return td;
 }
 
 function nameCell(name, side, index) {

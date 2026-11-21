@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  terminalRole, addColumn, removeColumn, liveTable, rows, emptyTable, columnNames, MAX_COLUMNS
+  terminalRole, addColumn, removeColumn, liveTable, rows, emptyTable, columnNames, logicKey, MAX_COLUMNS
 } from '../truthTable.js';
 import { parseCircuitFile, serializeCircuit } from '../circuitModel.js';
 import { deleteComponents } from '../editing.js';
@@ -105,4 +105,28 @@ test('adding and removing columns never changes the table or circuit it was give
   addColumn(circuit, table, 'input', at('sw2', 'out'));
   removeColumn(table, 'input', 0);
   assert.equal(JSON.stringify([circuit, table]), before);
+});
+
+// The sheet works the table out again only when this key changes, so dragging parts and
+// flipping switches stay smooth with a big table open.
+
+test('the table\'s key ignores where parts sit and how switches are set, but not wiring or letters', () => {
+  const circuit = panel();
+  circuit.truthTable = addColumn(circuit, emptyTable(), 'input', at('sw1', 'out'));
+  const key = logicKey(circuit);
+  const moved = structuredClone(circuit);
+  moved.components.find(c => c.id === 'n2_1').x += 40;
+  moved.components.find(c => c.id === 'sw2').state = 1;
+  moved.board = { width: 900, height: 1200 };
+  assert.equal(logicKey(moved), key, 'moving a part, flipping a switch or resizing the board changes nothing');
+
+  const wired = structuredClone(circuit);
+  wired.wires.push({ from: { component: 'sw1', pin: 'out' }, to: { component: 'n2_1', pin: 'in0' } });
+  assert.notEqual(logicKey(wired), key, 'a new wire does');
+  const lettered = structuredClone(circuit);
+  lettered.truthTable = addColumn(lettered, lettered.truthTable, 'output', at('n2_1', 'out'));
+  assert.notEqual(logicKey(lettered), key, 'a new letter does');
+  const fewer = structuredClone(circuit);
+  fewer.components = fewer.components.filter(c => c.id !== 'n2_2');
+  assert.notEqual(logicKey(fewer), key, 'a deleted part does');
 });

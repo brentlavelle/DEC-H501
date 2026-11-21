@@ -1,12 +1,14 @@
 // Filling in the truth table: the circuit is lifted off the board, every lead attached to
 // anything but HIGH or GND is trimmed to unknown, and each output reads T only if it is
-// always T, F only if always F, and ? otherwise.
+// always T, F only if always F, Q if it stays as it was, Q̄ if it flips, and ? otherwise.
+// A flip-flop's output means its value after one clock pulse.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fillTable } from '../truthTable.js';
 import { parseCircuitFile } from '../circuitModel.js';
-import { makeComponent } from '../subcircuits.js';
+import { makeComponent, flattenCircuit } from '../subcircuits.js';
+import { createSimulator } from '../sim/core.js';
 
 const wire = (from, to) => {
   const [fc, fp] = from.split('.');
@@ -58,24 +60,51 @@ test('a lamp shows what drives it; a lamp with nothing on it is dark', () => {
   assert.deepEqual(outputs(c, ['n.in0', 'n.in1'], ['l.in', 'm.in']), ['FF', 'TF', 'TF', 'TF']);
 });
 
-test('a flip-flop remembers, so its outputs are ?, unless reset held LO forces them', () => {
+const Q = 'Q', NQ = 'Q\u0304';
+
+test('the JK flip-flop fills in the textbook table: Q (no change), F, T, Q̄ (toggle)', () => {
+  const c = board([['f', 'jk']]);
+  // Rows J K: TT, TF, FT, FF.
+  assert.deepEqual(outputs(c, ['f.j', 'f.k'], ['f.q']), [NQ, 'T', 'F', Q]);
+  assert.deepEqual(outputs(c, ['f.j', 'f.k'], ['f.qbar']), [NQ, 'F', 'T', Q], 'the 0 output, against its own value');
+});
+
+test('reset held LO clears the flip-flop whatever J and K say; reset as an input', () => {
+  const c = board([['f', 'jk']]);
+  // Rows reset J: TT, TF, FT, FF, with K open (HI).
+  assert.deepEqual(outputs(c, ['f.reset', 'f.j'], ['f.q']), [NQ, 'F', 'F', 'F']);
+});
+
+test('a flip-flop with K open (HI): J toggles it or clears it; reset held LO forces it', () => {
   const free = board([['s', 'switch'], ['f', 'jk']], [wire('s.out', 'f.j')]);
-  assert.deepEqual(outputs(free, ['s.out'], ['f.q', 'f.qbar']), ['??', '??']);
+  // The 1 and 0 outputs each read against their own remembered value.
+  assert.deepEqual(outputs(free, ['s.out'], ['f.q', 'f.qbar']), [NQ + NQ, 'FT']);
   const held = board([['s', 'switch'], ['g', 'gnd'], ['f', 'jk']], [wire('s.out', 'f.j'), wire('g.out', 'f.reset')]);
   assert.deepEqual(outputs(held, ['s.out'], ['f.q', 'f.qbar']), ['FT', 'FT']);
 });
 
-test('a NAND latch: set and reset are known, hold is ?', () => {
+test('a NAND latch: set and reset are known, hold reads Q (it stays as it was)', () => {
   // q = NAND(S, qbar), qbar = NAND(R, q); inputs are active LO.
   const c = board([['n1', '2nand'], ['n2', '2nand']], [wire('n2.out', 'n1.in1'), wire('n1.out', 'n2.in0')]);
   // Rows S R: TT (hold), TF (reset), FT (set), FF (both low).
-  assert.deepEqual(outputs(c, ['n1.in0', 'n2.in1'], ['n1.out', 'n2.out']), ['??', 'FT', 'TF', 'TT']);
+  assert.deepEqual(outputs(c, ['n1.in0', 'n2.in1'], ['n1.out', 'n2.out']), [Q + Q, 'FT', 'TF', 'TT']);
 });
 
-test('a ring that never settles reads ?', () => {
+test('a ring of three inverters reads Q̄: each time round it flips, which is why it never settles', () => {
   const c = board([['s', 'switch'], ['a', 'not'], ['b', 'not'], ['d', 'not']],
     [wire('a.out', 'b.in'), wire('b.out', 'd.in'), wire('d.out', 'a.in')]);
-  assert.deepEqual(outputs(c, ['s.out'], ['a.out']), ['?', '?']);
+  assert.deepEqual(outputs(c, ['s.out'], ['a.out']), [NQ, NQ]);
+});
+
+test('a flip-flop driven by another flip-flop reads ?: the other one\'s state is not in the table', () => {
+  const c = board([['f1', 'jk'], ['f2', 'jk']], [wire('f1.q', 'f2.j'), wire('f1.q', 'f2.k')]);
+  assert.deepEqual(outputs(c, ['f2.reset'], ['f2.q']), ['?', 'F']);
+});
+
+test('a lamp on a latch output reads like the output itself', () => {
+  const c = board([['n1', '2nand'], ['n2', '2nand'], ['l', 'led']],
+    [wire('n2.out', 'n1.in1'), wire('n1.out', 'n2.in0'), wire('n1.out', 'l.in')]);
+  assert.deepEqual(outputs(c, ['n1.in0', 'n2.in1'], ['l.in']), [Q, 'F', 'T', 'T']);
 });
 
 test('the parity example: lamp 5 is the parity of switches 1 to 4', () => {
@@ -108,4 +137,25 @@ test('rows carry their inputs, in the sheet\'s order', () => {
   const c = board([['n', '2nand']]);
   const filled = fillTable(c, { inputs: [at('n.in0'), at('n.in1')], outputs: [at('n.out')] });
   assert.deepEqual(filled.map(r => r.inputs), [[true, true], [true, false], [false, true], [false, false]]);
+});
+
+// Regression: Brent's three-NAND latch (test/fixtures/three-nand-latch.json). A and B are the
+// open leads of two 2-input NANDs, X the 3-input NAND's output, which feeds back into both.
+// It can be cleared (A and B both F) but never set, so every other row holds.
+test('the three-NAND latch reads Q Q Q F, and the live simulator agrees', () => {
+  const c = parseCircuitFile(readFileSync(new URL('fixtures/three-nand-latch.json', import.meta.url), 'utf8'));
+  const filled = fillTable(c, c.truthTable);
+  assert.deepEqual(filled.map(r => r.outputs[0]), [Q, Q, Q, 'F']);
+
+  // Drive A and B from two added switches and start with X cleared: Q says it stays F.
+  for (const [a, b] of [[1, 1], [1, 0], [0, 1], [0, 0]]) {
+    const d = structuredClone(c);
+    d.components.push({ id: 'sa', type: 'switch', x: 0, y: 0, state: 0 }, { id: 'sb', type: 'switch', x: 0, y: 0, state: 0 });
+    d.wires.push(wire('sa.out', 'n2_3.in0'), wire('sb.out', 'n2_4.in0'));
+    const sim = createSimulator(flattenCircuit(d));
+    assert.equal(sim.read('n3_1', 'out'), false, 'cleared to begin with');
+    sim.setInput('sa', a);
+    sim.setInput('sb', b);
+    assert.equal(sim.read('n3_1', 'out'), false, `A=${a} B=${b} keeps it F`);
+  }
 });
