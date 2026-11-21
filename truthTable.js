@@ -102,12 +102,20 @@ export function rows(n) {
 // The circuit is lifted off the board: nothing here touches the live simulator. In the copy,
 // every lead attached to something other than HIGH or GND (an unlettered switch, a pulser,
 // the clock) is trimmed and reads unknown; an input that was never wired reads HI, as it does
-// on the board. Values are three-valued: true, false, or null for unknown. A flip-flop's
-// outputs are unknown, because what it holds depends on what happened before, unless its
-// reset is held LO. Every gate starts unknown and is worked out until nothing changes; what
-// is still unknown then (a held latch, a ring that never settles) reads ?.
-// An output cell is 'T' only if the output is T whatever the unknowns are, 'F' likewise,
-// and '?' otherwise.
+// on the board. Values are three-valued: true, false, or null for unknown.
+//
+// Each output cell is worked out twice, once supposing the output's own remembered value is
+// T and once F, holding the output there while everything else settles:
+//   'T' or 'F'  the same answer both times: it is always that.
+//   'Q'         the answer is the remembered value: it stays as it was (a latch holding).
+//   'Q̄'         the answer is the opposite: it flips (a flip-flop toggling).
+//   '?'         anything else, such as depending on a switch that is not in the table.
+// For a flip-flop's 1 or 0 output the answer is its value after one clock pulse, from J, K
+// and reset. For a gate output the answer is what the gate would put out, so a feedback loop
+// is cut at that output. A lamp reads like the output that drives it.
+
+export const STAYS = 'Q';
+export const FLIPS = 'Q̄';
 
 const and3 = values => (values.includes(false) ? false : values.includes(null) ? null : true);
 const or3 = values => (values.includes(true) ? true : values.includes(null) ? null : false);
@@ -128,6 +136,25 @@ const LOGIC = {
   andnor: v => not3(or3([and3([v[0], v[1]]), and3([v[2], v[3]])]))
 };
 
+// A J-K flip-flop's 1 output after one trailing clock edge, from J, K, reset and what it
+// held. Unknown J, K or reset are tried both ways; if the answers differ it is unknown.
+function nextQ(j, k, reset, held) {
+  const choices = v => (v === null ? [true, false] : [v]);
+  const answers = new Set();
+  for (const r of choices(reset)) {
+    for (const jv of choices(j)) {
+      for (const kv of choices(k)) {
+        if (!r) answers.add(false);
+        else if (jv && kv) answers.add(held === null ? null : !held);
+        else if (jv) answers.add(true);
+        else if (kv) answers.add(false);
+        else answers.add(held);
+      }
+    }
+  }
+  return answers.size === 1 ? [...answers][0] : null;
+}
+
 const key = (component, pin) => `${component}\u0000${pin}`;
 
 export function fillTable(circuit, table) {
@@ -147,9 +174,11 @@ export function fillTable(circuit, table) {
   const logic = flat.components.filter(c => LOGIC[c.type] || c.type === 'jk');
   const limit = 2 * flat.components.length + 8;
 
-  return rows(table.inputs.length).map(values => {
+  // Settles the lifted copy for one row, with some outputs held at given values (`held`).
+  // Returns readers for outputs and inputs, and what each held gate would put out itself.
+  function settle(values, held = new Map()) {
     const heldInputs = new Map(); // gate input pin -> value: a letter on it overrides its wire
-    const out = new Map(); // output pin -> value
+    const out = new Map(held); // output pin -> value
     table.inputs.forEach((terminal, i) => {
       const { component, pin } = resolve(terminal);
       if (SOURCES.has(typeOf(terminal.component))) out.set(key(component, pin), values[i]);
@@ -169,19 +198,19 @@ export function fillTable(circuit, table) {
       if (from) return and3(from.map(d => outputOf(d.component, d.pin))); // several drivers: LO wins
       return componentTypes[byId.get(component)?.type]?.openInput ?? true; // never wired
     };
+    const gateOutput = c => LOGIC[c.type](componentTypes[c.type].inputs.map(pin => read(c.id, pin)));
 
     for (let pass = 0; pass < limit; pass++) {
       let changed = false;
       for (const c of logic) {
-        const results = {};
-        if (c.type === 'jk') {
-          const reset = read(c.id, 'reset');
-          results.q = reset === false ? false : null;
-          results.qbar = reset === false ? true : null;
-        } else {
-          results.out = LOGIC[c.type](componentTypes[c.type].inputs.map(pin => read(c.id, pin)));
-        }
+        const results = c.type === 'jk'
+          ? (() => {
+            const reset = read(c.id, 'reset');
+            return { q: reset === false ? false : null, qbar: reset === false ? true : null };
+          })()
+          : { out: gateOutput(c) };
         for (const [pin, value] of Object.entries(results)) {
+          if (held.has(key(c.id, pin))) continue;
           if (outputOf(c.id, pin) !== value) {
             out.set(key(c.id, pin), value);
             changed = true;
@@ -190,11 +219,42 @@ export function fillTable(circuit, table) {
       }
       if (!changed) break;
     }
+    return { outputOf, read, gateOutput };
+  }
 
-    const cell = value => (value === true ? 'T' : value === false ? 'F' : '?');
+  // The answer for one output pin in one row, supposing it remembers `v`.
+  function answerFor(values, component, pin, v) {
+    const part = byId.get(component);
+    if (part?.type === 'jk') {
+      const q = pin === 'q' ? v : !v;
+      const state = settle(values, new Map([[key(component, 'q'), q], [key(component, 'qbar'), !q]]));
+      const next = nextQ(state.read(component, 'j'), state.read(component, 'k'), state.read(component, 'reset'), q);
+      return pin === 'q' ? next : not3(next);
+    }
+    if (part && LOGIC[part.type]) {
+      return settle(values, new Map([[key(component, pin), v]])).gateOutput(part);
+    }
+    return settle(values).outputOf(component, pin); // a source or rail: it remembers nothing
+  }
+
+  function classify(values, component, pin) {
+    const ifT = answerFor(values, component, pin, true);
+    const ifF = answerFor(values, component, pin, false);
+    if (ifT === null || ifF === null) return '?';
+    if (ifT === ifF) return ifT ? 'T' : 'F';
+    return ifT ? STAYS : FLIPS;
+  }
+
+  return rows(table.inputs.length).map(values => {
     const outputs = table.outputs.map(terminal => {
       const { component, pin } = resolve(terminal);
-      return cell(typeOf(terminal.component) === 'led' ? read(component, pin) : outputOf(component, pin));
+      if (typeOf(terminal.component) === 'led') {
+        const from = drivers.get(key(component, pin));
+        if (from?.length === 1) return classify(values, from[0].component, from[0].pin);
+        const value = settle(values).read(component, pin);
+        return value === true ? 'T' : value === false ? 'F' : '?';
+      }
+      return classify(values, component, pin);
     });
     return { inputs: values, outputs };
   });

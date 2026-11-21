@@ -380,10 +380,26 @@ function renderTruthPanel() {
     inputs.forEach(value => row.appendChild(cell('td', value ? 'T' : 'F')));
     if (inputChip) row.appendChild(cell('td', ''));
     first = true;
-    outputs.forEach(value => row.appendChild(split(cell('td', value, value === '?' ? 'tt-unknown' : undefined))));
+    outputs.forEach(value => row.appendChild(split(outputCell(value))));
     if (outputChip) row.appendChild(split(cell('td', '')));
   }
   truthGrid.replaceChildren(grid);
+}
+
+// T and F are certain. Q stays as it was, Q̄ flips (for a flip-flop: after one clock pulse),
+// and ? depends on something outside the table.
+const OUTPUT_MEANINGS = {
+  T: 'Always T',
+  F: 'Always F',
+  Q: 'Stays as it was',
+  'Q\u0304': 'Flips to the opposite',
+  '?': 'Depends on something outside the table'
+};
+
+function outputCell(value) {
+  const td = cell('td', value, value === '?' ? 'tt-unknown' : undefined);
+  td.title = OUTPUT_MEANINGS[value] ?? '';
+  return td;
 }
 
 function nameCell(name, side, index) {
