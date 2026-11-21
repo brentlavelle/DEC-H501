@@ -19,6 +19,7 @@ list passes.
 | WP9 examples and New | Done. Three examples on the File menu: Brent's 8-bit binary counter, and workbook experiments 3.5 (4-bit shift register) and 2.7 (parity bit generator, exclusive-ORs from AND/NOR gates). The workbook ones follow its descriptions; its wiring figures could not be read. File offers New H-501 and New empty board, and an empty board is the H-500's size |
 | WP10 parts land in the top strip | Done. `findFreeSpot` in `editing.js`: first free space along the top, left to right, 6 units between parts, the upper-right corner when full |
 | WP11 supersize | Done. In `units.js`, on the Edit menu, each repeatable and undoable, never a second clock or nameplate: **Add Blank H-501 to the Right**, **Copy Gates to the Right** (parts as laid out, no wires) and **Copy All to the Right** (parts and wires on the one clock). And a grip at the board's bottom-right corner resizes it, never smaller than what is on it (`resizeBoard`) |
+| WP12 truth tables | In progress. Done: **Tools → Truth Table**, a graph-paper sheet from the right; ? chips dragged onto inputs (A, B... on a gate's left side, a switch, pulser or the clock) and outputs (X, Y... on a gate's right side or a lamp), letters tagged on the board, T/F rows, saved with the circuit. To do: fill in the output columns (an input on a wired terminal will override that wire while the table runs) |
 | WP6 parity audit | Open, last |
 
 The text of the finished packages is in git history (`git show 751d8be:docs/WORK-PACKAGES.md`).

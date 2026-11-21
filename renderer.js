@@ -3,6 +3,7 @@
 
 import GateLibrary from './gateLibrary.js';
 import { getComponentPins, getComponentSize, isSubcircuitType } from './subcircuits.js';
+import { liveTable, columnNames, terminalRole } from './truthTable.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 // Small enough that the hotspots of a 4-input gate's pins, 14 units apart, do not overlap.
@@ -195,6 +196,9 @@ function renderCircuit(circuit, svgElement, view) {
       pinElement.setAttribute('data-component', component.id);
       pinElement.setAttribute('data-pin', pin.name);
       pinElement.setAttribute('data-direction', pin.direction || (pin.name.startsWith('in') ? 'input' : 'output'));
+      // Which truth-table chip this terminal takes, so the valid spots can light up in a drag.
+      const role = terminalRole(circuit, component.id, pin.name);
+      if (role) pinElement.setAttribute('data-tt-role', role);
       svgElement.appendChild(pinElement);
     });
   });
@@ -212,6 +216,49 @@ function renderCircuit(circuit, svgElement, view) {
     dot.setAttribute('data-source-component', end.source.component);
     dot.setAttribute('data-source-pin', end.source.pin);
     svgElement.appendChild(dot);
+  }
+
+  renderTruthTags(circuit, svgElement);
+}
+
+// The truth table's letters (A, B... and X, Y...) beside the terminals they are on. Inputs
+// sit to the left of their terminal, outputs to the right; on a switch, pulser, clock or lamp,
+// whose terminal is on top, the letter sits above it.
+const TOP_TERMINAL_TYPES = new Set(['switch', 'pulser', 'clock', 'led']);
+
+function renderTruthTags(circuit, svgElement) {
+  const table = liveTable(circuit);
+  const names = columnNames(table);
+  const columns = [
+    ...table.inputs.map((t, i) => ({ ...t, name: names.inputs[i], side: 'input' })),
+    ...table.outputs.map((t, i) => ({ ...t, name: names.outputs[i], side: 'output' }))
+  ];
+  for (const column of columns) {
+    const component = circuit.components.find(c => c.id === column.component);
+    const pin = getComponentPins(circuit, component.type).find(p => p.name === column.pin);
+    const px = component.x + pin.x;
+    const py = component.y + pin.y;
+    let x = column.side === 'input' ? px - 17 : px + 5;
+    let y = py - 6;
+    if (TOP_TERMINAL_TYPES.has(component.type)) {
+      x = px - 6;
+      y = py - 19;
+    }
+    const tag = document.createElementNS(SVG_NS, 'g');
+    tag.setAttribute('class', `tt-tag tt-tag-${column.side}`);
+    const rect = document.createElementNS(SVG_NS, 'rect');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width', 12);
+    rect.setAttribute('height', 12);
+    rect.setAttribute('rx', 2);
+    const text = document.createElementNS(SVG_NS, 'text');
+    text.setAttribute('x', x + 6);
+    text.setAttribute('y', y + 9.5);
+    text.setAttribute('text-anchor', 'middle');
+    text.textContent = column.name;
+    tag.append(rect, text);
+    svgElement.appendChild(tag);
   }
 }
 

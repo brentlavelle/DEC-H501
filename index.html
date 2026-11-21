@@ -82,6 +82,7 @@
           <button class="vt-menu-title" aria-haspopup="true" aria-expanded="false">Tools</button>
           <div class="vt-menu-items" role="menu">
             <button id="generateBomBtn" role="menuitem">Generate BOM</button>
+            <button id="truthTableBtn" role="menuitem">Truth Table</button>
           </div>
         </div>
         <div class="vt-menu">
@@ -118,5 +119,16 @@
       ></svg>
       <div id="resizeHandle" title="Drag to resize the board"></div>
     </div>
+
+    <!-- The truth table: a sheet of graph paper that slides in from the right. Drag a ? onto
+         a terminal on the board to add a column. Built by boardEditor.js from truthTable.js. -->
+    <aside id="truthPanel" class="tt-panel" aria-label="Truth table" aria-hidden="true">
+      <div class="tt-head">
+        <span class="tt-title">Truth Table</span>
+        <button id="truthCloseBtn" class="tt-close" title="Close the truth table">×</button>
+      </div>
+      <div id="truthGrid"></div>
+      <p class="tt-hint">Drag a <b>?</b> onto a terminal. Inputs on the left of the line, outputs on the right. Click a letter to take it off.</p>
+    </aside>
   </body>
 </html>
