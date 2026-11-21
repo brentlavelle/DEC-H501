@@ -1,0 +1,466 @@
+{
+  "version": 2,
+  "board": {
+    "width": 600,
+    "height": 970
+  },
+  "nameplate": {
+    "x": 30,
+    "y": 800,
+    "width": 194,
+    "height": 52,
+    "text": [
+      "DIGITAL",
+      "H-501 LOGIC LABORATORY"
+    ]
+  },
+  "components": [
+    {
+      "id": "ff1",
+      "type": "jk",
+      "x": 40,
+      "y": 105
+    },
+    {
+      "id": "ff2",
+      "type": "jk",
+      "x": 185,
+      "y": 105
+    },
+    {
+      "id": "ff3",
+      "type": "jk",
+      "x": 330,
+      "y": 105
+    },
+    {
+      "id": "ff4",
+      "type": "jk",
+      "x": 475,
+      "y": 105
+    },
+    {
+      "id": "n2_1",
+      "type": "2nand",
+      "x": 30,
+      "y": 185
+    },
+    {
+      "id": "n2_2",
+      "type": "2nand",
+      "x": 30,
+      "y": 250
+    },
+    {
+      "id": "n2_3",
+      "type": "2nand",
+      "x": 142,
+      "y": 185
+    },
+    {
+      "id": "n2_4",
+      "type": "2nand",
+      "x": 142,
+      "y": 250
+    },
+    {
+      "id": "n3_1",
+      "type": "3nand",
+      "x": 254,
+      "y": 217
+    },
+    {
+      "id": "n3_2",
+      "type": "3nand",
+      "x": 366,
+      "y": 217
+    },
+    {
+      "id": "n3_3",
+      "type": "3nand",
+      "x": 478,
+      "y": 217
+    },
+    {
+      "id": "hi1",
+      "type": "hi",
+      "x": 100,
+      "y": 318
+    },
+    {
+      "id": "hi2",
+      "type": "hi",
+      "x": 290,
+      "y": 318
+    },
+    {
+      "id": "hi3",
+      "type": "hi",
+      "x": 450,
+      "y": 318
+    },
+    {
+      "id": "n4_1",
+      "type": "4nand",
+      "x": 40,
+      "y": 355
+    },
+    {
+      "id": "n4_2",
+      "type": "4nand",
+      "x": 185,
+      "y": 355
+    },
+    {
+      "id": "n4_3",
+      "type": "4nand",
+      "x": 330,
+      "y": 355
+    },
+    {
+      "id": "n4_4",
+      "type": "4nand",
+      "x": 475,
+      "y": 355
+    },
+    {
+      "id": "an1",
+      "type": "andnor",
+      "x": 40,
+      "y": 430
+    },
+    {
+      "id": "an2",
+      "type": "andnor",
+      "x": 185,
+      "y": 430
+    },
+    {
+      "id": "an3",
+      "type": "andnor",
+      "x": 330,
+      "y": 430
+    },
+    {
+      "id": "an4",
+      "type": "andnor",
+      "x": 475,
+      "y": 430
+    },
+    {
+      "id": "hi4",
+      "type": "hi",
+      "x": 100,
+      "y": 498
+    },
+    {
+      "id": "hi5",
+      "type": "hi",
+      "x": 290,
+      "y": 498
+    },
+    {
+      "id": "hi6",
+      "type": "hi",
+      "x": 450,
+      "y": 498
+    },
+    {
+      "id": "n2_5",
+      "type": "2nand",
+      "x": 30,
+      "y": 535
+    },
+    {
+      "id": "n2_6",
+      "type": "2nand",
+      "x": 30,
+      "y": 600
+    },
+    {
+      "id": "n2_7",
+      "type": "2nand",
+      "x": 142,
+      "y": 535
+    },
+    {
+      "id": "n2_8",
+      "type": "2nand",
+      "x": 142,
+      "y": 600
+    },
+    {
+      "id": "n3_4",
+      "type": "3nand",
+      "x": 254,
+      "y": 567
+    },
+    {
+      "id": "n3_5",
+      "type": "3nand",
+      "x": 366,
+      "y": 567
+    },
+    {
+      "id": "n3_6",
+      "type": "3nand",
+      "x": 478,
+      "y": 567
+    },
+    {
+      "id": "ff5",
+      "type": "jk",
+      "x": 40,
+      "y": 675
+    },
+    {
+      "id": "ff6",
+      "type": "jk",
+      "x": 185,
+      "y": 675
+    },
+    {
+      "id": "ff7",
+      "type": "jk",
+      "x": 330,
+      "y": 675
+    },
+    {
+      "id": "ff8",
+      "type": "jk",
+      "x": 475,
+      "y": 675
+    },
+    {
+      "id": "gnd1",
+      "type": "gnd",
+      "x": 150,
+      "y": 743
+    },
+    {
+      "id": "gnd2",
+      "type": "gnd",
+      "x": 440,
+      "y": 743
+    },
+    {
+      "id": "l1",
+      "type": "led",
+      "x": 244,
+      "y": 795,
+      "label": "1"
+    },
+    {
+      "id": "l2",
+      "type": "led",
+      "x": 286,
+      "y": 795,
+      "label": "2"
+    },
+    {
+      "id": "l3",
+      "type": "led",
+      "x": 328,
+      "y": 795,
+      "label": "3"
+    },
+    {
+      "id": "l4",
+      "type": "led",
+      "x": 370,
+      "y": 795,
+      "label": "4"
+    },
+    {
+      "id": "l5",
+      "type": "led",
+      "x": 412,
+      "y": 795,
+      "label": "5"
+    },
+    {
+      "id": "l6",
+      "type": "led",
+      "x": 454,
+      "y": 795,
+      "label": "6"
+    },
+    {
+      "id": "l7",
+      "type": "led",
+      "x": 496,
+      "y": 795,
+      "label": "7"
+    },
+    {
+      "id": "l8",
+      "type": "led",
+      "x": 538,
+      "y": 795,
+      "label": "8"
+    },
+    {
+      "id": "clk",
+      "type": "clock",
+      "x": 30,
+      "y": 880,
+      "hz": 1
+    },
+    {
+      "id": "p1",
+      "type": "pulser",
+      "x": 100,
+      "y": 880,
+      "label": "1"
+    },
+    {
+      "id": "p2",
+      "type": "pulser",
+      "x": 142,
+      "y": 880,
+      "label": "2"
+    },
+    {
+      "id": "p3",
+      "type": "pulser",
+      "x": 184,
+      "y": 880,
+      "label": "3"
+    },
+    {
+      "id": "sw1",
+      "type": "switch",
+      "x": 244,
+      "y": 880,
+      "state": 0,
+      "label": "1"
+    },
+    {
+      "id": "sw2",
+      "type": "switch",
+      "x": 286,
+      "y": 880,
+      "state": 0,
+      "label": "2"
+    },
+    {
+      "id": "sw3",
+      "type": "switch",
+      "x": 328,
+      "y": 880,
+      "state": 0,
+      "label": "3"
+    },
+    {
+      "id": "sw4",
+      "type": "switch",
+      "x": 370,
+      "y": 880,
+      "state": 0,
+      "label": "4"
+    },
+    {
+      "id": "sw5",
+      "type": "switch",
+      "x": 412,
+      "y": 880,
+      "state": 0,
+      "label": "5"
+    },
+    {
+      "id": "sw6",
+      "type": "switch",
+      "x": 454,
+      "y": 880,
+      "state": 0,
+      "label": "6"
+    },
+    {
+      "id": "sw7",
+      "type": "switch",
+      "x": 496,
+      "y": 880,
+      "state": 0,
+      "label": "7"
+    },
+    {
+      "id": "sw8",
+      "type": "switch",
+      "x": 538,
+      "y": 880,
+      "state": 0,
+      "label": "8"
+    }
+  ],
+  "wires": [
+    {
+      "from": {
+        "component": "n2_3",
+        "pin": "out"
+      },
+      "to": {
+        "component": "n3_1",
+        "pin": "in0"
+      }
+    },
+    {
+      "from": {
+        "component": "n3_1",
+        "pin": "out"
+      },
+      "to": {
+        "component": "n2_3",
+        "pin": "in1"
+      }
+    },
+    {
+      "from": {
+        "component": "n2_3",
+        "pin": "out"
+      },
+      "to": {
+        "component": "n3_1",
+        "pin": "in2"
+      }
+    },
+    {
+      "from": {
+        "component": "n2_4",
+        "pin": "out"
+      },
+      "to": {
+        "component": "n3_1",
+        "pin": "in1"
+      }
+    },
+    {
+      "from": {
+        "component": "n3_1",
+        "pin": "out"
+      },
+      "to": {
+        "component": "n2_4",
+        "pin": "in1"
+      }
+    }
+  ],
+  "subcircuits": {},
+  "truthTable": {
+    "inputs": [
+      {
+        "component": "n2_3",
+        "pin": "in0"
+      },
+      {
+        "component": "n2_4",
+        "pin": "in0"
+      }
+    ],
+    "outputs": [
+      {
+        "component": "n3_1",
+        "pin": "out"
+      }
+    ]
+  }
+}

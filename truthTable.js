@@ -97,6 +97,20 @@ export function rows(n) {
   return all;
 }
 
+// What the table's answers depend on: the parts and how they are wired, inside components
+// too, and the letters. Not where parts sit, how switches are set (unlettered ones are
+// trimmed anyway) or the board's size. The sheet works the table out again only when this
+// changes.
+export function logicKey(circuit) {
+  const part = c => [c.id, c.type];
+  const wire = w => [w.from.component, w.from.pin, w.to.component, w.to.pin];
+  const subcircuits = Object.entries(circuit.subcircuits ?? {}).map(([name, def]) => [
+    name, (def.components ?? []).map(part), (def.wires ?? []).map(wire),
+    (def.pins ?? []).map(p => [p.name, p.direction, p.internal?.component, p.internal?.pin])
+  ]);
+  return JSON.stringify([circuit.components.map(part), circuit.wires.map(wire), subcircuits, liveTable(circuit)]);
+}
+
 // --- Filling in the outputs ---
 //
 // The circuit is lifted off the board: nothing here touches the live simulator. In the copy,

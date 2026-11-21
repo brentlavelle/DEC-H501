@@ -7,7 +7,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fillTable } from '../truthTable.js';
 import { parseCircuitFile } from '../circuitModel.js';
-import { makeComponent } from '../subcircuits.js';
+import { makeComponent, flattenCircuit } from '../subcircuits.js';
+import { createSimulator } from '../sim/core.js';
 
 const wire = (from, to) => {
   const [fc, fp] = from.split('.');
@@ -136,4 +137,25 @@ test('rows carry their inputs, in the sheet\'s order', () => {
   const c = board([['n', '2nand']]);
   const filled = fillTable(c, { inputs: [at('n.in0'), at('n.in1')], outputs: [at('n.out')] });
   assert.deepEqual(filled.map(r => r.inputs), [[true, true], [true, false], [false, true], [false, false]]);
+});
+
+// Regression: Brent's three-NAND latch (test/fixtures/three-nand-latch.json). A and B are the
+// open leads of two 2-input NANDs, X the 3-input NAND's output, which feeds back into both.
+// It can be cleared (A and B both F) but never set, so every other row holds.
+test('the three-NAND latch reads Q Q Q F, and the live simulator agrees', () => {
+  const c = parseCircuitFile(readFileSync(new URL('fixtures/three-nand-latch.json', import.meta.url), 'utf8'));
+  const filled = fillTable(c, c.truthTable);
+  assert.deepEqual(filled.map(r => r.outputs[0]), [Q, Q, Q, 'F']);
+
+  // Drive A and B from two added switches and start with X cleared: Q says it stays F.
+  for (const [a, b] of [[1, 1], [1, 0], [0, 1], [0, 0]]) {
+    const d = structuredClone(c);
+    d.components.push({ id: 'sa', type: 'switch', x: 0, y: 0, state: 0 }, { id: 'sb', type: 'switch', x: 0, y: 0, state: 0 });
+    d.wires.push(wire('sa.out', 'n2_3.in0'), wire('sb.out', 'n2_4.in0'));
+    const sim = createSimulator(flattenCircuit(d));
+    assert.equal(sim.read('n3_1', 'out'), false, 'cleared to begin with');
+    sim.setInput('sa', a);
+    sim.setInput('sb', b);
+    assert.equal(sim.read('n3_1', 'out'), false, `A=${a} B=${b} keeps it F`);
+  }
 });
