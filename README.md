@@ -63,6 +63,11 @@ local files.
   to grid** lines parts up.
 - **Delete:** Select a wire or parts and press Delete or Backspace, or use
   **Edit → Delete Selected**.
+- **Grow the machine:** **Edit → Add Blank H-501 to the Right** adds a fresh
+  panel beside the board, numbered on from the last. **Edit → Copy Gates to the
+  Right** copies the parts as you have laid them out, without wires, and **Edit
+  → Copy All to the Right** copies the wires too. Use them as often as you like;
+  the one clock serves every panel.
 - **Undo and redo:** Ctrl-Z and Ctrl-Shift-Z (Cmd on a Mac), or the **Edit**
   menu.
 - **Build a component:** Select some parts, then **Component → Make Component

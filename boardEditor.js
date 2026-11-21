@@ -7,6 +7,7 @@ import { flattenCircuit, makeComponent, ungroupComponent, getComponentSize } fro
 import { generateBOM } from './bomGenerator.js';
 import { createSimulator } from './sim/core.js';
 import { createDriver } from './simDriver.js';
+import { addBlankUnit, copyGates, copyAll } from './units.js';
 import {
   nextClockRate, nextComponentId, deleteComponents, moveComponents,
   carryControlSettings, createHistory, breadcrumbPath, findFreeSpot
@@ -249,6 +250,34 @@ fetchCircuit('./panels/h500.json')
     render();
   })
   .catch(error => console.error('Error loading circuit JSON:', error));
+
+// --- Edit menu: grow the machine one panel at a time (units.js) ---
+
+// `grow(circuit, panel)` returns the bigger circuit; `panel` is the H-501 panel, which also
+// gives the width of one panel. Each grow can be undone.
+async function growBoard(grow, message) {
+  if (navStack.length > 0) {
+    setStatus('Leave the component first: panels are added to the board itself.', true);
+    return;
+  }
+  try {
+    const panel = await fetchCircuit('./panels/h500.json');
+    edit(() => { circuit = grow(circuit, panel); });
+    selectedIds.clear();
+    rebuildSim({ carry: true });
+    render();
+    setStatus(message);
+  } catch (error) {
+    setStatus(error.message, true);
+  }
+}
+
+document.getElementById('addUnitBtn')?.addEventListener('click', () =>
+  growBoard(addBlankUnit, 'Added a blank H-501 to the right.'));
+document.getElementById('copyGatesBtn')?.addEventListener('click', () =>
+  growBoard(copyGates, 'Copied the gates to the right, without wires.'));
+document.getElementById('copyAllBtn')?.addEventListener('click', () =>
+  growBoard(copyAll, 'Copied the gates and wires to the right, on the one clock.'));
 
 // --- File menu: New / Save / Load / Examples ---
 
