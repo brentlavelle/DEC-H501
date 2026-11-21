@@ -10,6 +10,31 @@ body {
     color: #17212b;
 }
 
+/* The board's frame holds the resize grip over its bottom-right corner. */
+#boardFrame {
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+}
+
+#resizeHandle {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+    touch-action: none;
+    opacity: 0.75;
+    background: linear-gradient(135deg,
+        transparent 0 48%, #c7cdd3 48% 56%, transparent 56% 66%,
+        #c7cdd3 66% 74%, transparent 74% 84%, #c7cdd3 84% 92%, transparent 92%);
+}
+
+#resizeHandle:hover {
+    opacity: 1;
+}
+
 #board {
     /* Sized in script from circuit.board, at BOARD_SCALE pixels per board unit. */
     display: block;

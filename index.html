@@ -108,11 +108,15 @@
       </div>
       <div id="bomResults"></div>
     </header>
-    <svg
-      id="board"
-      viewBox="0 0 600 970"
-      role="img"
-      aria-label="Logic circuit board"
-    ></svg>
+    <!-- The board, and the grip at its bottom-right corner that resizes it. -->
+    <div id="boardFrame">
+      <svg
+        id="board"
+        viewBox="0 0 600 970"
+        role="img"
+        aria-label="Logic circuit board"
+      ></svg>
+      <div id="resizeHandle" title="Drag to resize the board"></div>
+    </div>
   </body>
 </html>

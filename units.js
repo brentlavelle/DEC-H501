@@ -6,6 +6,9 @@
 //   to the right. On an untouched panel it gives exactly what addBlankUnit gives.
 // - copyAll: the parts and the wires. The copy's wires from the clock go to the one clock,
 //   so both halves run in step. With no wires on the board it equals copyGates.
+// - resizeBoard: the size the board's corner can be dragged to, never cutting anything off.
+
+import { getComponentSize } from './subcircuits.js';
 
 // Splits "ff12" into ["ff", 12] and "n2_7" into ["n2_", 7]. An id with no trailing number
 // (the clock is "clk") has no number.
@@ -119,4 +122,38 @@ export function copyGates(circuit, panel) {
 // The board's parts and wires, as they are now, to the right: the board doubles in width.
 export function copyAll(circuit, panel) {
   return addUnitFrom(circuit, circuit, panel.board.width, { wires: true });
+}
+
+// The smallest board: one panel wide, so the terminal's menu bar still fits on one line.
+export const MIN_BOARD = { width: 600, height: 400 };
+// Room kept between the furthest part and the board's edge.
+export const BOARD_MARGIN = 8;
+
+// The size the board takes when its corner is dragged to `width` x `height`, in board units:
+// whole units, at least MIN_BOARD, and never so small that a part, the nameplate, or a part
+// inside a component definition (drawn on the same board when you open the component)
+// would fall off the edge. `circuit` is not changed.
+export function resizeBoard(circuit, width, height) {
+  let right = 0;
+  let bottom = 0;
+  const cover = (x, y, w, h) => {
+    right = Math.max(right, x + w);
+    bottom = Math.max(bottom, y + h);
+  };
+  const coverParts = components => {
+    for (const c of components) {
+      const size = getComponentSize(circuit, c.type);
+      if (size) cover(c.x, c.y, size.width, size.height);
+    }
+  };
+  coverParts(circuit.components);
+  for (const def of Object.values(circuit.subcircuits ?? {})) coverParts(def.components ?? []);
+  const plate = circuit.nameplate;
+  if (plate) cover(plate.x, plate.y, plate.width, plate.height);
+
+  const least = (wanted, floor, needed) => Math.max(Math.round(wanted), floor, Math.ceil(needed));
+  return {
+    width: least(width, MIN_BOARD.width, right > 0 ? right + BOARD_MARGIN : 0),
+    height: least(height, MIN_BOARD.height, bottom > 0 ? bottom + BOARD_MARGIN : 0)
+  };
 }
