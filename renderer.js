@@ -3,6 +3,7 @@
 
 import GateLibrary from './gateLibrary.js';
 import { getComponentPins, getComponentSize, isSubcircuitType } from './subcircuits.js';
+import { liveTable, columnNames, terminalRole } from './truthTable.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 // Small enough that the hotspots of a 4-input gate's pins, 14 units apart, do not overlap.
@@ -195,6 +196,9 @@ function renderCircuit(circuit, svgElement, view) {
       pinElement.setAttribute('data-component', component.id);
       pinElement.setAttribute('data-pin', pin.name);
       pinElement.setAttribute('data-direction', pin.direction || (pin.name.startsWith('in') ? 'input' : 'output'));
+      // Which truth-table chip this terminal takes, so the valid spots can light up in a drag.
+      const role = terminalRole(circuit, component.id, pin.name);
+      if (role) pinElement.setAttribute('data-tt-role', role);
       svgElement.appendChild(pinElement);
     });
   });
@@ -212,6 +216,48 @@ function renderCircuit(circuit, svgElement, view) {
     dot.setAttribute('data-source-component', end.source.component);
     dot.setAttribute('data-source-pin', end.source.pin);
     svgElement.appendChild(dot);
+  }
+
+  renderTruthTags(circuit, svgElement);
+}
+
+// The truth table's letters (A, B... and X, Y...) beside the terminals they are on, on the
+// same beige paper and in the same lettering as the sheet. An input on a gate's left side has
+// its letter to the left; everything else, including a switch, pulser, clock or lamp, whose
+// terminal is on top, has it to the right, clear of the numbers printed above the switches.
+const TT_TAG = 18;
+
+function renderTruthTags(circuit, svgElement) {
+  const table = liveTable(circuit);
+  const names = columnNames(table);
+  const columns = [
+    ...table.inputs.map((t, i) => ({ ...t, name: names.inputs[i], side: 'input' })),
+    ...table.outputs.map((t, i) => ({ ...t, name: names.outputs[i], side: 'output' }))
+  ];
+  for (const column of columns) {
+    const component = circuit.components.find(c => c.id === column.component);
+    const pin = getComponentPins(circuit, component.type).find(p => p.name === column.pin);
+    const px = component.x + pin.x;
+    const py = component.y + pin.y;
+    const gateInput = column.side === 'input' && !['switch', 'pulser', 'clock'].includes(component.type);
+    const x = gateInput ? px - TT_TAG - 5 : px + 5;
+    const y = py - TT_TAG / 2;
+    const tag = document.createElementNS(SVG_NS, 'g');
+    tag.setAttribute('class', `tt-tag tt-tag-${column.side}`);
+    const rect = document.createElementNS(SVG_NS, 'rect');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width', TT_TAG);
+    rect.setAttribute('height', TT_TAG);
+    rect.setAttribute('rx', 3);
+    const text = document.createElementNS(SVG_NS, 'text');
+    text.setAttribute('x', x + TT_TAG / 2);
+    text.setAttribute('y', y + TT_TAG / 2);
+    text.setAttribute('dominant-baseline', 'central');
+    text.setAttribute('text-anchor', 'middle');
+    text.textContent = column.name;
+    tag.append(rect, text);
+    svgElement.appendChild(tag);
   }
 }
 

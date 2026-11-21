@@ -82,6 +82,13 @@ local files.
   generator (2.7).
 - **Save and load:** **File → Save** and **File → Load...** use plain JSON
   files.
+- **Make a truth table:** **Tools → Truth Table** slides in a sheet of graph
+  paper. Drag its left **?** onto an input (the left side of a gate, a switch, a
+  pulser or the clock) to add column A, then B, and so on; the rows of T and F
+  follow. Drag the right **?** onto an output (the right side of a gate, or a
+  lamp) and its column fills in: **T** or **F** when the answer is always that,
+  **?** when it depends on something outside the table or on what a flip-flop
+  remembers. Click a letter to take it off; the arrow hides the sheet.
 - **Get a parts list:** **Tools → Generate BOM** lists the 7400-series chips
   your circuit would need.
 - **Change the screen:** **Screen** switches the terminal between amber, green

@@ -454,3 +454,155 @@ body {
     margin: 0.3rem 0 0;
     color: var(--phosphor) !important;
 }
+
+/* The truth table: beige graph paper sliding in from the right (boardEditor.js). */
+.tt-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 20;
+    width: 340px;
+    max-width: 90vw;
+    height: 100vh;
+    overflow: auto;
+    padding: 0.8rem 1rem 1.2rem;
+    color: #2b2620;
+    font-family: "Courier New", Courier, ui-monospace, monospace;
+    background-color: #efe4c6;
+    background-image:
+        linear-gradient(rgba(60, 100, 150, 0.16) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(60, 100, 150, 0.16) 1px, transparent 1px);
+    background-size: 16px 16px;
+    box-shadow: -6px 0 18px rgba(0, 0, 0, 0.35);
+    transform: translateX(105%);
+    transition: transform 0.25s ease-out;
+}
+
+.tt-panel.open {
+    transform: translateX(0);
+}
+
+.tt-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+}
+
+.tt-title {
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.tt-close {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    color: inherit;
+}
+
+.tt-table {
+    border-collapse: collapse;
+    font-size: 1.05rem;
+}
+
+.tt-table th,
+.tt-table td {
+    min-width: 2rem;
+    height: 1.6rem;
+    padding: 0 0.35rem;
+    text-align: center;
+}
+
+.tt-table thead th {
+    border-bottom: 2px solid #2b2620;
+}
+
+/* The dark line between inputs and outputs. */
+.tt-table .tt-split {
+    border-left: 3px solid #2b2620;
+}
+
+/* An output that depends on something outside the table, or on what a part remembers. */
+.tt-table .tt-unknown {
+    color: #8a6d2a;
+}
+
+.tt-name {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-weight: bold;
+    color: inherit;
+    cursor: pointer;
+}
+
+.tt-name:hover {
+    text-decoration: line-through;
+}
+
+.tt-chip {
+    display: inline-block;
+    width: 1.5rem;
+    border: 2px dashed #8a6d2a;
+    border-radius: 3px;
+    background: #f8efd6;
+    font-weight: bold;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.tt-ghost {
+    position: fixed;
+    z-index: 30;
+    pointer-events: none;
+    padding: 0 0.35rem;
+    border: 2px solid #8a6d2a;
+    border-radius: 3px;
+    background: #f8efd6;
+    color: #2b2620;
+    font: bold 1rem "Courier New", Courier, monospace;
+    transform: translate(-50%, -50%);
+}
+
+.tt-hint {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.35;
+}
+
+/* While a chip is dragged, the terminals that can take it light up. */
+body.tt-drag-input .pin-hotspot[data-tt-role="input"],
+body.tt-drag-output .pin-hotspot[data-tt-role="output"] {
+    fill: rgba(239, 228, 198, 0.55);
+    stroke: #e4a62a;
+    stroke-width: 1.5;
+}
+
+/* The letters beside their terminals on the board. */
+/* Shown only while the sheet is open: hiding the sheet hides them, but keeps the table. */
+.tt-tag {
+    display: none;
+    pointer-events: none;
+    filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.55));
+}
+
+body.tt-open .tt-tag {
+    display: inline;
+}
+
+.tt-tag rect {
+    fill: #efe4c6;
+    stroke: #8a6d2a;
+    stroke-width: 1.5;
+}
+
+.tt-tag text {
+    fill: #2b2620;
+    font: bold 14px "Courier New", Courier, monospace;
+}

@@ -8,6 +8,7 @@ import { generateBOM } from './bomGenerator.js';
 import { createSimulator } from './sim/core.js';
 import { createDriver } from './simDriver.js';
 import { addBlankUnit, copyGates, copyAll, resizeBoard } from './units.js';
+import { addColumn, removeColumn, liveTable, columnNames, fillTable, MAX_COLUMNS } from './truthTable.js';
 import {
   nextClockRate, nextComponentId, deleteComponents, moveComponents,
   carryControlSettings, createHistory, breadcrumbPath, findFreeSpot
@@ -211,6 +212,7 @@ function render() {
   renderCircuit(activeView(), board, { sim, rootPinMap });
   applySelectionHighlight();
   updateBreadcrumb();
+  renderTruthPanel();
 }
 
 // Optional snap to a module-bay grid (gate footprint + a small gutter).
@@ -324,6 +326,147 @@ function endResize() {
 }
 resizeHandle?.addEventListener('pointerup', endResize);
 resizeHandle?.addEventListener('pointercancel', endResize);
+
+// --- The truth table (truthTable.js holds the rules) ---
+// A sheet that slides in from the right. Its ? chips are dragged onto terminals on the board:
+// the left ? onto an input, the right ? onto an output. Clicking a letter takes it off.
+
+const truthPanel = document.getElementById('truthPanel');
+const truthGrid = document.getElementById('truthGrid');
+
+// Hiding the sheet keeps the table; its letters on the board hide with it (styles.css).
+function setTruthPanel(open) {
+  truthPanel?.classList.toggle('open', open);
+  document.body.classList.toggle('tt-open', open);
+  truthPanel?.setAttribute('aria-hidden', open ? 'false' : 'true');
+  renderTruthPanel();
+}
+
+document.getElementById('truthTableBtn')?.addEventListener('click', () => setTruthPanel(true));
+document.getElementById('truthCloseBtn')?.addEventListener('click', () => setTruthPanel(false));
+
+function cell(tag, text, className) {
+  const element = document.createElement(tag);
+  if (text !== undefined) element.textContent = text;
+  if (className) element.className = className;
+  return element;
+}
+
+function renderTruthPanel() {
+  if (!truthGrid || !truthPanel?.classList.contains('open') || !circuit) return;
+  const table = liveTable(circuit);
+  const names = columnNames(table);
+  const inputChip = table.inputs.length < MAX_COLUMNS;
+  const outputChip = table.outputs.length < MAX_COLUMNS;
+
+  const grid = cell('table', undefined, 'tt-table');
+  const head = grid.createTHead().insertRow();
+  names.inputs.forEach((name, index) => head.appendChild(nameCell(name, 'input', index)));
+  if (inputChip || table.inputs.length === 0) head.appendChild(chipCell('input', inputChip));
+  let first = true;
+  const split = element => {
+    if (first) element.classList.add('tt-split');
+    first = false;
+    return element;
+  };
+  names.outputs.forEach((name, index) => head.appendChild(split(nameCell(name, 'output', index))));
+  if (outputChip || table.outputs.length === 0) head.appendChild(split(chipCell('output', outputChip)));
+
+  // The outputs are worked out on a copy lifted off the board (fillTable): T or F only when
+  // the answer is always that, ? otherwise.
+  const body = grid.createTBody();
+  for (const { inputs, outputs } of fillTable(circuit, table)) {
+    const row = body.insertRow();
+    inputs.forEach(value => row.appendChild(cell('td', value ? 'T' : 'F')));
+    if (inputChip) row.appendChild(cell('td', ''));
+    first = true;
+    outputs.forEach(value => row.appendChild(split(cell('td', value, value === '?' ? 'tt-unknown' : undefined))));
+    if (outputChip) row.appendChild(split(cell('td', '')));
+  }
+  truthGrid.replaceChildren(grid);
+}
+
+function nameCell(name, side, index) {
+  const th = cell('th');
+  const button = cell('button', name, 'tt-name');
+  button.title = `Take ${name} off the table`;
+  button.addEventListener('click', () => {
+    edit(() => { circuit.truthTable = removeColumn(liveTable(circuit), side, index); });
+    render();
+  });
+  th.appendChild(button);
+  return th;
+}
+
+function chipCell(side, enabled) {
+  const th = cell('th');
+  if (!enabled) return th;
+  const chip = cell('span', '?', 'tt-chip');
+  chip.dataset.side = side;
+  chip.title = side === 'input'
+    ? 'Drag onto an input: the left side of a gate, or a switch, pulser or the clock'
+    : 'Drag onto an output: the right side of a gate, or a lamp';
+  chip.addEventListener('pointerdown', startChipDrag);
+  th.appendChild(chip);
+  return th;
+}
+
+// The terminal under a point on the screen, as { component, pin }, or null. A terminal's own
+// spot counts, and so does the body of a switch, pulser, clock or lamp, which have one each.
+const ONE_TERMINAL = { switch: 'out', pulser: 'out', clock: 'out', led: 'in' };
+
+function terminalAt(x, y) {
+  const element = document.elementFromPoint(x, y);
+  const pin = element?.closest?.('#board [data-pin]');
+  if (pin) return { component: pin.dataset.component, pin: pin.dataset.pin };
+  const part = element?.closest?.('#board [data-type]');
+  const only = part && ONE_TERMINAL[part.dataset.type];
+  return only ? { component: part.getAttribute('id'), pin: only } : null;
+}
+
+let chipDrag = null;
+
+function startChipDrag(event) {
+  if (event.button !== 0) return;
+  event.preventDefault();
+  const side = event.currentTarget.dataset.side;
+  const ghost = cell('div', '?', 'tt-ghost');
+  document.body.appendChild(ghost);
+  document.body.classList.add(`tt-drag-${side}`);
+  chipDrag = { side, ghost };
+  moveChipDrag(event);
+  document.addEventListener('pointermove', moveChipDrag);
+  document.addEventListener('pointerup', endChipDrag, { once: true });
+}
+
+function moveChipDrag(event) {
+  if (!chipDrag) return;
+  chipDrag.ghost.style.left = `${event.clientX}px`;
+  chipDrag.ghost.style.top = `${event.clientY}px`;
+}
+
+function endChipDrag(event) {
+  if (!chipDrag) return;
+  const { side, ghost } = chipDrag;
+  chipDrag = null;
+  ghost.remove();
+  document.body.classList.remove('tt-drag-input', 'tt-drag-output');
+  document.removeEventListener('pointermove', moveChipDrag);
+
+  const terminal = terminalAt(event.clientX, event.clientY);
+  if (!terminal) return; // dropped somewhere else: nothing happens
+  if (navStack.length > 0) {
+    setStatus('Leave the component first: the truth table works on the board itself.', true);
+    return;
+  }
+  try {
+    const next = addColumn(circuit, liveTable(circuit), side, terminal);
+    edit(() => { circuit.truthTable = next; });
+    render();
+  } catch (error) {
+    setStatus(error.message, true);
+  }
+}
 
 // --- File menu: New / Save / Load / Examples ---
 
