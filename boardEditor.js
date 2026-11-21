@@ -7,7 +7,7 @@ import { flattenCircuit, makeComponent, ungroupComponent, getComponentSize } fro
 import { generateBOM } from './bomGenerator.js';
 import { createSimulator } from './sim/core.js';
 import { createDriver } from './simDriver.js';
-import { addBlankUnit, copyGates, copyAll } from './units.js';
+import { addBlankUnit, copyGates, copyAll, resizeBoard } from './units.js';
 import {
   nextClockRate, nextComponentId, deleteComponents, moveComponents,
   carryControlSettings, createHistory, breadcrumbPath, findFreeSpot
@@ -278,6 +278,52 @@ document.getElementById('copyGatesBtn')?.addEventListener('click', () =>
   growBoard(copyGates, 'Copied the gates to the right, without wires.'));
 document.getElementById('copyAllBtn')?.addEventListener('click', () =>
   growBoard(copyAll, 'Copied the gates and wires to the right, on the one clock.'));
+
+// --- The resize grip: drag the board's bottom-right corner to change its size ---
+// resizeBoard (units.js) keeps the board from shrinking past anything on it. Only the board's
+// size changes; no part moves. A whole drag is one undo step.
+
+const resizeHandle = document.getElementById('resizeHandle');
+let resizeState = null;
+
+resizeHandle?.addEventListener('pointerdown', (event) => {
+  if (event.button !== 0) return;
+  event.preventDefault();
+  if (navStack.length > 0) {
+    setStatus('Leave the component first: the board is resized from the board itself.', true);
+    return;
+  }
+  resizeHandle.setPointerCapture(event.pointerId);
+  resizeState = { x: event.clientX, y: event.clientY, start: { ...boardSize() }, before: snapshot() };
+});
+
+resizeHandle?.addEventListener('pointermove', (event) => {
+  if (!resizeState) return;
+  const { x, y, start } = resizeState;
+  const size = resizeBoard(
+    circuit,
+    start.width + (event.clientX - x) / BOARD_SCALE,
+    start.height + (event.clientY - y) / BOARD_SCALE
+  );
+  const now = boardSize();
+  if (size.width === now.width && size.height === now.height) return;
+  circuit.board = size;
+  applyBoardSize();
+  setStatus(`Board ${size.width} × ${size.height}`);
+});
+
+function endResize() {
+  if (!resizeState) return;
+  const { before, start } = resizeState;
+  resizeState = null;
+  const now = boardSize();
+  if (now.width !== start.width || now.height !== start.height) {
+    history.record(before);
+    updateHistoryButtons();
+  }
+}
+resizeHandle?.addEventListener('pointerup', endResize);
+resizeHandle?.addEventListener('pointercancel', endResize);
 
 // --- File menu: New / Save / Load / Examples ---
 

@@ -68,6 +68,8 @@ local files.
   Right** copies the parts as you have laid them out, without wires, and **Edit
   → Copy All to the Right** copies the wires too. Use them as often as you like;
   the one clock serves every panel.
+- **Resize the board:** drag the grip at its bottom-right corner. It will not
+  shrink past anything on the board.
 - **Undo and redo:** Ctrl-Z and Ctrl-Shift-Z (Cmd on a Mac), or the **Edit**
   menu.
 - **Build a component:** Select some parts, then **Component → Make Component
