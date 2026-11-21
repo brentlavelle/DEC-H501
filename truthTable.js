@@ -8,8 +8,10 @@
 // - addColumn, removeColumn: a new table with a column added or taken away.
 // - liveTable: the table without columns whose part or pin no longer exists.
 // - rows: every combination of n inputs, the first input changing slowest, T before F.
+// - fillTable: the output columns, worked out on a copy lifted off the board.
 
-import { getComponentPins } from './subcircuits.js';
+import { getComponentPins, flattenCircuit } from './subcircuits.js';
+import { componentTypes } from './sim/components.js';
 
 export const MAX_COLUMNS = 6;
 export const INPUT_NAMES = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -93,4 +95,107 @@ export function rows(n) {
     all.push(Array.from({ length: n }, (_, col) => ((r >> (n - 1 - col)) & 1) === 0));
   }
   return all;
+}
+
+// --- Filling in the outputs ---
+//
+// The circuit is lifted off the board: nothing here touches the live simulator. In the copy,
+// every lead attached to something other than HIGH or GND (an unlettered switch, a pulser,
+// the clock) is trimmed and reads unknown; an input that was never wired reads HI, as it does
+// on the board. Values are three-valued: true, false, or null for unknown. A flip-flop's
+// outputs are unknown, because what it holds depends on what happened before, unless its
+// reset is held LO. Every gate starts unknown and is worked out until nothing changes; what
+// is still unknown then (a held latch, a ring that never settles) reads ?.
+// An output cell is 'T' only if the output is T whatever the unknowns are, 'F' likewise,
+// and '?' otherwise.
+
+const and3 = values => (values.includes(false) ? false : values.includes(null) ? null : true);
+const or3 = values => (values.includes(true) ? true : values.includes(null) ? null : false);
+const not3 = value => (value === null ? null : !value);
+const xor3 = (a, b) => (a === null || b === null ? null : a !== b);
+
+const LOGIC = {
+  and: v => and3(v),
+  or: v => or3(v),
+  not: v => not3(v[0]),
+  nand: v => not3(and3(v)),
+  '2nand': v => not3(and3(v)),
+  '3nand': v => not3(and3(v)),
+  '4nand': v => not3(and3(v)),
+  nor: v => not3(or3(v)),
+  xor: v => xor3(v[0], v[1]),
+  xnor: v => not3(xor3(v[0], v[1])),
+  andnor: v => not3(or3([and3([v[0], v[1]]), and3([v[2], v[3]])]))
+};
+
+const key = (component, pin) => `${component}\u0000${pin}`;
+
+export function fillTable(circuit, table) {
+  const flat = flattenCircuit(circuit);
+  const byId = new Map(flat.components.map(c => [c.id, c]));
+  const typeOf = id => circuit.components.find(c => c.id === id)?.type;
+  // A terminal on the board, as the part and pin that carry it after flattening.
+  const resolve = ({ component, pin }) => flat.rootPinMap[component]?.[pin] ?? { component, pin };
+
+  const drivers = new Map(); // input pin -> [output pins driving it]
+  for (const w of flat.wires) {
+    const k = key(w.to.component, w.to.pin);
+    if (!drivers.has(k)) drivers.set(k, []);
+    drivers.get(k).push(w.from);
+  }
+
+  const logic = flat.components.filter(c => LOGIC[c.type] || c.type === 'jk');
+  const limit = 2 * flat.components.length + 8;
+
+  return rows(table.inputs.length).map(values => {
+    const heldInputs = new Map(); // gate input pin -> value: a letter on it overrides its wire
+    const out = new Map(); // output pin -> value
+    table.inputs.forEach((terminal, i) => {
+      const { component, pin } = resolve(terminal);
+      if (SOURCES.has(typeOf(terminal.component))) out.set(key(component, pin), values[i]);
+      else heldInputs.set(key(component, pin), values[i]);
+    });
+    for (const c of flat.components) {
+      if (c.type === 'hi') out.set(key(c.id, 'out'), true);
+      else if (c.type === 'gnd') out.set(key(c.id, 'out'), false);
+      else if (SOURCES.has(c.type) && !out.has(key(c.id, 'out'))) out.set(key(c.id, 'out'), null); // trimmed
+    }
+
+    const outputOf = (component, pin) => (out.has(key(component, pin)) ? out.get(key(component, pin)) : null);
+    const read = (component, pin) => {
+      const k = key(component, pin);
+      if (heldInputs.has(k)) return heldInputs.get(k);
+      const from = drivers.get(k);
+      if (from) return and3(from.map(d => outputOf(d.component, d.pin))); // several drivers: LO wins
+      return componentTypes[byId.get(component)?.type]?.openInput ?? true; // never wired
+    };
+
+    for (let pass = 0; pass < limit; pass++) {
+      let changed = false;
+      for (const c of logic) {
+        const results = {};
+        if (c.type === 'jk') {
+          const reset = read(c.id, 'reset');
+          results.q = reset === false ? false : null;
+          results.qbar = reset === false ? true : null;
+        } else {
+          results.out = LOGIC[c.type](componentTypes[c.type].inputs.map(pin => read(c.id, pin)));
+        }
+        for (const [pin, value] of Object.entries(results)) {
+          if (outputOf(c.id, pin) !== value) {
+            out.set(key(c.id, pin), value);
+            changed = true;
+          }
+        }
+      }
+      if (!changed) break;
+    }
+
+    const cell = value => (value === true ? 'T' : value === false ? 'F' : '?');
+    const outputs = table.outputs.map(terminal => {
+      const { component, pin } = resolve(terminal);
+      return cell(typeOf(terminal.component) === 'led' ? read(component, pin) : outputOf(component, pin));
+    });
+    return { inputs: values, outputs };
+  });
 }

@@ -221,10 +221,11 @@ function renderCircuit(circuit, svgElement, view) {
   renderTruthTags(circuit, svgElement);
 }
 
-// The truth table's letters (A, B... and X, Y...) beside the terminals they are on. Inputs
-// sit to the left of their terminal, outputs to the right; on a switch, pulser, clock or lamp,
-// whose terminal is on top, the letter sits above it.
-const TOP_TERMINAL_TYPES = new Set(['switch', 'pulser', 'clock', 'led']);
+// The truth table's letters (A, B... and X, Y...) beside the terminals they are on, on the
+// same beige paper and in the same lettering as the sheet. An input on a gate's left side has
+// its letter to the left; everything else, including a switch, pulser, clock or lamp, whose
+// terminal is on top, has it to the right, clear of the numbers printed above the switches.
+const TT_TAG = 18;
 
 function renderTruthTags(circuit, svgElement) {
   const table = liveTable(circuit);
@@ -238,23 +239,21 @@ function renderTruthTags(circuit, svgElement) {
     const pin = getComponentPins(circuit, component.type).find(p => p.name === column.pin);
     const px = component.x + pin.x;
     const py = component.y + pin.y;
-    let x = column.side === 'input' ? px - 17 : px + 5;
-    let y = py - 6;
-    if (TOP_TERMINAL_TYPES.has(component.type)) {
-      x = px - 6;
-      y = py - 19;
-    }
+    const gateInput = column.side === 'input' && !['switch', 'pulser', 'clock'].includes(component.type);
+    const x = gateInput ? px - TT_TAG - 5 : px + 5;
+    const y = py - TT_TAG / 2;
     const tag = document.createElementNS(SVG_NS, 'g');
     tag.setAttribute('class', `tt-tag tt-tag-${column.side}`);
     const rect = document.createElementNS(SVG_NS, 'rect');
     rect.setAttribute('x', x);
     rect.setAttribute('y', y);
-    rect.setAttribute('width', 12);
-    rect.setAttribute('height', 12);
-    rect.setAttribute('rx', 2);
+    rect.setAttribute('width', TT_TAG);
+    rect.setAttribute('height', TT_TAG);
+    rect.setAttribute('rx', 3);
     const text = document.createElementNS(SVG_NS, 'text');
-    text.setAttribute('x', x + 6);
-    text.setAttribute('y', y + 9.5);
+    text.setAttribute('x', x + TT_TAG / 2);
+    text.setAttribute('y', y + TT_TAG / 2);
+    text.setAttribute('dominant-baseline', 'central');
     text.setAttribute('text-anchor', 'middle');
     text.textContent = column.name;
     tag.append(rect, text);

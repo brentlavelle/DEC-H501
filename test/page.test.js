@@ -55,3 +55,14 @@ test('a switch that is on glows with the same light as a held pulser', () => {
   assert.ok(pulser, 'the pulser glows');
   assert.equal(glow(rule('#board use[data-type="switch"][data-state="1"]')), pulser);
 });
+
+test('the truth table sheet hides with an arrow, and its letters on the board show only while it is open', () => {
+  const css = read('styles.css');
+  const close = html.match(/<button id="truthCloseBtn"[^>]*>([^<]*)<\/button>/);
+  assert.ok(close, 'there is a button to hide the sheet');
+  assert.equal(close[1].trim(), '→', 'a right arrow, not an X: nothing is deleted');
+  assert.match(close[0], /title="Hide[^"]*"/);
+  assert.match(css, /\.tt-tag\s*\{[^}]*display:\s*none/, 'letters hidden by default');
+  assert.match(css, /body\.tt-open \.tt-tag\s*\{[^}]*display:\s*inline/, 'and shown while the sheet is open');
+  assert.match(read('boardEditor.js'), /classList\.toggle\('tt-open', open\)/, 'the editor marks the page while the sheet is open');
+});

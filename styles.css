@@ -527,6 +527,11 @@ body {
     border-left: 3px solid #2b2620;
 }
 
+/* An output that depends on something outside the table, or on what a part remembers. */
+.tt-table .tt-unknown {
+    color: #8a6d2a;
+}
+
 .tt-name {
     border: 0;
     background: transparent;
@@ -580,17 +585,24 @@ body.tt-drag-output .pin-hotspot[data-tt-role="output"] {
 }
 
 /* The letters beside their terminals on the board. */
+/* Shown only while the sheet is open: hiding the sheet hides them, but keeps the table. */
 .tt-tag {
+    display: none;
     pointer-events: none;
+    filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.55));
+}
+
+body.tt-open .tt-tag {
+    display: inline;
 }
 
 .tt-tag rect {
     fill: #efe4c6;
     stroke: #8a6d2a;
-    stroke-width: 1;
+    stroke-width: 1.5;
 }
 
 .tt-tag text {
     fill: #2b2620;
-    font: bold 9px "Courier New", Courier, monospace;
+    font: bold 14px "Courier New", Courier, monospace;
 }

@@ -8,7 +8,7 @@ import { generateBOM } from './bomGenerator.js';
 import { createSimulator } from './sim/core.js';
 import { createDriver } from './simDriver.js';
 import { addBlankUnit, copyGates, copyAll, resizeBoard } from './units.js';
-import { addColumn, removeColumn, liveTable, columnNames, rows, MAX_COLUMNS } from './truthTable.js';
+import { addColumn, removeColumn, liveTable, columnNames, fillTable, MAX_COLUMNS } from './truthTable.js';
 import {
   nextClockRate, nextComponentId, deleteComponents, moveComponents,
   carryControlSettings, createHistory, breadcrumbPath, findFreeSpot
@@ -334,8 +334,10 @@ resizeHandle?.addEventListener('pointercancel', endResize);
 const truthPanel = document.getElementById('truthPanel');
 const truthGrid = document.getElementById('truthGrid');
 
+// Hiding the sheet keeps the table; its letters on the board hide with it (styles.css).
 function setTruthPanel(open) {
   truthPanel?.classList.toggle('open', open);
+  document.body.classList.toggle('tt-open', open);
   truthPanel?.setAttribute('aria-hidden', open ? 'false' : 'true');
   renderTruthPanel();
 }
@@ -370,13 +372,15 @@ function renderTruthPanel() {
   names.outputs.forEach((name, index) => head.appendChild(split(nameCell(name, 'output', index))));
   if (outputChip || table.outputs.length === 0) head.appendChild(split(chipCell('output', outputChip)));
 
+  // The outputs are worked out on a copy lifted off the board (fillTable): T or F only when
+  // the answer is always that, ? otherwise.
   const body = grid.createTBody();
-  for (const values of rows(table.inputs.length)) {
+  for (const { inputs, outputs } of fillTable(circuit, table)) {
     const row = body.insertRow();
-    values.forEach(value => row.appendChild(cell('td', value ? 'T' : 'F')));
+    inputs.forEach(value => row.appendChild(cell('td', value ? 'T' : 'F')));
     if (inputChip) row.appendChild(cell('td', ''));
     first = true;
-    table.outputs.forEach(() => row.appendChild(split(cell('td', ''))));
+    outputs.forEach(value => row.appendChild(split(cell('td', value, value === '?' ? 'tt-unknown' : undefined))));
     if (outputChip) row.appendChild(split(cell('td', '')));
   }
   truthGrid.replaceChildren(grid);
