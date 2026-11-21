@@ -248,7 +248,7 @@ on as in "Power-on" above, including ignoring its clock during that settle.
 | Flip-flops power on in either state | Power on reset |
 | Rocker switches bounce; pulsers are filtered [W] | Nothing bounces |
 | Fan-out limits: 10 for logic outputs, 30 for switches, pulsers, clock and HI [W] | Not enforced |
-| GND terminals link the grounds of two units | One unit only. A GND terminal is a LO source |
+| GND terminals link the grounds of two units | Panels are added to the right with **Edit → Add Blank H-501 to the Right**, any number of times, all on one clock. A GND terminal is a LO source |
 | A fixed panel of 30 logic elements | The same panel as a starting layout that can be rearranged, extended and resized |
 
 ## 8. Schema version 2

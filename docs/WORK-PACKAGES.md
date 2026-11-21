@@ -18,7 +18,7 @@ list passes.
 | WP8 lighter board, glowing switches | Done. Two unplanned changes landed with it: the machine is named H-501 on the nameplate, terminal and page title (the original hardware stays H-500 everywhere else), and the breadcrumb shows only inside a subcircuit, where it is the way back out |
 | WP9 examples and New | Done. Three examples on the File menu: Brent's 8-bit binary counter, and workbook experiments 3.5 (4-bit shift register) and 2.7 (parity bit generator, exclusive-ORs from AND/NOR gates). The workbook ones follow its descriptions; its wiring figures could not be read. File offers New H-501 and New empty board, and an empty board is the H-500's size |
 | WP10 parts land in the top strip | Done. `findFreeSpot` in `editing.js`: first free space along the top, left to right, 6 units between parts, the upper-right corner when full |
-| WP11 supersize | Open, one design question below |
+| WP11 supersize | In progress. Done in `units.js`, on the Edit menu, each repeatable and undoable, never a second clock or nameplate: **Add Blank H-501 to the Right** (a fresh panel, the bottom row closing the clock's gap), **Copy Gates to the Right** (the parts as laid out now, no wires; on an untouched panel it equals Add Blank) and **Copy All to the Right** (parts and wires; copied clock wires stay on the one clock; with no wires it equals Copy Gates). To do: dragging the board's corner to resize the canvas |
 | WP6 parity audit | Open, last |
 
 The text of the finished packages is in git history (`git show 751d8be:docs/WORK-PACKAGES.md`).

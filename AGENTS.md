@@ -31,6 +31,7 @@ file name and the Add menu's "H-500 parts".
 | `menus.js` | Opens and closes the terminal's menus and sets the phosphor colour. Knows nothing about what the items do |
 | `boardEditor.js` | All interaction: menus' actions, wiring, selection, moving, the controls, make/ungroup, BOM. Owns `circuit`, `navStack`, `selectedIds` and the simulator. Draws the board at `BOARD_SCALE` (1.2) screen pixels per board unit |
 | `editing.js` | Editing rules with no DOM: ids, delete, move, undo history, clock positions, breadcrumb |
+| `units.js` | Grows the board to the right: `addBlankUnit` (a fresh panel), `copyGates` (the parts as laid out, no wires) and `copyAll` (parts and wires). Never a second clock or nameplate; copied wires from the clock stay on it. No DOM |
 | `renderer.js` | `renderCircuit` rebuilds the SVG; `updateCircuit` updates levels in place each clock tick; `wireEnds` lists the terminals that get a connection dot. Draws the layout's nameplate. Reads levels from the simulator and computes nothing |
 | `sim/core.js`, `sim/components.js` | The simulator: `createSimulator(flat, { carryFrom })`, settle, virtual-time `advance`, the behavior of each primitive. No DOM, no timers, no wall clock |
 | `simDriver.js` | The only place wall-clock time enters: calls `sim.advance` once per animation frame |
